@@ -1,3 +1,9 @@
+iptables (1.4.1.1-2+vyatta+1) unstable; urgency=low
+
+  * add ipp2p iptables extension
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Wed, 27 Aug 2008 15:29:05 -0700
+
 iptables (1.4.1.1-2) unstable; urgency=low
 
   * fixed /bin/dash unnerving in howtos/Makefile. Reported by Daniel

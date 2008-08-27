@@ -8,7 +8,7 @@ install :=  --exclude=multi
 %:
 	dh $@
 
-build: patch build-stamp
+build: build-stamp
 build-stamp:
 	dh build --before dh_auto_configure
 	autoreconf
@@ -23,7 +23,7 @@ install: build
 	cp -auv extensions/*.so debian/iptables/lib/xtables
 	dh install --after dh_install
 
-clean: unpatch
+clean:
 	dh clean
 
 binary: install

@@ -25,23 +25,23 @@
 .SH NAME
 iptables \- administration tool for IPv4 packet filtering and NAT
 .SH SYNOPSIS
-.BR "iptables [-t table] -[AD] " "chain rule-specification [options]"
+.BR "iptables [-t table] \-[AD] " "chain rule-specification [options]"
 .br
-.BR "iptables [-t table] -I " "chain [rulenum] rule-specification [options]"
+.BR "iptables [-t table] \-I " "chain [rulenum] rule-specification [options]"
 .br
-.BR "iptables [-t table] -R " "chain rulenum rule-specification [options]"
+.BR "iptables [-t table] \-R " "chain rulenum rule-specification [options]"
 .br
-.BR "iptables [-t table] -D " "chain rulenum [options]"
+.BR "iptables [-t table] \-D " "chain rulenum [options]"
 .br
-.BR "iptables [-t table] -[LFZ] " "[chain] [options]"
+.BR "iptables [-t table] \-[LFZ] " "[chain] [options]"
 .br
-.BR "iptables [-t table] -N " "chain"
+.BR "iptables [-t table] \-N " "chain"
 .br
-.BR "iptables [-t table] -X " "[chain]"
+.BR "iptables [-t table] \-X " "[chain]"
 .br
-.BR "iptables [-t table] -P " "chain target [options]"
+.BR "iptables [-t table] \-P " "chain target [options]"
 .br
-.BR "iptables [-t table] -E " "old-chain-name new-chain-name"
+.BR "iptables [-t table] \-E " "old-chain-name new-chain-name"
 .SH DESCRIPTION
 .B Iptables
 is used to set up, maintain, and inspect the tables of IP packet
@@ -96,7 +96,7 @@ There are currently three independent tables (which tables are present
 at any time depends on the kernel configuration options and which
 modules are present).
 .TP
-.BI "-t, --table " "table"
+.BI "\-t, \-\-table " "table"
 This option specifies the packet matching table which the command
 should operate on.  If the kernel is configured with automatic module
 loading, an attempt will be made to load the appropriate module for
@@ -106,7 +106,7 @@ The tables are as follows:
 .RS
 .TP .4i
 .BR "filter" :
-This is the default table (if no -t option is passed).  It contains
+This is the default table (if no \-t option is passed).  It contains
 the built-in chains
 .B INPUT
 (for packets destined to local sockets),
@@ -162,95 +162,95 @@ need to use only enough letters to ensure that
 .B iptables
 can differentiate it from all other options.
 .TP
-.BI "-A, --append " "chain rule-specification"
+.BI "\-A, \-\-append " "chain rule-specification"
 Append one or more rules to the end of the selected chain.
 When the source and/or destination names resolve to more than one
 address, a rule will be added for each possible address combination.
 .TP
-.BI "-D, --delete " "chain rule-specification"
+.BI "\-D, \-\-delete " "chain rule-specification"
 .ns
 .TP
-.BI "-D, --delete " "chain rulenum"
+.BI "\-D, \-\-delete " "chain rulenum"
 Delete one or more rules from the selected chain.  There are two
 versions of this command: the rule can be specified as a number in the
 chain (starting at 1 for the first rule) or a rule to match.
 .TP
-.BR "-I, --insert " "\fIchain\fP [\fIrulenum\fP] \fIrule-specification\fP"
+.BR "\-I, \-\-insert " "\fIchain\fP [\fIrulenum\fP] \fIrule-specification\fP"
 Insert one or more rules in the selected chain as the given rule
 number.  So, if the rule number is 1, the rule or rules are inserted
 at the head of the chain.  This is also the default if no rule number
 is specified.
 .TP
-.BI "-R, --replace " "chain rulenum rule-specification"
+.BI "\-R, \-\-replace " "chain rulenum rule-specification"
 Replace a rule in the selected chain.  If the source and/or
 destination names resolve to multiple addresses, the command will
 fail.  Rules are numbered starting at 1.
 .TP
-.BR "-L, --list " "[\fIchain\fP]"
+.BR "\-L, \-\-list " "[\fIchain\fP]"
 List all rules in the selected chain.  If no chain is selected, all
 chains are listed. Like every other iptables command, it applies to the
 specified table (filter is the default), so NAT rules get listed by
 .nf
- iptables -t nat -n -L
+ iptables \-t nat \-n \-L
 .fi
 Please note that it is often used with the
-.B -n
+.B \-n
 option, in order to avoid long reverse DNS lookups.
 It is legal to specify the
-.B -Z
+.B \-Z
 (zero) option as well, in which case the chain(s) will be atomically
 listed and zeroed.  The exact output is affected by the other
 arguments given. The exact rules are suppressed until you use
 .nf
- iptables -L -v
+ iptables \-L \-v
 .fi
 .TP
-.BR "-S, --list-rules " "[\fIchain\fP]"
+.BR "\-S, \-\-list-rules " "[\fIchain\fP]"
 Print all rules in the selected chain.  If no chain is selected, all
 chains are printed like iptables-save. Like every other iptables command,
 it applies to the specified table (filter is the default).
 .TP
-.BR "-F, --flush " "[\fIchain\fP]"
+.BR "\-F, \-\-flush " "[\fIchain\fP]"
 Flush the selected chain (all the chains in the table if none is given).
 This is equivalent to deleting all the rules one by one.
 .TP
-.BR "-Z, --zero " "[\fIchain\fP]"
+.BR "\-Z, \-\-zero " "[\fIchain\fP]"
 Zero the packet and byte counters in all chains.  It is legal to
 specify the
-.B "-L, --list"
+.B "\-L, \-\-list"
 (list) option as well, to see the counters immediately before they are
 cleared. (See above.)
 .TP
-.BI "-N, --new-chain " "chain"
+.BI "\-N, \-\-new-chain " "chain"
 Create a new user-defined chain by the given name.  There must be no
 target of that name already.
 .TP
-.BR "-X, --delete-chain " "[\fIchain\fP]"
+.BR "\-X, \-\-delete-chain " "[\fIchain\fP]"
 Delete the optional user-defined chain specified.  There must be no references
 to the chain.  If there are, you must delete or replace the referring rules
 before the chain can be deleted.  The chain must be empty, i.e. not contain
 any rules.  If no argument is given, it will attempt to delete every
 non-builtin chain in the table.
 .TP
-.BI "-P, --policy " "chain target"
+.BI "\-P, \-\-policy " "chain target"
 Set the policy for the chain to the given target.  See the section
 .B TARGETS
 for the legal targets.  Only built-in (non-user-defined) chains can have
 policies, and neither built-in nor user-defined chains can be policy
 targets.
 .TP
-.BI "-E, --rename-chain " "old-chain new-chain"
+.BI "\-E, \-\-rename-chain " "old-chain new-chain"
 Rename the user specified chain to the user supplied name.  This is
 cosmetic, and has no effect on the structure of the table.
 .TP
-.B -h
+.B \-h
 Help.
 Give a (currently very brief) description of the command syntax.
 .SS PARAMETERS
 The following parameters make up a rule specification (as used in the
 add, delete, insert, replace and append commands).
 .TP
-.BR "-p, --protocol " "[!] \fIprotocol\fP"
+.BR "\-p, \-\-protocol " "[!] \fIprotocol\fP"
 The protocol of the rule or of the packet to check.
 The specified protocol can be one of
 .IR tcp ,
@@ -268,7 +268,7 @@ Protocol
 will match with all protocols and is taken as default when this
 option is omitted.
 .TP
-.BR "-s, --source " "[!] \fIaddress\fP[/\fImask\fP]"
+.BR "\-s, \-\-source " "[!] \fIaddress\fP[/\fImask\fP]"
 Source specification.
 .I Address
 can be either a network name, a hostname (please note that specifying
@@ -284,18 +284,18 @@ is equivalent to
 .IR 255.255.255.0 .
 A "!" argument before the address specification inverts the sense of
 the address. The flag
-.B --src
+.B \-\-src
 is an alias for this option.
 .TP
-.BR "-d, --destination " "[!] \fIaddress\fP[/\fImask\fP]"
+.BR "\-d, \-\-destination " "[!] \fIaddress\fP[/\fImask\fP]"
 Destination specification. 
 See the description of the
-.B -s
+.B \-s
 (source) flag for a detailed description of the syntax.  The flag
-.B --dst
+.B \-\-dst
 is an alias for this option.
 .TP
-.BI "-j, --jump " "target"
+.BI "\-j, \-\-jump " "target"
 This specifies the target of the rule; i.e., what to do if the packet
 matches it.  The target can be a user-defined chain (other than the
 one this rule is in), one of the special builtin targets which decide
@@ -303,18 +303,18 @@ the fate of the packet immediately, or an extension (see
 .B EXTENSIONS
 below).  If this
 option is omitted in a rule (and
-.B -g
+.B \-g
 is not used), then matching the rule will have no
 effect on the packet's fate, but the counters on the rule will be
 incremented.
 .TP
-.BI "-g, --goto " "chain"
+.BI "\-g, \-\-goto " "chain"
 This specifies that the processing should continue in a user
-specified chain. Unlike the --jump option return will not continue
+specified chain. Unlike the \-\-jump option return will not continue
 processing in this chain but instead in the chain that called us via
---jump.
+\-\-jump.
 .TP
-.BR "-i, --in-interface " "[!] \fIname\fP"
+.BR "\-i, \-\-in-interface " "[!] \fIname\fP"
 Name of an interface via which a packet was received (only for
 packets entering the 
 .BR INPUT ,
@@ -326,7 +326,7 @@ sense is inverted.  If the interface name ends in a "+", then any
 interface which begins with this name will match.  If this option is
 omitted, any interface name will match.
 .TP
-.BR "-o, --out-interface " "[!] \fIname\fP"
+.BR "\-o, \-\-out-interface " "[!] \fIname\fP"
 Name of an interface via which a packet is going to be sent (for packets
 entering the
 .BR FORWARD ,
@@ -338,15 +338,15 @@ sense is inverted.  If the interface name ends in a "+", then any
 interface which begins with this name will match.  If this option is
 omitted, any interface name will match.
 .TP
-.B "[!] " "-f, --fragment"
+.B "[!] " "\-f, \-\-fragment"
 This means that the rule only refers to second and further fragments
 of fragmented packets.  Since there is no way to tell the source or
 destination ports of such a packet (or ICMP type), such a packet will
 not match any rules which specify them.  When the "!" argument
-precedes the "-f" flag, the rule will only match head fragments, or
+precedes the "\-f" flag, the rule will only match head fragments, or
 unfragmented packets.
 .TP
-.BI "-c, --set-counters " "PKTS BYTES"
+.BI "\-c, \-\-set-counters " "PKTS BYTES"
 This enables the administrator to initialize the packet and byte
 counters of a rule (during
 .B INSERT,
@@ -356,57 +356,57 @@ operations).
 .SS "OTHER OPTIONS"
 The following additional options can be specified:
 .TP
-.B "-v, --verbose"
+.B "\-v, \-\-verbose"
 Verbose output.  This option makes the list command show the interface
 name, the rule options (if any), and the TOS masks.  The packet and
 byte counters are also listed, with the suffix 'K', 'M' or 'G' for
 1000, 1,000,000 and 1,000,000,000 multipliers respectively (but see
 the
-.B -x
+.B \-x
 flag to change this).
 For appending, insertion, deletion and replacement, this causes
 detailed information on the rule or rules to be printed.
 .TP
-.B "-n, --numeric"
+.B "\-n, \-\-numeric"
 Numeric output.
 IP addresses and port numbers will be printed in numeric format.
 By default, the program will try to display them as host names,
 network names, or services (whenever applicable).
 .TP
-.B "-x, --exact"
+.B "\-x, \-\-exact"
 Expand numbers.
 Display the exact value of the packet and byte counters,
 instead of only the rounded number in K's (multiples of 1000)
 M's (multiples of 1000K) or G's (multiples of 1000M).  This option is
 only relevant for the 
-.B -L
+.B \-L
 command.
 .TP
-.B "--line-numbers"
+.B "\-\-line-numbers"
 When listing rules, add line numbers to the beginning of each rule,
 corresponding to that rule's position in the chain.
 .TP
-.B "--modprobe=command"
+.B "\-\-modprobe=command"
 When adding or inserting rules into a chain, use
 .B command
 to load any necessary modules (targets, match extensions, etc).
 .SH MATCH EXTENSIONS
 iptables can use extended packet matching modules.  These are loaded
 in two ways: implicitly, when
-.B -p
+.B \-p
 or
-.B --protocol
+.B \-\-protocol
 is specified, or with the
-.B -m
+.B \-m
 or
-.B --match
+.B \-\-match
 options, followed by the matching module name; after these, various
 extra command line options become available, depending on the specific
 module.  You can specify multiple extended match modules in one line,
 and you can use the
-.B -h
+.B \-h
 or
-.B --help
+.B \-\-help
 options after the module has been specified to receive help specific
 to that module.
 
@@ -442,9 +442,9 @@ involves both INPUT and OUTPUT chains); previously a forwarded packet
 would pass through all three.
 .PP
 The other main difference is that
-.B -i
+.B \-i
 refers to the input interface;
-.B -o
+.B \-o
 refers to the output interface, and both are available for packets
 entering the
 .B FORWARD
@@ -456,9 +456,9 @@ optional extension modules.  This should simplify much of the previous
 confusion over the combination of IP masquerading and packet filtering
 seen previously.  So the following options are handled differently:
 .nf
- -j MASQ
- -M -S
- -M -L
+ \-j MASQ
+ \-M \-S
+ \-M \-L
 .fi
 There are several other changes in iptables.
 .SH SEE ALSO

@@ -1,3 +1,22 @@
+iptables (1.4.1.1-2+vyatta+2) unstable; urgency=low
+
+	  3.2.0
+  [ Mark O'Brien ]
+
+
+  [ Stephen Hemminger ]
+  * Add ipp2p.h file
+
+  [ An-Cheng Huang ]
+  * add -i for autoreconf
+  * update package version string
+  * add ipp2p iptables extension
+  * apply debian patches
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Tue, 25 Nov 2008 19:07:46 -0800
+
 iptables (1.4.1.1-2+vyatta+1) unstable; urgency=low
 
   * add ipp2p iptables extension

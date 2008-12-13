@@ -1,7 +1,7 @@
 Source: iptables
 Section: net
 Priority: important
-Maintainer: Laurence J. Lane <ljlane@debian.org>
+Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
 Build-Depends: debhelper (>>7.0), linuxdoc-tools, quilt, autoconf, automake, libtool
 Standards-Version: 3.8.0
 Homepage: http://www.netfilter.org/

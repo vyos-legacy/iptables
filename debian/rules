@@ -27,6 +27,7 @@ clean:
 	dh clean
 
 binary: install
+	rm -f debian/files
 	dh binary --before dh_gencontrol
 	if [ -f "../.VYATTA_DEV_BUILD" ]; then \
 		dh_gencontrol -- -v999.dev; \

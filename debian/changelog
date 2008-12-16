@@ -1,3 +1,12 @@
+iptables (1.4.1.1-2+vyatta+3) unstable; urgency=low
+
+  Build system changes
+  * add support for development build
+  * update maintainer information
+  * "files" file should be removed before package build
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Mon, 15 Dec 2008 16:24:41 -0800
+
 iptables (1.4.1.1-2+vyatta+2) unstable; urgency=low
 
 	  3.2.0

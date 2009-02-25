@@ -79,10 +79,9 @@
 #define CMD_SET_POLICY		0x0400U
 #define CMD_RENAME_CHAIN	0x0800U
 #define CMD_LIST_RULES		0x1000U
-#define CMD_ZERO_NUM		0x2000U
-#define NUMBER_OF_CMD	15
+#define NUMBER_OF_CMD	14
 static const char cmdflags[] = { 'I', 'D', 'D', 'R', 'A', 'L', 'F', 'Z',
-				 'Z', 'N', 'X', 'P', 'E', 'S' };
+				 'N', 'X', 'P', 'E', 'S' };
 
 #define OPTION_OFFSET 256
 
@@ -133,6 +132,7 @@ static struct option original_opts[] = {
 	{.name = "line-numbers",  .has_arg = 0, .val = '0'},
 	{.name = "modprobe",      .has_arg = 1, .val = 'M'},
 	{.name = "set-counters",  .has_arg = 1, .val = 'c'},
+	{.name = "goto",          .has_arg = 1, .val = 'g'},
 	{NULL},
 };
 
@@ -166,7 +166,6 @@ static char commands_v_options[NUMBER_OF_CMD][NUMBER_OF_OPT] =
 /*LIST*/      {' ','x','x','x','x',' ',' ','x','x',' ','x'},
 /*FLUSH*/     {'x','x','x','x','x',' ','x','x','x','x','x'},
 /*ZERO*/      {'x','x','x','x','x',' ','x','x','x','x','x'},
-/*ZERO_NUM*/  {'x','x','x','x','x',' ','x','x','x','x','x'},
 /*NEW_CHAIN*/ {'x','x','x','x','x',' ','x','x','x','x','x'},
 /*DEL_CHAIN*/ {'x','x','x','x','x',' ','x','x','x','x','x'},
 /*SET_POLICY*/{'x','x','x','x','x',' ','x','x','x','x',' '},
@@ -310,8 +309,7 @@ exit_printhelp(struct ip6tables_rule_match *matches)
 "  --list-rules -S [chain [rulenum]]\n"
 "				Print the rules in a chain or all chains\n"
 "  --flush   -F [chain]		Delete all rules in  chain or all chains\n"
-"  --zero    -Z [chain[rulenum]]\n"
-"		                Zero counters in chain or all chains\n"
+"  --zero    -Z [chain]		Zero counters in chain or all chains\n"
 "  --new     -N chain		Create a new user-defined chain\n"
 "  --delete-chain\n"
 "            -X [chain]		Delete a user-defined chain\n"
@@ -322,19 +320,23 @@ exit_printhelp(struct ip6tables_rule_match *matches)
 "				Change chain name, (moving any references)\n"
 
 "Options:\n"
-"  --proto	-p [!] proto	protocol: by number or name, eg. `tcp'\n"
-"  --source	-s [!] address[/mask]\n"
+"[!] --proto	-p proto	protocol: by number or name, eg. `tcp'\n"
+"[!] --source	-s address[/mask]\n"
 "				source specification\n"
-"  --destination -d [!] address[/mask]\n"
+"[!] --destination -d address[/mask]\n"
 "				destination specification\n"
-"  --in-interface -i [!] input name[+]\n"
+"[!] --in-interface -i input name[+]\n"
 "				network interface name ([+] for wildcard)\n"
 "  --jump	-j target\n"
 "				target for rule (may load target extension)\n"
+#ifdef IP6T_F_GOTO
+"  --goto	-g chain\n"
+"				jump to chain with no return\n"
+#endif
 "  --match	-m match\n"
 "				extended match (may load extension)\n"
 "  --numeric	-n		numeric output of addresses and ports\n"
-"  --out-interface -o [!] output name[+]\n"
+"[!] --out-interface -o output name[+]\n"
 "				network interface name ([+] for wildcard)\n"
 "  --table	-t table	table to manipulate (default: `filter')\n"
 "  --verbose	-v		verbose mode\n"
@@ -826,6 +828,11 @@ print_firewall(const struct ip6t_entry *fw,
 	if (format & FMT_NOTABLE)
 		fputs("  ", stdout);
 
+#ifdef IP6T_F_GOTO
+	if(fw->ipv6.flags & IP6T_F_GOTO)
+		printf("[goto] ");
+#endif
+
 	IP6T_MATCH_ITERATE(fw, print_match, &fw->ipv6, format & FMT_NUMERIC);
 
 	if (target) {
@@ -1262,7 +1269,11 @@ void print_rule(const struct ip6t_entry *e,
 	/* Print target name */
 	target_name = ip6tc_get_target(e, h);
 	if (target_name && (*target_name != '\0'))
+#ifdef IP6T_F_GOTO
+		printf("-%c %s ", e->ipv6.flags & IP6T_F_GOTO ? 'g' : 'j', target_name);
+#else
 		printf("-j %s ", target_name);
+#endif
 
 	/* Print targinfo part */
 	t = ip6t_get_target((struct ip6t_entry *)e);
@@ -1450,7 +1461,7 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 	opterr = 0;
 
 	while ((c = getopt_long(argc, argv,
-	   "-A:D:R:I:L::S::M:F::Z::N:X::E:P:Vh::o:p:s:d:j:i:bvnt:m:xc:",
+	   "-A:D:R:I:L::S::M:F::Z::N:X::E:P:Vh::o:p:s:d:j:i:bvnt:m:xc:g:",
 					   opts, NULL)) != -1) {
 		switch (c) {
 			/*
@@ -1497,7 +1508,7 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 			break;
 
 		case 'L':
-			add_command(&command, CMD_LIST, CMD_ZERO|CMD_ZERO_NUM,
+			add_command(&command, CMD_LIST, CMD_ZERO,
 				    invert);
 			if (optarg) chain = optarg;
 			else if (optind < argc && argv[optind][0] != '-'
@@ -1509,8 +1520,8 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 			break;
 
 		case 'S':
-			add_command(&command, CMD_LIST_RULES, 
-				    CMD_ZERO|CMD_ZERO_NUM, invert);
+			add_command(&command, CMD_LIST_RULES, CMD_ZERO,
+				    invert);
 			if (optarg) chain = optarg;
 			else if (optind < argc && argv[optind][0] != '-'
 				 && argv[optind][0] != '!')
@@ -1536,11 +1547,6 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 			else if (optind < argc && argv[optind][0] != '-'
 				&& argv[optind][0] != '!')
 				chain = argv[optind++];
-			if (optind < argc && argv[optind][0] != '-'
-				&& argv[optind][0] != '!') {
-				rulenum = parse_rulenumber(argv[optind++]);
-				command = CMD_ZERO_NUM;
-			}
 			break;
 
 		case 'N':
@@ -1646,6 +1652,15 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 			dhostnetworkmask = argv[optind-1];
 			break;
 
+#ifdef IP6T_F_GOTO
+		case 'g':
+			set_option(&options, OPT_JUMP, &fw.ipv6.invflags,
+					invert);
+			fw.ipv6.flags |= IP6T_F_GOTO;
+			jumpto = parse_target(optarg);
+			break;
+#endif
+
 		case 'j':
 			set_option(&options, OPT_JUMP, &fw.ipv6.invflags,
 				   invert);
@@ -1732,7 +1747,7 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 			if (invert)
 				exit_error(PARAMETER_PROBLEM,
 					   "unexpected ! flag before --table");
-			*table = argv[optind-1];
+			*table = optarg;
 			break;
 
 		case 'x':
@@ -1875,8 +1890,7 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 
 				if (!m)
 					exit_error(PARAMETER_PROBLEM,
-						   "Unknown arg `%s'",
-						   argv[optind-1]);
+						   "Unknown arg `%s'", optarg);
 			}
 		}
 		invert = FALSE;
@@ -2003,6 +2017,11 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 			 * We cannot know if the plugin is corrupt, non
 			 * existant OR if the user just misspelled a
 			 * chain. */
+#ifdef IP6T_F_GOTO
+			if (fw.ipv6.flags & IP6T_F_GOTO)
+				exit_error(PARAMETER_PROBLEM,
+						"goto '%s' is not a chain\n", jumpto);
+#endif
 			find_target(jumpto, LOAD_MUST_SUCCEED);
 		} else {
 			e = generate_entry(&fw, matches, target->t);
@@ -2043,12 +2062,8 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 	case CMD_ZERO:
 		ret = zero_entries(chain, options&OPT_VERBOSE, handle);
 		break;
-	case CMD_ZERO_NUM:
-		ret = ip6tc_zero_counter(chain, rulenum, handle);
-		break;
 	case CMD_LIST:
 	case CMD_LIST|CMD_ZERO:
-	case CMD_LIST|CMD_ZERO_NUM:
 		ret = list_entries(chain,
 				   rulenum,
 				   options&OPT_VERBOSE,
@@ -2059,12 +2074,9 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 		if (ret && (command & CMD_ZERO))
 			ret = zero_entries(chain,
 					   options&OPT_VERBOSE, handle);
-		if (ret && (command & CMD_ZERO_NUM))
-			ret = ip6tc_zero_counter(chain, rulenum, handle);
 		break;
 	case CMD_LIST_RULES:
 	case CMD_LIST_RULES|CMD_ZERO:
-	case CMD_LIST_RULES|CMD_ZERO_NUM:
 		ret = list_rules(chain,
 				   rulenum,
 				   options&OPT_VERBOSE,
@@ -2072,8 +2084,6 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 		if (ret && (command & CMD_ZERO))
 			ret = zero_entries(chain,
 					   options&OPT_VERBOSE, handle);
-		if (ret && (command & CMD_ZERO_NUM))
-			ret = ip6tc_zero_counter(chain, rulenum, handle);
 		break;
 	case CMD_NEW_CHAIN:
 		ret = ip6tc_create_chain(chain, handle);

@@ -23,7 +23,7 @@
 #include <linux/netfilter/xt_sctp.h>
 
 /* Some ZS!#@:$%*#$! has replaced the ELEMCOUNT macro in ipt_sctp.h with
- * ARRAY_SIZE without noticing that this file is used from userserspace,
+ * ARRAY_SIZE without noticing that this file is used from userspace,
  * and userspace doesn't have ARRAY_SIZE */
 
 #ifndef ELEMCOUNT
@@ -40,7 +40,6 @@
 static void
 print_chunk(u_int32_t chunknum, int numeric);
 
-/* Initialize the match. */
 static void sctp_init(struct xt_entry_match *m)
 {
 	int i;
@@ -57,11 +56,11 @@ static void sctp_help(void)
 {
 	printf(
 "sctp match options\n"
-" --source-port [!] port[:port]                          match source port(s)\n"
+"[!] --source-port port[:port]                          match source port(s)\n"
 " --sport ...\n"
-" --destination-port [!] port[:port]                     match destination port(s)\n"
+"[!] --destination-port port[:port]                     match destination port(s)\n"
 " --dport ...\n" 
-" --chunk-types [!] (all|any|none) (chunktype[:flags])+	match if all, any or none of\n"
+"[!] --chunk-types (all|any|none) (chunktype[:flags])+	match if all, any or none of\n"
 "						        chunktypes are present\n"
 "chunktypes - DATA INIT INIT_ACK SACK HEARTBEAT HEARTBEAT_ACK ABORT SHUTDOWN SHUTDOWN_ACK ERROR COOKIE_ECHO COOKIE_ACK ECN_ECNE ECN_CWR SHUTDOWN_COMPLETE ASCONF ASCONF_ACK ALL NONE\n");
 }
@@ -444,7 +443,6 @@ out:
 	return;
 }
 
-/* Prints out the matchinfo. */
 static void
 sctp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
@@ -475,7 +473,6 @@ sctp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 	}
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void sctp_save(const void *ip, const struct xt_entry_match *match)
 {
 	const struct xt_sctp_info *einfo =
@@ -543,4 +540,3 @@ void _init(void)
 	xtables_register_match(&sctp_match);
 	xtables_register_match(&sctp_match6);
 }
-

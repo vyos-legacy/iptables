@@ -1,6 +1,8 @@
-debian/tmp/usr/sbin/* sbin
-debian/tmp/usr/bin/* usr/sbin
-debian/tmp/lib/xtables
-debian/tmp/usr/share/man/man8 usr/share/man
+usr/sbin/* sbin
+usr/bin/* usr/sbin
+lib/xtables
+lib/libxtables.so.*
+usr/share/man/man8 usr/share/man
 iptables-apply usr/sbin
 iptables-apply.8 usr/share/man/man8
+iptables.xslt usr/share/iptables

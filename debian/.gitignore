@@ -1,0 +1,11 @@
+files
+iptables-dev.debhelper.log
+iptables-dev.postinst.debhelper
+iptables-dev.prerm.debhelper
+iptables-dev
+iptables.debhelper.log
+iptables.postinst.debhelper
+iptables.prerm.debhelper
+iptables.substvars
+iptables
+tmp

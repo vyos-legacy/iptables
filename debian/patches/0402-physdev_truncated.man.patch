@@ -1,7 +1,7 @@
 Index: b/extensions/libxt_physdev.man
 ===================================================================
---- a/extensions/libxt_physdev.man	2008-07-11 13:06:17.930197947 -0400
-+++ b/extensions/libxt_physdev.man	2008-07-11 13:07:15.553197844 -0400
+--- a/extensions/libxt_physdev.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_physdev.man	2009-01-12 13:19:05.523583097 -0500
 @@ -12,7 +12,7 @@
  .B PREROUTING
  chains). If the interface name ends in a "+", then any

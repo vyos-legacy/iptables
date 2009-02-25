@@ -16,8 +16,8 @@ static void physdev_help(void)
 {
 	printf(
 "physdev match options:\n"
-" --physdev-in [!] input name[+]		bridge port name ([+] for wildcard)\n"
-" --physdev-out [!] output name[+]	bridge port name ([+] for wildcard)\n"
+" [!] --physdev-in inputname[+]		bridge port name ([+] for wildcard)\n"
+" [!] --physdev-out outputname[+]	bridge port name ([+] for wildcard)\n"
 " [!] --physdev-is-in			arrived on a bridge device\n"
 " [!] --physdev-is-out			will leave on a bridge device\n"
 " [!] --physdev-is-bridged		it's a bridged packet\n");
@@ -143,22 +143,23 @@ static void physdev_save(const void *ip, const struct xt_entry_match *match)
 		(struct xt_physdev_info*)match->data;
 
 	if (info->bitmask & XT_PHYSDEV_OP_ISIN)
-		printf("%s --physdev-is-in",
-		       info->invert & XT_PHYSDEV_OP_ISIN ? " !":"");
+		printf("%s--physdev-is-in ",
+		       (info->invert & XT_PHYSDEV_OP_ISIN) ? "! " : "");
 	if (info->bitmask & XT_PHYSDEV_OP_IN)
-		printf("%s --physdev-in %s",
-		(info->invert & XT_PHYSDEV_OP_IN) ? " !":"", info->physindev);
+		printf("%s--physdev-in %s ",
+		       (info->invert & XT_PHYSDEV_OP_IN) ? "! " : "",
+		       info->physindev);
 
 	if (info->bitmask & XT_PHYSDEV_OP_ISOUT)
-		printf("%s --physdev-is-out",
-		       info->invert & XT_PHYSDEV_OP_ISOUT ? " !":"");
+		printf("%s--physdev-is-out ",
+		       (info->invert & XT_PHYSDEV_OP_ISOUT) ? "! " : "");
 	if (info->bitmask & XT_PHYSDEV_OP_OUT)
-		printf("%s --physdev-out %s",
-		(info->invert & XT_PHYSDEV_OP_OUT) ? " !":"", info->physoutdev);
+		printf("%s--physdev-out %s ",
+		       (info->invert & XT_PHYSDEV_OP_OUT) ? "! " : "",
+		       info->physoutdev);
 	if (info->bitmask & XT_PHYSDEV_OP_BRIDGED)
-		printf("%s --physdev-is-bridged",
-		       info->invert & XT_PHYSDEV_OP_BRIDGED ? " !":"");
-	printf(" ");
+		printf("%s--physdev-is-bridged ",
+		       (info->invert & XT_PHYSDEV_OP_BRIDGED) ? "! " : "");
 }
 
 static struct xtables_match physdev_match = {

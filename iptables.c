@@ -76,10 +76,9 @@
 #define CMD_SET_POLICY		0x0400U
 #define CMD_RENAME_CHAIN	0x0800U
 #define CMD_LIST_RULES		0x1000U
-#define CMD_ZERO_NUM		0x2000U
-#define NUMBER_OF_CMD  15
+#define NUMBER_OF_CMD	14
 static const char cmdflags[] = { 'I', 'D', 'D', 'R', 'A', 'L', 'F', 'Z',
-				 'Z', 'N', 'X', 'P', 'E', 'S' };
+				 'N', 'X', 'P', 'E', 'S' };
 
 #define OPTION_OFFSET 256
 
@@ -166,7 +165,6 @@ static char commands_v_options[NUMBER_OF_CMD][NUMBER_OF_OPT] =
 /*LIST*/      {' ','x','x','x','x',' ',' ','x','x','x',' ','x'},
 /*FLUSH*/     {'x','x','x','x','x',' ','x','x','x','x','x','x'},
 /*ZERO*/      {'x','x','x','x','x',' ','x','x','x','x','x','x'},
-/*ZERO_NUM*/  {'x','x','x','x','x',' ','x','x','x','x','x','x'},
 /*NEW_CHAIN*/ {'x','x','x','x','x',' ','x','x','x','x','x','x'},
 /*DEL_CHAIN*/ {'x','x','x','x','x',' ','x','x','x','x','x','x'},
 /*SET_POLICY*/{'x','x','x','x','x',' ','x','x','x','x','x',' '},
@@ -313,8 +311,7 @@ exit_printhelp(struct iptables_rule_match *matches)
 "  --list-rules -S [chain [rulenum]]\n"
 "				Print the rules in a chain or all chains\n"
 "  --flush   -F [chain]		Delete all rules in  chain or all chains\n"
-"  --zero    -Z [chain [rulenum]]\n"
-"		                Zero counters in chain or all chains\n"
+"  --zero    -Z [chain]		Zero counters in chain or all chains\n"
 "  --new     -N chain		Create a new user-defined chain\n"
 "  --delete-chain\n"
 "            -X [chain]		Delete a user-defined chain\n"
@@ -325,14 +322,14 @@ exit_printhelp(struct iptables_rule_match *matches)
 "				Change chain name, (moving any references)\n"
 
 "Options:\n"
-"  --proto	-p [!] proto	protocol: by number or name, eg. `tcp'\n"
-"  --source	-s [!] address[/mask]\n"
+"[!] --proto	-p proto	protocol: by number or name, eg. `tcp'\n"
+"[!] --source	-s address[/mask]\n"
 "				source specification\n"
-"  --destination -d [!] address[/mask]\n"
+"[!] --destination -d address[/mask]\n"
 "				destination specification\n"
-"  --in-interface -i [!] input name[+]\n"
+"[!] --in-interface -i input name[+]\n"
 "				network interface name ([+] for wildcard)\n"
-"  --jump	-j target\n"
+" --jump	-j target\n"
 "				target for rule (may load target extension)\n"
 #ifdef IPT_F_GOTO
 "  --goto      -g chain\n"
@@ -341,7 +338,7 @@ exit_printhelp(struct iptables_rule_match *matches)
 "  --match	-m match\n"
 "				extended match (may load extension)\n"
 "  --numeric	-n		numeric output of addresses and ports\n"
-"  --out-interface -o [!] output name[+]\n"
+"[!] --out-interface -o output name[+]\n"
 "				network interface name ([+] for wildcard)\n"
 "  --table	-t table	table to manipulate (default: `filter')\n"
 "  --verbose	-v		verbose mode\n"
@@ -1524,7 +1521,7 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 			break;
 
 		case 'L':
-			add_command(&command, CMD_LIST, CMD_ZERO|CMD_ZERO_NUM,
+			add_command(&command, CMD_LIST, CMD_ZERO,
 				    invert);
 			if (optarg) chain = optarg;
 			else if (optind < argc && argv[optind][0] != '-'
@@ -1536,8 +1533,8 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 			break;
 
 		case 'S':
-			add_command(&command, CMD_LIST_RULES, 
-				    CMD_ZERO|CMD_ZERO_NUM, invert);
+			add_command(&command, CMD_LIST_RULES, CMD_ZERO,
+				    invert);
 			if (optarg) chain = optarg;
 			else if (optind < argc && argv[optind][0] != '-'
 				 && argv[optind][0] != '!')
@@ -1563,11 +1560,6 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 			else if (optind < argc && argv[optind][0] != '-'
 				&& argv[optind][0] != '!')
 				chain = argv[optind++];
-			if (optind < argc && argv[optind][0] != '-'
-				&& argv[optind][0] != '!') {
-				rulenum = parse_rulenumber(argv[optind++]);
-				command = CMD_ZERO_NUM;
-			}
 			break;
 
 		case 'N':
@@ -1772,7 +1764,7 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 			if (invert)
 				exit_error(PARAMETER_PROBLEM,
 					   "unexpected ! flag before --table");
-			*table = argv[optind-1];
+			*table = optarg;
 			break;
 
 		case 'x':
@@ -1919,12 +1911,19 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 				}
 				if (!m)
 					exit_error(PARAMETER_PROBLEM,
-						   "Unknown arg `%s'",
-						   argv[optind-1]);
+						   "Unknown arg `%s'", optarg);
 			}
 		}
 		invert = FALSE;
 	}
+
+	if (strcmp(*table, "nat") == 0 &&
+	    ((policy != NULL && strcmp(policy, "DROP") == 0) ||
+	    (jumpto != NULL && strcmp(jumpto, "DROP") == 0)))
+		fprintf(stderr, "\nThe \"nat\" table is not intended for "
+		        "filtering, hence the use of DROP is deprecated and "
+		        "will permanently be disabled in the next iptables "
+		        "release. Please adjust your scripts.\n\n");
 
 	for (matchp = matches; matchp; matchp = matchp->next)
 		if (matchp->match->final_check != NULL)
@@ -2095,12 +2094,8 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 	case CMD_ZERO:
 		ret = zero_entries(chain, options&OPT_VERBOSE, handle);
 		break;
-	case CMD_ZERO_NUM:
-		ret = iptc_zero_counter(chain, rulenum, handle);
-		break;
 	case CMD_LIST:
 	case CMD_LIST|CMD_ZERO:
-	case CMD_LIST|CMD_ZERO_NUM:
 		ret = list_entries(chain,
 				   rulenum,
 				   options&OPT_VERBOSE,
@@ -2111,12 +2106,9 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 		if (ret && (command & CMD_ZERO))
 			ret = zero_entries(chain,
 					   options&OPT_VERBOSE, handle);
-		if (ret && (command & CMD_ZERO_NUM))
-			ret = iptc_zero_counter(chain, rulenum, handle);
 		break;
 	case CMD_LIST_RULES:
 	case CMD_LIST_RULES|CMD_ZERO:
-	case CMD_LIST_RULES|CMD_ZERO_NUM:
 		ret = list_rules(chain,
 				   rulenum,
 				   options&OPT_VERBOSE,
@@ -2124,8 +2116,6 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 		if (ret && (command & CMD_ZERO))
 			ret = zero_entries(chain,
 					   options&OPT_VERBOSE, handle);
-		if (ret && (command & CMD_ZERO_NUM))
-			ret = iptc_zero_counter(chain, rulenum, handle);
 		break;
 	case CMD_NEW_CHAIN:
 		ret = iptc_create_chain(chain, handle);

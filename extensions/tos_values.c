@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <linux/ip.h>
 
 struct tos_value_mask {
 	uint8_t value, mask;
@@ -56,8 +57,9 @@ static bool tos_parse_symbolic(const char *str, struct tos_value_mask *tvm,
 {
 	const unsigned int max = 255;
 	const struct tos_symbol_info *symbol;
+	char *tmp;
 
-	if (strtonum(str, NULL, NULL, 0, max))
+	if (strtonum(str, &tmp, NULL, 0, max))
 		return tos_parse_numeric(str, tvm, max);
 
 	/* Do not consider ECN bits */

@@ -1,9 +1,9 @@
 Index: b/extensions/libip6t_HL.man
 ===================================================================
---- a/extensions/libip6t_HL.man	2008-07-12 10:05:37.972688404 -0400
-+++ b/extensions/libip6t_HL.man	2008-07-12 10:21:10.951284054 -0400
+--- a/extensions/libip6t_HL.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_HL.man	2009-01-12 13:19:09.062582917 -0500
 @@ -7,11 +7,11 @@
- .TP
+ .PP
  .B Don't ever set or increment the value on packets that leave your local network!
  .TP
 -.BI "--hl-set " "value"
@@ -19,8 +19,8 @@ Index: b/extensions/libip6t_HL.man
  Increment the Hop Limit `value' times.
 Index: b/extensions/libip6t_LOG.man
 ===================================================================
---- a/extensions/libip6t_LOG.man	2008-07-12 10:05:37.977688671 -0400
-+++ b/extensions/libip6t_LOG.man	2008-07-12 10:21:10.951284054 -0400
+--- a/extensions/libip6t_LOG.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_LOG.man	2009-01-12 13:19:09.083660910 -0500
 @@ -10,22 +10,22 @@
  separate rules with the same matching criteria, first using target LOG
  then DROP (or REJECT).
@@ -52,8 +52,8 @@ Index: b/extensions/libip6t_LOG.man
  Log the userid of the process which generated the packet.
 Index: b/extensions/libip6t_REJECT.man
 ===================================================================
---- a/extensions/libip6t_REJECT.man	2008-07-12 10:05:37.981688808 -0400
-+++ b/extensions/libip6t_REJECT.man	2008-07-12 10:21:10.951284054 -0400
+--- a/extensions/libip6t_REJECT.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_REJECT.man	2009-01-12 13:19:09.083660910 -0500
 @@ -11,7 +11,7 @@
  chains.  The following option controls the nature of the error packet
  returned:
@@ -65,8 +65,8 @@ Index: b/extensions/libip6t_REJECT.man
  .B " icmp6-no-route"
 Index: b/extensions/libip6t_ah.man
 ===================================================================
---- a/extensions/libip6t_ah.man	2008-07-12 10:05:37.986688487 -0400
-+++ b/extensions/libip6t_ah.man	2008-07-12 10:21:10.951284054 -0400
+--- a/extensions/libip6t_ah.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_ah.man	2009-01-12 13:19:09.083660910 -0500
 @@ -1,10 +1,10 @@
  This module matches the parameters in Authentication header of IPsec packets.
  .TP
@@ -83,8 +83,8 @@ Index: b/extensions/libip6t_ah.man
  Matches if the reserved field is filled with zero.
 Index: b/extensions/libip6t_dst.man
 ===================================================================
---- a/extensions/libip6t_dst.man	2008-07-12 10:05:37.991688522 -0400
-+++ b/extensions/libip6t_dst.man	2008-07-12 10:21:10.951284054 -0400
+--- a/extensions/libip6t_dst.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_dst.man	2009-01-12 13:19:09.083660910 -0500
 @@ -1,7 +1,7 @@
  This module matches the parameters in Destination Options header
  .TP
@@ -97,8 +97,8 @@ Index: b/extensions/libip6t_dst.man
  numeric type of option and the length of the option data in octets.
 Index: b/extensions/libip6t_frag.man
 ===================================================================
---- a/extensions/libip6t_frag.man	2008-07-12 10:05:37.995688273 -0400
-+++ b/extensions/libip6t_frag.man	2008-07-12 10:21:10.952284319 -0400
+--- a/extensions/libip6t_frag.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_frag.man	2009-01-12 13:19:09.083660910 -0500
 @@ -1,20 +1,20 @@
  This module matches the parameters in Fragment header.
  .TP
@@ -128,8 +128,8 @@ Index: b/extensions/libip6t_frag.man
  Matches if this is the last fragment.
 Index: b/extensions/libip6t_hbh.man
 ===================================================================
---- a/extensions/libip6t_hbh.man	2008-07-12 10:05:38.000688374 -0400
-+++ b/extensions/libip6t_hbh.man	2008-07-12 10:21:10.952284319 -0400
+--- a/extensions/libip6t_hbh.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_hbh.man	2009-01-12 13:19:09.084707789 -0500
 @@ -1,7 +1,7 @@
  This module matches the parameters in Hop-by-Hop Options header
  .TP
@@ -142,8 +142,8 @@ Index: b/extensions/libip6t_hbh.man
  numeric type of option and the length of the option data in octets.
 Index: b/extensions/libip6t_hl.man
 ===================================================================
---- a/extensions/libip6t_hl.man	2008-07-12 10:05:38.004688468 -0400
-+++ b/extensions/libip6t_hl.man	2008-07-12 10:21:10.952284319 -0400
+--- a/extensions/libip6t_hl.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_hl.man	2009-01-12 13:19:09.084707789 -0500
 @@ -1,10 +1,10 @@
  This module matches the Hop Limit field in the IPv6 header.
  .TP
@@ -160,8 +160,8 @@ Index: b/extensions/libip6t_hl.man
  Matches if Hop Limit is greater than \fIvalue\fP.
 Index: b/extensions/libip6t_icmp6.man
 ===================================================================
---- a/extensions/libip6t_icmp6.man	2008-07-12 10:05:38.009688309 -0400
-+++ b/extensions/libip6t_icmp6.man	2008-07-12 10:21:10.952284319 -0400
+--- a/extensions/libip6t_icmp6.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_icmp6.man	2009-01-12 13:19:09.084707789 -0500
 @@ -1,7 +1,7 @@
 -This extension can be used if `--protocol ipv6-icmp' or `--protocol icmpv6' is
 +This extension can be used if `\-\-protocol ipv6-icmp' or `\-\-protocol icmpv6' is
@@ -181,8 +181,8 @@ Index: b/extensions/libip6t_icmp6.man
  .fi
 Index: b/extensions/libip6t_ipv6header.man
 ===================================================================
---- a/extensions/libip6t_ipv6header.man	2008-07-12 10:05:38.014688448 -0400
-+++ b/extensions/libip6t_ipv6header.man	2008-07-12 10:21:10.952284319 -0400
+--- a/extensions/libip6t_ipv6header.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_ipv6header.man	2009-01-12 13:19:09.084707789 -0500
 @@ -1,10 +1,10 @@
  This module matches IPv6 extension headers and/or upper layer header.
  .TP
@@ -199,8 +199,8 @@ Index: b/extensions/libip6t_ipv6header.man
  Possible \fIheader\fP types can be:
 Index: b/extensions/libip6t_mh.man
 ===================================================================
---- a/extensions/libip6t_mh.man	2008-07-12 10:05:38.019688456 -0400
-+++ b/extensions/libip6t_mh.man	2008-07-12 10:21:10.952284319 -0400
+--- a/extensions/libip6t_mh.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_mh.man	2009-01-12 13:19:09.084707789 -0500
 @@ -1,12 +1,12 @@
 -This extension is loaded if `--protocol ipv6-mh' or `--protocol mh' is
 +This extension is loaded if `\-\-protocol ipv6-mh' or `\-\-protocol mh' is
@@ -219,8 +219,8 @@ Index: b/extensions/libip6t_mh.man
  .fi
 Index: b/extensions/libip6t_rt.man
 ===================================================================
---- a/extensions/libip6t_rt.man	2008-07-12 10:05:38.023688437 -0400
-+++ b/extensions/libip6t_rt.man	2008-07-12 10:21:10.952284319 -0400
+--- a/extensions/libip6t_rt.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libip6t_rt.man	2009-01-12 13:19:09.084707789 -0500
 @@ -1,19 +1,19 @@
  Match on IPv6 routing header
  .TP
@@ -249,8 +249,8 @@ Index: b/extensions/libip6t_rt.man
  List of type=0 addresses is not a strict list.
 Index: b/extensions/libipt_CLUSTERIP.man
 ===================================================================
---- a/extensions/libipt_CLUSTERIP.man	2008-07-12 10:05:38.028688242 -0400
-+++ b/extensions/libipt_CLUSTERIP.man	2008-07-12 10:21:10.952284319 -0400
+--- a/extensions/libipt_CLUSTERIP.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_CLUSTERIP.man	2009-01-12 13:19:09.084707789 -0500
 @@ -3,22 +3,22 @@
  them.  Connections are statically distributed between the nodes in this
  cluster.
@@ -282,8 +282,8 @@ Index: b/extensions/libipt_CLUSTERIP.man
  Specify the random seed used for hash initialization.
 Index: b/extensions/libipt_DNAT.man
 ===================================================================
---- a/extensions/libipt_DNAT.man	2008-07-12 10:05:38.032688372 -0400
-+++ b/extensions/libipt_DNAT.man	2008-07-12 10:21:10.953284092 -0400
+--- a/extensions/libipt_DNAT.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_DNAT.man	2009-01-12 13:19:09.085707668 -0500
 @@ -10,27 +10,27 @@
  also be mangled), and rules should cease being examined.  It takes one
  type of option:
@@ -321,8 +321,8 @@ Index: b/extensions/libipt_DNAT.man
  .PP
 Index: b/extensions/libipt_ECN.man
 ===================================================================
---- a/extensions/libipt_ECN.man	2008-07-12 10:05:38.037688678 -0400
-+++ b/extensions/libipt_ECN.man	2008-07-12 10:21:10.953284092 -0400
+--- a/extensions/libipt_ECN.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_ECN.man	2009-01-12 13:19:09.085707668 -0500
 @@ -1,7 +1,7 @@
  This target allows to selectively work around known ECN blackholes.
  It can only be used in the mangle table.
@@ -335,8 +335,8 @@ Index: b/extensions/libipt_ECN.man
 +.BR "\-p tcp" .
 Index: b/extensions/libipt_LOG.man
 ===================================================================
---- a/extensions/libipt_LOG.man	2008-07-12 10:05:38.042688552 -0400
-+++ b/extensions/libipt_LOG.man	2008-07-12 10:21:10.953284092 -0400
+--- a/extensions/libipt_LOG.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_LOG.man	2009-01-12 13:19:09.085707668 -0500
 @@ -10,22 +10,22 @@
  separate rules with the same matching criteria, first using target LOG
  then DROP (or REJECT).
@@ -368,8 +368,8 @@ Index: b/extensions/libipt_LOG.man
  Log the userid of the process which generated the packet.
 Index: b/extensions/libipt_MASQUERADE.man
 ===================================================================
---- a/extensions/libipt_MASQUERADE.man	2008-07-12 10:05:38.047688440 -0400
-+++ b/extensions/libipt_MASQUERADE.man	2008-07-12 10:21:10.953284092 -0400
+--- a/extensions/libipt_MASQUERADE.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_MASQUERADE.man	2009-01-12 13:19:09.085707668 -0500
 @@ -12,19 +12,19 @@
  next dialup is unlikely to have the same interface address (and hence
  any established connections are lost anyway).  It takes one option:
@@ -397,8 +397,8 @@ Index: b/extensions/libipt_MASQUERADE.man
  .PP
 Index: b/extensions/libipt_NETMAP.man
 ===================================================================
---- a/extensions/libipt_NETMAP.man	2008-07-12 10:05:38.052688236 -0400
-+++ b/extensions/libipt_NETMAP.man	2008-07-12 10:21:10.953284092 -0400
+--- a/extensions/libipt_NETMAP.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_NETMAP.man	2009-01-12 13:19:09.085707668 -0500
 @@ -3,7 +3,7 @@
  .B nat
  table.
@@ -410,8 +410,8 @@ Index: b/extensions/libipt_NETMAP.man
  All bits that are zero in the mask are filled in from the original address.
 Index: b/extensions/libipt_REDIRECT.man
 ===================================================================
---- a/extensions/libipt_REDIRECT.man	2008-07-12 10:05:38.056688280 -0400
-+++ b/extensions/libipt_REDIRECT.man	2008-07-12 10:21:10.954284094 -0400
+--- a/extensions/libipt_REDIRECT.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_REDIRECT.man	2009-01-12 13:19:09.085707668 -0500
 @@ -9,17 +9,17 @@
  destination IP to the primary address of the incoming interface
  (locally-generated packets are mapped to the 127.0.0.1 address).
@@ -437,8 +437,8 @@ Index: b/extensions/libipt_REDIRECT.man
  .PP
 Index: b/extensions/libipt_REJECT.man
 ===================================================================
---- a/extensions/libipt_REJECT.man	2008-07-12 10:05:38.062688413 -0400
-+++ b/extensions/libipt_REJECT.man	2008-07-12 10:21:10.954284094 -0400
+--- a/extensions/libipt_REJECT.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_REJECT.man	2009-01-12 13:19:09.086707624 -0500
 @@ -11,7 +11,7 @@
  chains.  The following option controls the nature of the error packet
  returned:
@@ -450,8 +450,8 @@ Index: b/extensions/libipt_REJECT.man
  .B " icmp-net-unreachable"
 Index: b/extensions/libipt_SAME.man
 ===================================================================
---- a/extensions/libipt_SAME.man	2008-07-12 10:05:38.066688257 -0400
-+++ b/extensions/libipt_SAME.man	2008-07-12 10:21:10.954284094 -0400
+--- a/extensions/libipt_SAME.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_SAME.man	2009-01-12 13:19:09.086707624 -0500
 @@ -1,15 +1,15 @@
  Similar to SNAT/DNAT depending on chain: it takes a range of addresses
 -(`--to 1.2.3.4-1.2.3.7') and gives a client the same
@@ -474,8 +474,8 @@ Index: b/extensions/libipt_SAME.man
  port prediction (kernel >= 2.6.21).
 Index: b/extensions/libipt_SET.man
 ===================================================================
---- a/extensions/libipt_SET.man	2008-07-12 10:05:38.071688425 -0400
-+++ b/extensions/libipt_SET.man	2008-07-12 10:21:10.954284094 -0400
+--- a/extensions/libipt_SET.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_SET.man	2009-01-12 13:19:09.086707624 -0500
 @@ -1,10 +1,10 @@
  This modules adds and/or deletes entries from IP sets which can be defined 
  by ipset(8).
@@ -491,8 +491,8 @@ Index: b/extensions/libipt_SET.man
  .BR "src"
 Index: b/extensions/libipt_SNAT.man
 ===================================================================
---- a/extensions/libipt_SNAT.man	2008-07-12 10:05:38.076688430 -0400
-+++ b/extensions/libipt_SNAT.man	2008-07-12 10:21:10.954284094 -0400
+--- a/extensions/libipt_SNAT.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_SNAT.man	2009-01-12 13:19:09.086707624 -0500
 @@ -7,28 +7,28 @@
  mangled), and rules should cease being examined.  It takes one type
  of option:
@@ -531,8 +531,8 @@ Index: b/extensions/libipt_SNAT.man
  .PP
 Index: b/extensions/libipt_TTL.man
 ===================================================================
---- a/extensions/libipt_TTL.man	2008-07-12 10:05:38.081688244 -0400
-+++ b/extensions/libipt_TTL.man	2008-07-12 10:21:10.954284094 -0400
+--- a/extensions/libipt_TTL.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_TTL.man	2009-01-12 13:19:09.086707624 -0500
 @@ -9,11 +9,11 @@
  .B mangle
  table.
@@ -550,8 +550,8 @@ Index: b/extensions/libipt_TTL.man
  Increment the TTL value `value' times.
 Index: b/extensions/libipt_ULOG.man
 ===================================================================
---- a/extensions/libipt_ULOG.man	2008-07-12 10:05:38.085688467 -0400
-+++ b/extensions/libipt_ULOG.man	2008-07-12 10:21:10.955284282 -0400
+--- a/extensions/libipt_ULOG.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_ULOG.man	2009-01-12 13:19:09.149931384 -0500
 @@ -7,19 +7,19 @@
  Like LOG, this is a "non-terminating target", i.e. rule traversal
  continues at the next rule.
@@ -578,8 +578,8 @@ Index: b/extensions/libipt_ULOG.man
  netlink multipart message to userspace.  Default is 1 (for backwards
 Index: b/extensions/libipt_addrtype.man
 ===================================================================
---- a/extensions/libipt_addrtype.man	2008-07-12 10:05:38.090688519 -0400
-+++ b/extensions/libipt_addrtype.man	2008-07-12 10:21:10.955284282 -0400
+--- a/extensions/libipt_addrtype.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_addrtype.man	2009-01-12 13:19:09.149931384 -0500
 @@ -40,13 +40,13 @@
  .TP
  .BI "XRESOLVE"
@@ -619,8 +619,8 @@ Index: b/extensions/libipt_addrtype.man
  option.
 Index: b/extensions/libipt_ah.man
 ===================================================================
---- a/extensions/libipt_ah.man	2008-07-12 10:05:38.095688303 -0400
-+++ b/extensions/libipt_ah.man	2008-07-12 10:21:10.955284282 -0400
+--- a/extensions/libipt_ah.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_ah.man	2009-01-12 13:19:09.149931384 -0500
 @@ -1,3 +1,3 @@
  This module matches the SPIs in Authentication header of IPsec packets.
  .TP
@@ -628,8 +628,8 @@ Index: b/extensions/libipt_ah.man
 +[\fB!\fP] \fB\-\-ahspi\fP \fIspi\fP[\fB:\fP\fIspi\fP]
 Index: b/extensions/libipt_ecn.man
 ===================================================================
---- a/extensions/libipt_ecn.man	2008-07-12 10:05:38.099688386 -0400
-+++ b/extensions/libipt_ecn.man	2008-07-12 10:21:10.955284282 -0400
+--- a/extensions/libipt_ecn.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_ecn.man	2009-01-12 13:19:09.150582824 -0500
 @@ -1,11 +1,11 @@
  This allows you to match the ECN bits of the IPv4 and TCP header.  ECN is the Explicit Congestion Notification mechanism as specified in RFC3168
  .TP
@@ -647,8 +647,8 @@ Index: b/extensions/libipt_ecn.man
  a number between `0' and `3'.
 Index: b/extensions/libipt_icmp.man
 ===================================================================
---- a/extensions/libipt_icmp.man	2008-07-12 10:05:38.104688802 -0400
-+++ b/extensions/libipt_icmp.man	2008-07-12 10:21:10.955284282 -0400
+--- a/extensions/libipt_icmp.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_icmp.man	2009-01-12 13:19:09.150582824 -0500
 @@ -1,9 +1,9 @@
 -This extension can be used if `--protocol icmp' is specified.  It
 +This extension can be used if `\-\-protocol icmp' is specified.  It
@@ -664,8 +664,8 @@ Index: b/extensions/libipt_icmp.man
  .fi
 Index: b/extensions/libipt_realm.man
 ===================================================================
---- a/extensions/libipt_realm.man	2008-07-12 10:05:38.109688381 -0400
-+++ b/extensions/libipt_realm.man	2008-07-12 10:21:10.955284282 -0400
+--- a/extensions/libipt_realm.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_realm.man	2009-01-12 13:19:09.150582824 -0500
 @@ -1,7 +1,7 @@
  This matches the routing realm.  Routing realms are used in complex routing
  setups involving dynamic routing protocols like BGP.
@@ -677,9 +677,9 @@ Index: b/extensions/libipt_realm.man
  that case).
 Index: b/extensions/libipt_recent.man
 ===================================================================
---- a/extensions/libipt_recent.man	2008-07-12 10:20:46.450284133 -0400
-+++ b/extensions/libipt_recent.man	2008-07-12 10:21:10.956284231 -0400
-@@ -5,66 +5,66 @@
+--- a/extensions/libipt_recent.man	2009-01-12 13:19:04.477583019 -0500
++++ b/extensions/libipt_recent.man	2009-01-12 13:19:09.150582824 -0500
+@@ -5,73 +5,73 @@
  to connect to port 139 on your firewall and then DROP all future
  packets from them without considering them.
  .TP
@@ -694,6 +694,15 @@ Index: b/extensions/libipt_recent.man
  source address is already in the list, this will update the existing
  entry. This will always return success (or failure if `!' is passed
  in).
+ .TP
+-\fB--rsource\fP
++\fB\-\-rsource\fP
+ Match/save the source address of each packet in the recent list table. This
+ is the default.
+ .TP
+-\fB--rdest\fP
++\fB\-\-rdest\fP
+ Match/save the destination address of each packet in the recent list table.
  .TP
 -[\fB!\fR] \fB--rcheck\fR
 +[\fB!\fR] \fB\-\-rcheck\fR
@@ -734,10 +743,10 @@ Index: b/extensions/libipt_recent.man
  number of hits within a specific time frame.
  .TP
 -\fB--rttl\fR
--This option must be used in conjunction with one of \fB--rcheck\fR or
+-This option may only be used in conjunction with one of \fB--rcheck\fR or
 -\fB--update\fR. When used, this will narrow the match to only happen
 +\fB\-\-rttl\fR
-+This option must be used in conjunction with one of \fB\-\-rcheck\fR or
++This option may only be used in conjunction with one of \fB\-\-rcheck\fR or
 +\fB\-\-update\fR. When used, this will narrow the match to only happen
  when the address is in the list and the TTL of the current packet
 -matches that of the packet which hit the \fB--set\fR rule. This may be
@@ -761,14 +770,14 @@ Index: b/extensions/libipt_recent.man
  Examples:
  .IP
 -# iptables -A FORWARD -m recent --name badguy --rcheck --seconds 60 -j DROP
-+# iptables \-A FORWARD \-m recent \-\-name badguy \-\-rcheck \-\-seconds 60 \-j DROP
++# iptables -A FORWARD -m recent \-\-name badguy \-\-rcheck \-\-seconds 60 -j DROP
  
 -# iptables -A FORWARD -p tcp -i eth0 --dport 139 -m recent --name badguy --set -j DROP
-+# iptables \-A FORWARD \-p tcp \-i eth0 \-\-dport 139 \-m recent \-\-name badguy \-\-set \-j DROP
++# iptables -A FORWARD -p tcp -i eth0 \-\-dport 139 -m recent \-\-name badguy \-\-set -j DROP
  .P
  Official website (http://snowman.net/projects/ipt_recent/) also has
  some examples of usage.
-@@ -78,7 +78,7 @@
+@@ -85,7 +85,7 @@
  echo xx.xx.xx.xx > /proc/net/ipt_recent/DEFAULT
  to Add to the DEFAULT list
  .TP
@@ -779,8 +788,8 @@ Index: b/extensions/libipt_recent.man
  echo clear > /proc/net/ipt_recent/DEFAULT
 Index: b/extensions/libipt_set.man
 ===================================================================
---- a/extensions/libipt_set.man	2008-07-12 10:05:38.119688334 -0400
-+++ b/extensions/libipt_set.man	2008-07-12 10:21:10.956284231 -0400
+--- a/extensions/libipt_set.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_set.man	2009-01-12 13:19:09.151582975 -0500
 @@ -1,13 +1,13 @@
  This modules macthes IP sets which can be defined by ipset(8).
  .TP
@@ -799,8 +808,8 @@ Index: b/extensions/libipt_set.man
  address or port number of the packet can be found in the specified set. If 
 Index: b/extensions/libipt_ttl.man
 ===================================================================
---- a/extensions/libipt_ttl.man	2008-07-12 10:05:38.123688374 -0400
-+++ b/extensions/libipt_ttl.man	2008-07-12 10:21:10.956284231 -0400
+--- a/extensions/libipt_ttl.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libipt_ttl.man	2009-01-12 13:19:09.151582975 -0500
 @@ -1,10 +1,10 @@
  This module matches the time to live field in the IP header.
  .TP
@@ -817,8 +826,8 @@ Index: b/extensions/libipt_ttl.man
  Matches if TTL is less than the given TTL value.
 Index: b/extensions/libxt_CLASSIFY.man
 ===================================================================
---- a/extensions/libxt_CLASSIFY.man	2008-07-12 10:05:38.128688364 -0400
-+++ b/extensions/libxt_CLASSIFY.man	2008-07-12 10:21:10.956284231 -0400
+--- a/extensions/libxt_CLASSIFY.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_CLASSIFY.man	2009-01-12 13:19:09.151582975 -0500
 @@ -1,4 +1,4 @@
  This module allows you to set the skb->priority value (and thus classify the packet into a specific CBQ class).
  .TP
@@ -827,8 +836,8 @@ Index: b/extensions/libxt_CLASSIFY.man
  Set the major and minor class value.
 Index: b/extensions/libxt_CONNMARK.man
 ===================================================================
---- a/extensions/libxt_CONNMARK.man	2008-07-12 10:05:38.133688303 -0400
-+++ b/extensions/libxt_CONNMARK.man	2008-07-12 10:21:10.956284231 -0400
+--- a/extensions/libxt_CONNMARK.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_CONNMARK.man	2009-01-12 13:19:09.151582975 -0500
 @@ -1,9 +1,9 @@
  This module sets the netfilter mark value associated with a connection.
  .TP
@@ -894,8 +903,8 @@ Index: b/extensions/libxt_CONNMARK.man
  copied. This is only valid in the \fBmangle\fR table.
 Index: b/extensions/libxt_CONNSECMARK.man
 ===================================================================
---- a/extensions/libxt_CONNSECMARK.man	2008-07-12 10:05:38.138688281 -0400
-+++ b/extensions/libxt_CONNSECMARK.man	2008-07-12 10:21:10.956284231 -0400
+--- a/extensions/libxt_CONNSECMARK.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_CONNSECMARK.man	2009-01-12 13:19:09.151582975 -0500
 @@ -5,11 +5,11 @@
  .B mangle
  table.
@@ -912,8 +921,8 @@ Index: b/extensions/libxt_CONNSECMARK.man
  
 Index: b/extensions/libxt_DSCP.man
 ===================================================================
---- a/extensions/libxt_DSCP.man	2008-07-12 10:05:38.143688581 -0400
-+++ b/extensions/libxt_DSCP.man	2008-07-12 10:21:10.957284144 -0400
+--- a/extensions/libxt_DSCP.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_DSCP.man	2009-01-12 13:19:09.151582975 -0500
 @@ -2,8 +2,8 @@
  header of the IPv4 packet.  As this manipulates a packet, it can only
  be used in the mangle table.
@@ -927,8 +936,8 @@ Index: b/extensions/libxt_DSCP.man
  Set the DSCP field to a DiffServ class.
 Index: b/extensions/libxt_MARK.man
 ===================================================================
---- a/extensions/libxt_MARK.man	2008-07-12 10:05:38.148688455 -0400
-+++ b/extensions/libxt_MARK.man	2008-07-12 10:21:10.957284144 -0400
+--- a/extensions/libxt_MARK.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_MARK.man	2009-01-12 13:19:09.152582930 -0500
 @@ -2,24 +2,24 @@
  The target can only be used in the \fBmangle\fR table. It can, for example, be
  used in conjunction with routing based on fwmark (needs iproute2).
@@ -964,8 +973,8 @@ Index: b/extensions/libxt_MARK.man
  \fIbits\fR\fB/0\fR.)
 Index: b/extensions/libxt_NFLOG.man
 ===================================================================
---- a/extensions/libxt_NFLOG.man	2008-07-12 10:05:38.153688445 -0400
-+++ b/extensions/libxt_NFLOG.man	2008-07-12 10:21:10.957284144 -0400
+--- a/extensions/libxt_NFLOG.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_NFLOG.man	2009-01-12 13:19:09.152582930 -0500
 @@ -8,20 +8,20 @@
  may subscribe to the group to receive the packets. Like LOG, this is a
  non-terminating target, i.e. rule traversal continues at the next rule.
@@ -994,8 +1003,8 @@ Index: b/extensions/libxt_NFLOG.man
  result in less overhead per packet, but increase delay until the
 Index: b/extensions/libxt_NFQUEUE.man
 ===================================================================
---- a/extensions/libxt_NFQUEUE.man	2008-07-12 10:05:38.158688283 -0400
-+++ b/extensions/libxt_NFQUEUE.man	2008-07-12 10:21:10.957284144 -0400
+--- a/extensions/libxt_NFQUEUE.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_NFQUEUE.man	2009-01-12 13:19:09.152582930 -0500
 @@ -2,7 +2,7 @@
  you to put a packet into any specific queue, identified by its 16-bit queue
  number.  
@@ -1003,31 +1012,12 @@ Index: b/extensions/libxt_NFQUEUE.man
 -\fB--queue-num\fP \fIvalue\fP
 +\fB\-\-queue-num\fP \fIvalue\fP
  This specifies the QUEUE number to use. Valid queue numbers are 0 to 65535. The default value is 0.
- .TP
+ .PP
  It can only be used with Kernel versions 2.6.14 or later, since it requires
-Index: b/extensions/libxt_RATEEST.man
-===================================================================
---- a/extensions/libxt_RATEEST.man	2008-07-12 10:05:38.162688508 -0400
-+++ b/extensions/libxt_RATEEST.man	2008-07-12 10:21:10.957284144 -0400
-@@ -1,11 +1,11 @@
- The RATEEST target collects statistics, performs rate estimation calculation
- and saves the results for later evaluation using the \fBrateest\fP match.
- .TP
--\fB--rateest-name\fP \fIname\fP
-+\fB\-\-rateest-name\fP \fIname\fP
- Count matched packets into the pool referred to by \fIname\fP, which is freely
- choosable.
- .TP
--\fB--rateest-interval\fP \fIamount\fP{\fBs\fP|\fBms\fP|\fBus\fP}
-+\fB\-\-rateest-interval\fP \fIamount\fP{\fBs\fP|\fBms\fP|\fBus\fP}
- Rate measurement interval, in seconds, milliseconds or microseconds.
- .TP
--\fB--rateest-ewmalog\fP \fIvalue\fP
-+\fB\-\-rateest-ewmalog\fP \fIvalue\fP
 Index: b/extensions/libxt_SECMARK.man
 ===================================================================
---- a/extensions/libxt_SECMARK.man	2008-07-12 10:05:38.167688349 -0400
-+++ b/extensions/libxt_SECMARK.man	2008-07-12 10:21:10.957284144 -0400
+--- a/extensions/libxt_SECMARK.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_SECMARK.man	2009-01-12 13:19:09.152582930 -0500
 @@ -4,4 +4,4 @@
  .B mangle
  table.
@@ -1036,8 +1026,8 @@ Index: b/extensions/libxt_SECMARK.man
 +.BI "\-\-selctx " "security_context"
 Index: b/extensions/libxt_TCPMSS.man
 ===================================================================
---- a/extensions/libxt_TCPMSS.man	2008-07-12 10:05:38.172688318 -0400
-+++ b/extensions/libxt_TCPMSS.man	2008-07-12 10:21:10.958284137 -0400
+--- a/extensions/libxt_TCPMSS.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_TCPMSS.man	2009-01-12 13:19:09.152582930 -0500
 @@ -3,7 +3,7 @@
  outgoing interface's MTU minus 40 for IPv4 or 60 for IPv6, respectively).
  Of course, it can only be used
@@ -1053,8 +1043,8 @@ Index: b/extensions/libxt_TCPMSS.man
  .nf
 - iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN \\
 -             -j TCPMSS --clamp-mss-to-pmtu
-+ iptables \-t mangle \-A FORWARD \-p tcp \-\-tcp-flags SYN,RST SYN \\
-+             \-j TCPMSS \-\-clamp-mss-to-pmtu
++ iptables -t mangle -A FORWARD -p tcp \-\-tcp-flags SYN,RST SYN \\
++             -j TCPMSS \-\-clamp-mss-to-pmtu
  .fi
  .TP
 -.BI "--set-mss " "value"
@@ -1062,15 +1052,14 @@ Index: b/extensions/libxt_TCPMSS.man
  Explicitly set MSS option to specified value.
  .TP
 -.B "--clamp-mss-to-pmtu"
--Automatically clamp MSS value to (path_MTU - 40 for IPv4; -60 for IPv6).
 +.B "\-\-clamp-mss-to-pmtu"
-+Automatically clamp MSS value to (path_MTU \- 40 for IPv4; \-60 for IPv6).
- .TP
+ Automatically clamp MSS value to (path_MTU - 40 for IPv4; -60 for IPv6).
+ .PP
  These options are mutually exclusive.
 Index: b/extensions/libxt_TCPOPTSTRIP.man
 ===================================================================
---- a/extensions/libxt_TCPOPTSTRIP.man	2008-07-12 10:05:38.177688344 -0400
-+++ b/extensions/libxt_TCPOPTSTRIP.man	2008-07-12 10:21:10.958284137 -0400
+--- a/extensions/libxt_TCPOPTSTRIP.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_TCPOPTSTRIP.man	2009-01-12 13:19:09.153582825 -0500
 @@ -1,7 +1,7 @@
  This target will strip TCP options off a TCP packet. (It will actually replace
  them by NO-OPs.) As such, you will need to add the \fB-p tcp\fR parameters.
@@ -1083,8 +1072,8 @@ Index: b/extensions/libxt_TCPOPTSTRIP.man
 +iptables with \fB-j TCPOPTSTRIP \-h\fR.
 Index: b/extensions/libxt_TOS.man
 ===================================================================
---- a/extensions/libxt_TOS.man	2008-07-12 10:20:46.471284215 -0400
-+++ b/extensions/libxt_TOS.man	2008-07-12 10:21:10.958284137 -0400
+--- a/extensions/libxt_TOS.man	2009-01-12 13:19:07.634582985 -0500
++++ b/extensions/libxt_TOS.man	2009-01-12 13:19:09.153582825 -0500
 @@ -3,25 +3,25 @@
  shares the same bits as DSCP and ECN. The TOS target is only valid in the
  \fBmangle\fR table.
@@ -1122,8 +1111,8 @@ Index: b/extensions/libxt_TOS.man
  \fIbits\fR\fB/0\fR.)
 Index: b/extensions/libxt_comment.man
 ===================================================================
---- a/extensions/libxt_comment.man	2008-07-12 10:05:38.186688398 -0400
-+++ b/extensions/libxt_comment.man	2008-07-12 10:21:10.958284137 -0400
+--- a/extensions/libxt_comment.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_comment.man	2009-01-12 13:19:09.153582825 -0500
 @@ -1,6 +1,6 @@
  Allows you to add comments (up to 256 characters) to any rule.
  .TP
@@ -1135,8 +1124,8 @@ Index: b/extensions/libxt_comment.man
 +iptables \-A INPUT \-s 192.168.0.0/16 \-m comment \-\-comment "A privatized IP block"
 Index: b/extensions/libxt_connbytes.man
 ===================================================================
---- a/extensions/libxt_connbytes.man	2008-07-12 10:05:38.191688135 -0400
-+++ b/extensions/libxt_connbytes.man	2008-07-12 10:21:10.958284137 -0400
+--- a/extensions/libxt_connbytes.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_connbytes.man	2009-01-12 13:19:09.153582825 -0500
 @@ -10,16 +10,16 @@
  The transferred bytes per connection can also be viewed through
  /proc/net/ip_conntrack and accessed via ctnetlink
@@ -1165,8 +1154,8 @@ Index: b/extensions/libxt_connbytes.man
 +iptables .. \-m connbytes \-\-connbytes 10000:100000 \-\-connbytes-dir both \-\-connbytes-mode bytes ...
 Index: b/extensions/libxt_connlimit.man
 ===================================================================
---- a/extensions/libxt_connlimit.man	2008-07-12 10:05:38.196688286 -0400
-+++ b/extensions/libxt_connlimit.man	2008-07-12 10:21:10.964875504 -0400
+--- a/extensions/libxt_connlimit.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_connlimit.man	2009-01-12 13:19:09.153582825 -0500
 @@ -1,27 +1,27 @@
  Allows you to restrict the number of parallel connections to a server per
  client IP address (or client address block).
@@ -1205,8 +1194,8 @@ Index: b/extensions/libxt_connlimit.man
 +16 \-\-connlimit-mask 64 \-j REJECT
 Index: b/extensions/libxt_connmark.man
 ===================================================================
---- a/extensions/libxt_connmark.man	2008-07-12 10:05:38.200688458 -0400
-+++ b/extensions/libxt_connmark.man	2008-07-12 10:21:10.965159471 -0400
+--- a/extensions/libxt_connmark.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_connmark.man	2009-01-12 13:19:09.153582825 -0500
 @@ -1,6 +1,6 @@
  This module matches the netfilter mark field associated with a connection
  (which can be set using the \fBCONNMARK\fR target below).
@@ -1217,8 +1206,8 @@ Index: b/extensions/libxt_connmark.man
  specified, this is logically ANDed with the mark before the comparison).
 Index: b/extensions/libxt_conntrack.man
 ===================================================================
---- a/extensions/libxt_conntrack.man	2008-07-12 10:05:38.206688370 -0400
-+++ b/extensions/libxt_conntrack.man	2008-07-12 10:21:10.965159471 -0400
+--- a/extensions/libxt_conntrack.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_conntrack.man	2009-01-12 13:19:09.154583006 -0500
 @@ -1,44 +1,44 @@
  This module, when combined with connection tracking, allows access to the
  connection tracking state for this packet/connection.
@@ -1289,8 +1278,8 @@ Index: b/extensions/libxt_conntrack.man
  None of the below.
 Index: b/extensions/libxt_dccp.man
 ===================================================================
---- a/extensions/libxt_dccp.man	2008-07-12 10:05:38.219688182 -0400
-+++ b/extensions/libxt_dccp.man	2008-07-12 10:21:10.965159471 -0400
+--- a/extensions/libxt_dccp.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_dccp.man	2009-01-12 13:19:09.154583006 -0500
 @@ -1,12 +1,12 @@
  .TP
 -[\fB!\fP] \fB--source-port\fP,\fB--sport\fP \fIport\fP[\fB:\fP\fIport\fP]
@@ -1310,8 +1299,8 @@ Index: b/extensions/libxt_dccp.man
  Match if DCP option set.
 Index: b/extensions/libxt_dscp.man
 ===================================================================
---- a/extensions/libxt_dscp.man	2008-07-12 10:05:38.224688327 -0400
-+++ b/extensions/libxt_dscp.man	2008-07-12 10:21:10.965159471 -0400
+--- a/extensions/libxt_dscp.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_dscp.man	2009-01-12 13:19:09.154583006 -0500
 @@ -1,10 +1,10 @@
  This module matches the 6 bit DSCP field within the TOS field in the
  IP header.  DSCP has superseded TOS within the IETF.
@@ -1327,8 +1316,8 @@ Index: b/extensions/libxt_dscp.man
  into its according numeric value.
 Index: b/extensions/libxt_esp.man
 ===================================================================
---- a/extensions/libxt_esp.man	2008-07-12 10:05:38.229688272 -0400
-+++ b/extensions/libxt_esp.man	2008-07-12 10:21:10.965159471 -0400
+--- a/extensions/libxt_esp.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_esp.man	2009-01-12 13:19:09.154583006 -0500
 @@ -1,3 +1,3 @@
  This module matches the SPIs in ESP header of IPsec packets.
  .TP
@@ -1336,8 +1325,8 @@ Index: b/extensions/libxt_esp.man
 +[\fB!\fP] \fB\-\-espspi\fP \fIspi\fP[\fB:\fP\fIspi\fP]
 Index: b/extensions/libxt_hashlimit.man
 ===================================================================
---- a/extensions/libxt_hashlimit.man	2008-07-12 10:05:38.233688480 -0400
-+++ b/extensions/libxt_hashlimit.man	2008-07-12 10:21:10.966159115 -0400
+--- a/extensions/libxt_hashlimit.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_hashlimit.man	2009-01-12 13:19:09.154583006 -0500
 @@ -13,47 +13,47 @@
  matching on subnet
  "10000 packets per minute for every /28 subnet in 10.0.0.0/8"
@@ -1406,8 +1395,8 @@ Index: b/extensions/libxt_hashlimit.man
  How many milliseconds between garbage collection intervals.
 Index: b/extensions/libxt_helper.man
 ===================================================================
---- a/extensions/libxt_helper.man	2008-07-12 10:05:38.239688544 -0400
-+++ b/extensions/libxt_helper.man	2008-07-12 10:21:10.966159115 -0400
+--- a/extensions/libxt_helper.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_helper.man	2009-01-12 13:19:09.154583006 -0500
 @@ -1,11 +1,11 @@
  This module matches packets related to a specific conntrack-helper.
  .TP
@@ -1424,8 +1413,8 @@ Index: b/extensions/libxt_helper.man
  .RE
 Index: b/extensions/libxt_iprange.man
 ===================================================================
---- a/extensions/libxt_iprange.man	2008-07-12 10:05:38.244688581 -0400
-+++ b/extensions/libxt_iprange.man	2008-07-12 10:21:10.967159219 -0400
+--- a/extensions/libxt_iprange.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_iprange.man	2009-01-12 13:19:09.155583036 -0500
 @@ -1,7 +1,7 @@
  This matches on a given arbitrary range of IP addresses.
  .TP
@@ -1438,8 +1427,8 @@ Index: b/extensions/libxt_iprange.man
  Match destination IP in the specified range.
 Index: b/extensions/libxt_length.man
 ===================================================================
---- a/extensions/libxt_length.man	2008-07-12 10:05:38.249691863 -0400
-+++ b/extensions/libxt_length.man	2008-07-12 10:21:10.967159219 -0400
+--- a/extensions/libxt_length.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_length.man	2009-01-12 13:19:09.155583036 -0500
 @@ -2,4 +2,4 @@
  f a packet against a specific value
  or range of values.
@@ -1448,8 +1437,8 @@ Index: b/extensions/libxt_length.man
 +[\fB!\fP] \fB\-\-length\fP \fIlength\fP[\fB:\fP\fIlength\fP]
 Index: b/extensions/libxt_mark.man
 ===================================================================
---- a/extensions/libxt_mark.man	2008-07-12 10:05:38.254688290 -0400
-+++ b/extensions/libxt_mark.man	2008-07-12 10:21:10.968159269 -0400
+--- a/extensions/libxt_mark.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_mark.man	2009-01-12 13:19:09.155583036 -0500
 @@ -3,7 +3,7 @@
  .B MARK
  target below).
@@ -1461,8 +1450,8 @@ Index: b/extensions/libxt_mark.man
  comparison).
 Index: b/extensions/libxt_multiport.man
 ===================================================================
---- a/extensions/libxt_multiport.man	2008-07-12 10:05:38.259688381 -0400
-+++ b/extensions/libxt_multiport.man	2008-07-12 10:21:10.968159269 -0400
+--- a/extensions/libxt_multiport.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_multiport.man	2009-01-12 13:19:09.203191356 -0500
 @@ -1,23 +1,23 @@
  This module matches a set of source or destination ports.  Up to 15
  ports can be specified.  A port range (port:port) counts as two
@@ -1496,8 +1485,8 @@ Index: b/extensions/libxt_multiport.man
  the given ports.
 Index: b/extensions/libxt_owner.man
 ===================================================================
---- a/extensions/libxt_owner.man	2008-07-12 10:05:38.264688308 -0400
-+++ b/extensions/libxt_owner.man	2008-07-12 10:21:10.969159475 -0400
+--- a/extensions/libxt_owner.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_owner.man	2009-01-12 13:19:09.203708004 -0500
 @@ -3,17 +3,17 @@
  POSTROUTING chains. Forwarded packets do not have any socket associated with
  them. Packets from kernel threads do have a socket, but usually no owner.
@@ -1523,8 +1512,8 @@ Index: b/extensions/libxt_owner.man
  Matches if the packet is associated with a socket.
 Index: b/extensions/libxt_physdev.man
 ===================================================================
---- a/extensions/libxt_physdev.man	2008-07-12 10:20:46.457284150 -0400
-+++ b/extensions/libxt_physdev.man	2008-07-12 10:21:10.969159475 -0400
+--- a/extensions/libxt_physdev.man	2009-01-12 13:19:05.523583097 -0500
++++ b/extensions/libxt_physdev.man	2009-01-12 13:19:09.203708004 -0500
 @@ -3,7 +3,7 @@
  a transparent bridging IP firewall and is only useful for kernel versions
  above version 2.5.44.
@@ -1561,8 +1550,8 @@ Index: b/extensions/libxt_physdev.man
  This is only useful in the FORWARD and POSTROUTING chains.
 Index: b/extensions/libxt_pkttype.man
 ===================================================================
---- a/extensions/libxt_pkttype.man	2008-07-12 10:05:38.273688351 -0400
-+++ b/extensions/libxt_pkttype.man	2008-07-12 10:21:10.969159475 -0400
+--- a/extensions/libxt_pkttype.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_pkttype.man	2009-01-12 13:19:09.204707872 -0500
 @@ -1,3 +1,3 @@
  This module matches the link-layer packet type.
  .TP
@@ -1570,8 +1559,8 @@ Index: b/extensions/libxt_pkttype.man
 +[\fB!\fP] \fB\-\-pkt-type\fP {\fBunicast\fP|\fBbroadcast\fP|\fBmulticast\fP}
 Index: b/extensions/libxt_policy.man
 ===================================================================
---- a/extensions/libxt_policy.man	2008-07-12 10:05:38.278688308 -0400
-+++ b/extensions/libxt_policy.man	2008-07-12 10:21:10.970159203 -0400
+--- a/extensions/libxt_policy.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_policy.man	2009-01-12 13:19:09.204707872 -0500
 @@ -1,6 +1,6 @@
  This modules matches the policy used by IPsec for handling a packet.
  .TP
@@ -1632,8 +1621,8 @@ Index: b/extensions/libxt_policy.man
 +\fB\-\-strict\fP.
 Index: b/extensions/libxt_quota.man
 ===================================================================
---- a/extensions/libxt_quota.man	2008-07-12 10:05:38.283688396 -0400
-+++ b/extensions/libxt_quota.man	2008-07-12 10:21:10.970159203 -0400
+--- a/extensions/libxt_quota.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_quota.man	2009-01-12 13:19:09.204707872 -0500
 @@ -1,6 +1,6 @@
  Implements network quotas by decrementing a byte counter with each
  packet.
@@ -1644,8 +1633,8 @@ Index: b/extensions/libxt_quota.man
  .P
 Index: b/extensions/libxt_sctp.man
 ===================================================================
---- a/extensions/libxt_sctp.man	2008-07-12 10:05:38.287688303 -0400
-+++ b/extensions/libxt_sctp.man	2008-07-12 10:21:10.970159203 -0400
+--- a/extensions/libxt_sctp.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_sctp.man	2009-01-12 13:19:09.204707872 -0500
 @@ -1,9 +1,9 @@
  .TP
 -[\fB!\fP] \fB--source-port\fP,\fB--sport\fP \fIport\fP[\fB:\fP\fIport\fP]
@@ -1673,8 +1662,8 @@ Index: b/extensions/libxt_sctp.man
 +iptables \-A INPUT \-p sctp \-\-chunk-types any DATA:Be \-j ACCEPT
 Index: b/extensions/libxt_state.man
 ===================================================================
---- a/extensions/libxt_state.man	2008-07-12 10:05:38.292688331 -0400
-+++ b/extensions/libxt_state.man	2008-07-12 10:21:10.970159203 -0400
+--- a/extensions/libxt_state.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_state.man	2009-01-12 13:19:09.204707872 -0500
 @@ -1,7 +1,7 @@
  This module, when combined with connection tracking, allows access to
  the connection tracking state for this packet.
@@ -1684,51 +1673,10 @@ Index: b/extensions/libxt_state.man
  Where state is a comma separated list of the connection states to
  match.  Possible states are
  .B INVALID
-Index: b/extensions/libxt_statistic.man
-===================================================================
---- a/extensions/libxt_statistic.man	2008-07-12 10:05:38.297688461 -0400
-+++ b/extensions/libxt_statistic.man	2008-07-12 10:21:10.971159784 -0400
-@@ -1,30 +1,30 @@
- This module matches packets based on some statistic condition.
- It supports two distinct modes settable with the 
--.B --mode
-+.B \-\-mode
- option.
- .TP
- Supported options:
- .TP
--.BI "--mode " "mode"
-+.BI "\-\-mode " "mode"
- Set the matching mode of the matching rule, supported modes are
- .B random
- and
- .B nth. 
- .TP
--.BI "--probability " "p"
-+.BI "\-\-probability " "p"
- Set the probability from 0 to 1 for a packet to be randomly
- matched. It works only with the
- .B random
- mode.
- .TP
--.BI "--every " "n"
-+.BI "\-\-every " "n"
- Match one packet every nth packet. It works only with the
- .B nth
- mode (see also the 
--.B --packet
-+.B \-\-packet
- option).
- .TP
--.BI "--packet " "p"
-+.BI "\-\-packet " "p"
- Set the initial counter value (0 <= p <= n-1, default 0) for the
- .B nth 
- mode.
 Index: b/extensions/libxt_string.man
 ===================================================================
---- a/extensions/libxt_string.man	2008-07-12 10:05:38.301688484 -0400
-+++ b/extensions/libxt_string.man	2008-07-12 10:21:10.971159784 -0400
+--- a/extensions/libxt_string.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_string.man	2009-01-12 13:19:09.205708015 -0500
 @@ -1,16 +1,16 @@
  This modules matches a given string by using some pattern matching strategy. It requires a linux kernel >= 2.6.14.
  .TP
@@ -1753,8 +1701,8 @@ Index: b/extensions/libxt_string.man
  Matches the given pattern in hex notation.
 Index: b/extensions/libxt_tcp.man
 ===================================================================
---- a/extensions/libxt_tcp.man	2008-07-12 10:05:38.307688426 -0400
-+++ b/extensions/libxt_tcp.man	2008-07-12 10:21:10.971159784 -0400
+--- a/extensions/libxt_tcp.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_tcp.man	2009-01-12 13:19:09.205708015 -0500
 @@ -1,7 +1,7 @@
 -These extensions can be used if `--protocol tcp' is specified. It
 +These extensions can be used if `\-\-protocol tcp' is specified. It
@@ -1767,7 +1715,7 @@ Index: b/extensions/libxt_tcp.man
  using the format \fIport\fP\fB:\fP\fIport\fP.
 @@ -9,15 +9,15 @@
  "65535" is assumed.
- If the second port greater then the first they will be swapped.
+ If the second port is greater than the first they will be swapped.
  The flag
 -.B --sport
 +.B \-\-sport
@@ -1813,8 +1761,8 @@ Index: b/extensions/libxt_tcp.man
  Match if TCP option set.
 Index: b/extensions/libxt_tcpmss.man
 ===================================================================
---- a/extensions/libxt_tcpmss.man	2008-07-12 10:05:38.312688547 -0400
-+++ b/extensions/libxt_tcpmss.man	2008-07-12 10:21:10.972159130 -0400
+--- a/extensions/libxt_tcpmss.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_tcpmss.man	2009-01-12 13:19:09.205708015 -0500
 @@ -1,4 +1,4 @@
  This matches the TCP MSS (maximum segment size) field of the TCP header.  You can only use this on TCP SYN or SYN/ACK packets, since the MSS is only negotiated during the TCP handshake at connection startup time.
  .TP
@@ -1823,8 +1771,8 @@ Index: b/extensions/libxt_tcpmss.man
  Match a given TCP MSS value or range.
 Index: b/extensions/libxt_time.man
 ===================================================================
---- a/extensions/libxt_time.man	2008-07-12 10:05:38.318688471 -0400
-+++ b/extensions/libxt_time.man	2008-07-12 10:21:10.972159130 -0400
+--- a/extensions/libxt_time.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_time.man	2009-01-12 13:19:09.205708015 -0500
 @@ -1,68 +1,68 @@
  This matches if the packet arrival time/date is within a given range. All
  options are optional, but are ANDed when specified.
@@ -1914,8 +1862,8 @@ Index: b/extensions/libxt_time.man
  say "fourth Thursday OR fourth Friday" in one rule. It is possible with
 Index: b/extensions/libxt_tos.man
 ===================================================================
---- a/extensions/libxt_tos.man	2008-07-12 10:05:38.322688518 -0400
-+++ b/extensions/libxt_tos.man	2008-07-12 10:21:10.972159130 -0400
+--- a/extensions/libxt_tos.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_tos.man	2009-01-12 13:19:09.205708015 -0500
 @@ -2,11 +2,11 @@
  including the "Precedence" bits) or the (also 8-bit) Priority field in the IPv6
  header.
@@ -1933,8 +1881,8 @@ Index: b/extensions/libxt_tos.man
  Note that this implies a mask of 0x3F, i.e. all but the ECN bits.
 Index: b/extensions/libxt_u32.man
 ===================================================================
---- a/extensions/libxt_u32.man	2008-07-12 10:05:38.327688448 -0400
-+++ b/extensions/libxt_u32.man	2008-07-12 10:21:10.973159249 -0400
+--- a/extensions/libxt_u32.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_u32.man	2009-01-12 13:19:09.205708015 -0500
 @@ -2,7 +2,7 @@
  specified values. The specification of what to extract is general enough to
  find data at given offsets from tcp headers or payloads.
@@ -1973,8 +1921,8 @@ Index: b/extensions/libxt_u32.man
  .IP
 Index: b/extensions/libxt_udp.man
 ===================================================================
---- a/extensions/libxt_udp.man	2008-07-12 10:05:38.332688462 -0400
-+++ b/extensions/libxt_udp.man	2008-07-12 10:21:10.973159249 -0400
+--- a/extensions/libxt_udp.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_udp.man	2009-01-12 13:19:09.206707928 -0500
 @@ -1,14 +1,14 @@
 -These extensions can be used if `--protocol udp' is specified.  It
 +These extensions can be used if `\-\-protocol udp' is specified.  It
@@ -1995,348 +1943,10 @@ Index: b/extensions/libxt_udp.man
 -.B --destination-port
 +.B \-\-destination-port
  option of the TCP extension for details.
-Index: b/ip6tables.8.in
-===================================================================
---- a/ip6tables.8.in	2008-07-12 10:05:38.347688402 -0400
-+++ b/ip6tables.8.in	2008-07-12 10:21:10.949284234 -0400
-@@ -27,23 +27,23 @@
- .SH NAME
- ip6tables \- IPv6 packet filter administration
- .SH SYNOPSIS
--.BR "ip6tables [-t table] -[AD] " "chain rule-specification [options]"
-+.BR "ip6tables [-t table] \-[AD] " "chain rule-specification [options]"
- .br
--.BR "ip6tables [-t table] -I " "chain [rulenum] rule-specification [options]"
-+.BR "ip6tables [-t table] \-I " "chain [rulenum] rule-specification [options]"
- .br
--.BR "ip6tables [-t table] -R " "chain rulenum rule-specification [options]"
-+.BR "ip6tables [-t table] \-R " "chain rulenum rule-specification [options]"
- .br
--.BR "ip6tables [-t table] -D " "chain rulenum [options]"
-+.BR "ip6tables [-t table] \-D " "chain rulenum [options]"
- .br
--.BR "ip6tables [-t table] -[LFZ] " "[chain] [options]"
-+.BR "ip6tables [-t table] \-[LFZ] " "[chain] [options]"
- .br
--.BR "ip6tables [-t table] -N " "chain"
-+.BR "ip6tables [-t table] \-N " "chain"
- .br
--.BR "ip6tables [-t table] -X " "[chain]"
-+.BR "ip6tables [-t table] \-X " "[chain]"
- .br
--.BR "ip6tables [-t table] -P " "chain target [options]"
-+.BR "ip6tables [-t table] \-P " "chain target [options]"
- .br
--.BR "ip6tables [-t table] -E " "old-chain-name new-chain-name"
-+.BR "ip6tables [-t table] \-E " "old-chain-name new-chain-name"
- .SH DESCRIPTION
- .B Ip6tables
- is used to set up, maintain, and inspect the tables of IPv6 packet
-@@ -98,7 +98,7 @@
- at any time depends on the kernel configuration options and which
- modules are present), as nat table has not been implemented yet.
- .TP
--.BI "-t, --table " "table"
-+.BI "\-t, \-\-table " "table"
- This option specifies the packet matching table which the command
- should operate on.  If the kernel is configured with automatic module
- loading, an attempt will be made to load the appropriate module for
-@@ -108,7 +108,7 @@
- .RS
- .TP .4i
- .BR "filter" :
--This is the default table (if no -t option is passed).  It contains
-+This is the default table (if no \-t option is passed).  It contains
- the built-in chains
- .B INPUT
- (for packets coming into the box itself),
-@@ -154,94 +154,94 @@
- .B ip6tables
- can differentiate it from all other options.
- .TP
--.BI "-A, --append " "chain rule-specification"
-+.BI "\-A, \-\-append " "chain rule-specification"
- Append one or more rules to the end of the selected chain.
- When the source and/or destination names resolve to more than one
- address, a rule will be added for each possible address combination.
- .TP
--.BI "-D, --delete " "chain rule-specification"
-+.BI "\-D, \-\-delete " "chain rule-specification"
- .ns
- .TP
--.BI "-D, --delete " "chain rulenum"
-+.BI "\-D, \-\-delete " "chain rulenum"
- Delete one or more rules from the selected chain.  There are two
- versions of this command: the rule can be specified as a number in the
- chain (starting at 1 for the first rule) or a rule to match.
- .TP
--.B "-I, --insert"
-+.B "\-I, \-\-insert"
- Insert one or more rules in the selected chain as the given rule
- number.  So, if the rule number is 1, the rule or rules are inserted
- at the head of the chain.  This is also the default if no rule number
- is specified.
- .TP
--.BI "-R, --replace " "chain rulenum rule-specification"
-+.BI "\-R, \-\-replace " "chain rulenum rule-specification"
- Replace a rule in the selected chain.  If the source and/or
- destination names resolve to multiple addresses, the command will
- fail.  Rules are numbered starting at 1.
- .TP
--.BR "-L, --list " "[\fIchain\fP]"
-+.BR "\-L, \-\-list " "[\fIchain\fP]"
- List all rules in the selected chain.  If no chain is selected, all
- chains are listed.  As every other iptables command, it applies to the
- specified table (filter is the default), so mangle rules get listed by
- .nf
-- ip6tables -t mangle -n -L
-+ ip6tables \-t mangle \-n \-L
- .fi
- Please note that it is often used with the
--.B -n
-+.B \-n
- option, in order to avoid long reverse DNS lookups.
- It is legal to specify the
--.B -Z
-+.B \-Z
- (zero) option as well, in which case the chain(s) will be atomically
- listed and zeroed.  The exact output is affected by the other
- arguments given. The exact rules are suppressed until you use
- .nf
-- ip6tables -L -v
-+ ip6tables \-L \-v
- .fi
- .TP
--.BR "-S, --list-rules " "[\fIchain\fP]"
-+.BR "\-S, \-\-list-rules " "[\fIchain\fP]"
- Print all rules in the selected chain.  If no chain is selected, all
- chains are printed like iptables-save. Like every other iptables command,
- it applies to the specified table (filter is the default).
- .TP
--.BR "-F, --flush " "[\fIchain\fP]"
-+.BR "\-F, \-\-flush " "[\fIchain\fP]"
- Flush the selected chain (all the chains in the table if none is given).
- This is equivalent to deleting all the rules one by one.
- .TP
--.BR "-Z, --zero " "[\fIchain\fP]"
-+.BR "\-Z, \-\-zero " "[\fIchain\fP]"
- Zero the packet and byte counters in all chains.  It is legal to
- specify the
--.B "-L, --list"
-+.B "\-L, \-\-list"
- (list) option as well, to see the counters immediately before they are
- cleared. (See above.)
- .TP
--.BI "-N, --new-chain " "chain"
-+.BI "\-N, \-\-new-chain " "chain"
- Create a new user-defined chain by the given name.  There must be no
- target of that name already.
- .TP
--.BR "-X, --delete-chain " "[\fIchain\fP]"
-+.BR "\-X, \-\-delete-chain " "[\fIchain\fP]"
- Delete the optional user-defined chain specified.  There must be no references
- to the chain.  If there are, you must delete or replace the referring
- rules before the chain can be deleted.  If no argument is given, it
- will attempt to delete every non-builtin chain in the table.
- .TP
--.BI "-P, --policy " "chain target"
-+.BI "\-P, \-\-policy " "chain target"
- Set the policy for the chain to the given target.  See the section
- .B TARGETS
- for the legal targets.  Only built-in (non-user-defined) chains can have
- policies, and neither built-in nor user-defined chains can be policy
- targets.
- .TP
--.BI "-E, --rename-chain " "old-chain new-chain"
-+.BI "\-E, \-\-rename-chain " "old-chain new-chain"
- Rename the user specified chain to the user supplied name.  This is
- cosmetic, and has no effect on the structure of the table.
- .TP
--.B -h
-+.B \-h
- Help.
- Give a (currently very brief) description of the command syntax.
- .SS PARAMETERS
- The following parameters make up a rule specification (as used in the
- add, delete, insert, replace and append commands).
- .TP
--.BR "-p, --protocol " "[!] \fIprotocol\fP"
-+.BR "\-p, \-\-protocol " "[!] \fIprotocol\fP"
- The protocol of the rule or of the packet to check.
- The specified protocol can be one of
- .IR tcp ,
-@@ -266,7 +266,7 @@
- will match with all protocols and is taken as default when this
- option is omitted.
- .TP
--.BR "-s, --source " "[!] \fIaddress\fP[/\fImask\fP]"
-+.BR "\-s, \-\-source " "[!] \fIaddress\fP[/\fImask\fP]"
- Source specification.
- .I Address
- can be either a hostname (please note that specifying
-@@ -283,18 +283,18 @@
- .IR ffff:ffff:ffff:ffff:0000:0000:0000:0000 .
- A "!" argument before the address specification inverts the sense of
- the address. The flag
--.B --src
-+.B \-\-src
- is an alias for this option.
- .TP
--.BR "-d, --destination " "[!] \fIaddress\fP[/\fImask\fP]"
-+.BR "\-d, \-\-destination " "[!] \fIaddress\fP[/\fImask\fP]"
- Destination specification. 
- See the description of the
--.B -s
-+.B \-s
- (source) flag for a detailed description of the syntax.  The flag
--.B --dst
-+.B \-\-dst
- is an alias for this option.
- .TP
--.BI "-j, --jump " "target"
-+.BI "\-j, \-\-jump " "target"
- This specifies the target of the rule; i.e., what to do if the packet
- matches it.  The target can be a user-defined chain (other than the
- one this rule is in), one of the special builtin targets which decide
-@@ -305,7 +305,7 @@
- effect on the packet's fate, but the counters on the rule will be
- incremented.
- .TP
--.BR "-i, --in-interface " "[!] \fIname\fP"
-+.BR "\-i, \-\-in-interface " "[!] \fIname\fP"
- Name of an interface via which a packet is going to be received (only for
- packets entering the 
- .BR INPUT ,
-@@ -317,7 +317,7 @@
- interface which begins with this name will match.  If this option is
- omitted, any interface name will match.
- .TP
--.BR "-o, --out-interface " "[!] \fIname\fP"
-+.BR "\-o, \-\-out-interface " "[!] \fIname\fP"
- Name of an interface via which a packet is going to be sent (for packets
- entering the
- .BR FORWARD 
-@@ -330,15 +330,15 @@
- .TP
- .\" Currently not supported (header-based)
- .\" 
--.\" .B "[!] " "-f, --fragment"
-+.\" .B "[!] " "\-f, \-\-fragment"
- .\" This means that the rule only refers to second and further fragments
- .\" of fragmented packets.  Since there is no way to tell the source or
- .\" destination ports of such a packet (or ICMP type), such a packet will
- .\" not match any rules which specify them.  When the "!" argument
--.\" precedes the "-f" flag, the rule will only match head fragments, or
-+.\" precedes the "\-f" flag, the rule will only match head fragments, or
- .\" unfragmented packets.
- .\" .TP
--.B "-c, --set-counters " "PKTS BYTES"
-+.B "\-c, \-\-set-counters " "PKTS BYTES"
- This enables the administrator to initialize the packet and byte
- counters of a rule (during
- .B INSERT,
-@@ -348,57 +348,57 @@
- .SS "OTHER OPTIONS"
- The following additional options can be specified:
- .TP
--.B "-v, --verbose"
-+.B "\-v, \-\-verbose"
- Verbose output.  This option makes the list command show the interface
- name, the rule options (if any), and the TOS masks.  The packet and
- byte counters are also listed, with the suffix 'K', 'M' or 'G' for
- 1000, 1,000,000 and 1,000,000,000 multipliers respectively (but see
- the
--.B -x
-+.B \-x
- flag to change this).
- For appending, insertion, deletion and replacement, this causes
- detailed information on the rule or rules to be printed.
- .TP
--.B "-n, --numeric"
-+.B "\-n, \-\-numeric"
- Numeric output.
- IP addresses and port numbers will be printed in numeric format.
- By default, the program will try to display them as host names,
- network names, or services (whenever applicable).
- .TP
--.B "-x, --exact"
-+.B "\-x, \-\-exact"
- Expand numbers.
- Display the exact value of the packet and byte counters,
- instead of only the rounded number in K's (multiples of 1000)
- M's (multiples of 1000K) or G's (multiples of 1000M).  This option is
- only relevant for the 
--.B -L
-+.B \-L
- command.
- .TP
--.B "--line-numbers"
-+.B "\-\-line-numbers"
- When listing rules, add line numbers to the beginning of each rule,
- corresponding to that rule's position in the chain.
- .TP
--.B "--modprobe=command"
-+.B "\-\-modprobe=command"
- When adding or inserting rules into a chain, use
- .B command
- to load any necessary modules (targets, match extensions, etc).
- .SH MATCH EXTENSIONS
- ip6tables can use extended packet matching modules.  These are loaded
- in two ways: implicitly, when
--.B -p
-+.B \-p
- or
--.B --protocol
-+.B \-\-protocol
- is specified, or with the
--.B -m
-+.B \-m
- or
--.B --match
-+.B \-\-match
- options, followed by the matching module name; after these, various
- extra command line options become available, depending on the specific
- module.  You can specify multiple extended match modules in one line,
- and you can use the
--.B -h
-+.B \-h
- or
--.B --help
-+.B \-\-help
- options after the module has been specified to receive help specific
- to that module.
- 
-@@ -434,9 +434,9 @@
- would pass through all three.
- .PP
- The other main difference is that 
--.B -i
-+.B \-i
- refers to the input interface;
--.B -o
-+.B \-o
- refers to the output interface, and both are available for packets
- entering the
- .B FORWARD
-@@ -448,11 +448,11 @@
- .\" confusion over the combination of IP masquerading and packet filtering
- .\" seen previously.  So the following options are handled differently:
- .\" .br
--.\" -j MASQ
-+.\" \-j MASQ
- .\" .br
--.\" -M -S
-+.\" \-M \-S
- .\" .br
--.\" -M -L
-+.\" \-M \-L
- .\" .br
- There are several other changes in ip6tables.
- .SH SEE ALSO
 Index: b/iptables-xml.8
 ===================================================================
---- a/iptables-xml.8	2008-07-12 10:05:38.352688338 -0400
-+++ b/iptables-xml.8	2008-07-12 10:21:10.948284494 -0400
+--- a/iptables-xml.8	2008-10-08 12:31:58.000000000 -0400
++++ b/iptables-xml.8	2009-01-12 13:19:09.206707928 -0500
 @@ -42,7 +42,7 @@
  
  .PP
@@ -2348,220 +1958,148 @@ Index: b/iptables-xml.8
  target like SNAT and another chain.
 Index: b/iptables.8.in
 ===================================================================
---- a/iptables.8.in	2008-07-12 10:05:38.357688456 -0400
-+++ b/iptables.8.in	2008-07-12 10:21:10.951284054 -0400
-@@ -25,23 +25,23 @@
- .SH NAME
- iptables \- administration tool for IPv4 packet filtering and NAT
- .SH SYNOPSIS
--.BR "iptables [-t table] -[AD] " "chain rule-specification [options]"
-+.BR "iptables [-t table] \-[AD] " "chain rule-specification [options]"
- .br
--.BR "iptables [-t table] -I " "chain [rulenum] rule-specification [options]"
-+.BR "iptables [-t table] \-I " "chain [rulenum] rule-specification [options]"
- .br
--.BR "iptables [-t table] -R " "chain rulenum rule-specification [options]"
-+.BR "iptables [-t table] \-R " "chain rulenum rule-specification [options]"
- .br
--.BR "iptables [-t table] -D " "chain rulenum [options]"
-+.BR "iptables [-t table] \-D " "chain rulenum [options]"
- .br
--.BR "iptables [-t table] -[LFZ] " "[chain] [options]"
-+.BR "iptables [-t table] \-[LFZ] " "[chain] [options]"
- .br
--.BR "iptables [-t table] -N " "chain"
-+.BR "iptables [-t table] \-N " "chain"
- .br
--.BR "iptables [-t table] -X " "[chain]"
-+.BR "iptables [-t table] \-X " "[chain]"
- .br
--.BR "iptables [-t table] -P " "chain target [options]"
-+.BR "iptables [-t table] \-P " "chain target [options]"
- .br
--.BR "iptables [-t table] -E " "old-chain-name new-chain-name"
-+.BR "iptables [-t table] \-E " "old-chain-name new-chain-name"
- .SH DESCRIPTION
- .B Iptables
- is used to set up, maintain, and inspect the tables of IP packet
-@@ -96,7 +96,7 @@
+--- a/iptables.8.in	2008-10-08 12:31:58.000000000 -0400
++++ b/iptables.8.in	2009-01-12 13:19:09.206707928 -0500
+@@ -84,7 +84,7 @@
  at any time depends on the kernel configuration options and which
  modules are present).
  .TP
--.BI "-t, --table " "table"
-+.BI "\-t, \-\-table " "table"
+-\fB-t\fP, \fB--table\fP \fItable\fP
++\fB-t\fP, \fB\-\-table\fP \fItable\fP
  This option specifies the packet matching table which the command
  should operate on.  If the kernel is configured with automatic module
  loading, an attempt will be made to load the appropriate module for
-@@ -106,7 +106,7 @@
- .RS
- .TP .4i
- .BR "filter" :
--This is the default table (if no -t option is passed).  It contains
-+This is the default table (if no \-t option is passed).  It contains
- the built-in chains
- .B INPUT
- (for packets destined to local sockets),
-@@ -162,95 +162,95 @@
- .B iptables
- can differentiate it from all other options.
+@@ -134,31 +134,31 @@
+ need to use only enough letters to ensure that
+ \fBiptables\fP can differentiate it from all other options.
  .TP
--.BI "-A, --append " "chain rule-specification"
-+.BI "\-A, \-\-append " "chain rule-specification"
+-\fB-A\fP, \fB--append\fP \fIchain rule-specification\fP
++\fB-A\fP, \fB\-\-append\fP \fIchain rule-specification\fP
  Append one or more rules to the end of the selected chain.
  When the source and/or destination names resolve to more than one
  address, a rule will be added for each possible address combination.
  .TP
--.BI "-D, --delete " "chain rule-specification"
-+.BI "\-D, \-\-delete " "chain rule-specification"
+-\fB-D\fP, \fB--delete\fP \fIchain rule-specification\fP
++\fB-D\fP, \fB\-\-delete\fP \fIchain rule-specification\fP
  .ns
  .TP
--.BI "-D, --delete " "chain rulenum"
-+.BI "\-D, \-\-delete " "chain rulenum"
+-\fB-D\fP, \fB--delete\fP \fIchain rulenum\fP
++\fB-D\fP, \fB\-\-delete\fP \fIchain rulenum\fP
  Delete one or more rules from the selected chain.  There are two
  versions of this command: the rule can be specified as a number in the
  chain (starting at 1 for the first rule) or a rule to match.
  .TP
--.BR "-I, --insert " "\fIchain\fP [\fIrulenum\fP] \fIrule-specification\fP"
-+.BR "\-I, \-\-insert " "\fIchain\fP [\fIrulenum\fP] \fIrule-specification\fP"
+-\fB-I\fP, \fB--insert\fP \fIchain\fP [\fIrulenum\fP] \fIrule-specification\fP
++\fB-I\fP, \fB\-\-insert\fP \fIchain\fP [\fIrulenum\fP] \fIrule-specification\fP
  Insert one or more rules in the selected chain as the given rule
  number.  So, if the rule number is 1, the rule or rules are inserted
  at the head of the chain.  This is also the default if no rule number
  is specified.
  .TP
--.BI "-R, --replace " "chain rulenum rule-specification"
-+.BI "\-R, \-\-replace " "chain rulenum rule-specification"
+-\fB-R\fP, \fB--replace\fP \fIchain rulenum rule-specification\fP
++\fB-R\fP, \fB\-\-replace\fP \fIchain rulenum rule-specification\fP
  Replace a rule in the selected chain.  If the source and/or
  destination names resolve to multiple addresses, the command will
  fail.  Rules are numbered starting at 1.
  .TP
--.BR "-L, --list " "[\fIchain\fP]"
-+.BR "\-L, \-\-list " "[\fIchain\fP]"
+-\fB-L\fP, \fB--list\fP [\fIchain\fP]
++\fB-L\fP, \fB\-\-list\fP [\fIchain\fP]
  List all rules in the selected chain.  If no chain is selected, all
  chains are listed. Like every other iptables command, it applies to the
  specified table (filter is the default), so NAT rules get listed by
- .nf
-- iptables -t nat -n -L
-+ iptables \-t nat \-n \-L
- .fi
- Please note that it is often used with the
--.B -n
-+.B \-n
- option, in order to avoid long reverse DNS lookups.
- It is legal to specify the
--.B -Z
-+.B \-Z
- (zero) option as well, in which case the chain(s) will be atomically
- listed and zeroed.  The exact output is affected by the other
- arguments given. The exact rules are suppressed until you use
- .nf
-- iptables -L -v
-+ iptables \-L \-v
+@@ -175,40 +175,40 @@
+  iptables -L -v
  .fi
  .TP
--.BR "-S, --list-rules " "[\fIchain\fP]"
-+.BR "\-S, \-\-list-rules " "[\fIchain\fP]"
+-\fB-S\fP, \fB--list-rules\fP [\fIchain\fP]
++\fB-S\fP, \fB\-\-list-rules\fP [\fIchain\fP]
  Print all rules in the selected chain.  If no chain is selected, all
  chains are printed like iptables-save. Like every other iptables command,
  it applies to the specified table (filter is the default).
  .TP
--.BR "-F, --flush " "[\fIchain\fP]"
-+.BR "\-F, \-\-flush " "[\fIchain\fP]"
+-\fB-F\fP, \fB--flush\fP [\fIchain\fP]
++\fB-F\fP, \fB\-\-flush\fP [\fIchain\fP]
  Flush the selected chain (all the chains in the table if none is given).
  This is equivalent to deleting all the rules one by one.
  .TP
--.BR "-Z, --zero " "[\fIchain\fP]"
-+.BR "\-Z, \-\-zero " "[\fIchain\fP]"
+-\fB-Z\fP, \fB--zero\fP [\fIchain\fP]
++\fB-Z\fP, \fB\-\-zero\fP [\fIchain\fP]
  Zero the packet and byte counters in all chains.  It is legal to
  specify the
--.B "-L, --list"
-+.B "\-L, \-\-list"
+-\fB-L\fP, \fB--list\fP
++\fB-L\fP, \fB\-\-list\fP
  (list) option as well, to see the counters immediately before they are
  cleared. (See above.)
  .TP
--.BI "-N, --new-chain " "chain"
-+.BI "\-N, \-\-new-chain " "chain"
+-\fB-N\fP, \fB--new-chain\fP \fIchain\fP
++\fB-N\fP, \fB\-\-new-chain\fP \fIchain\fP
  Create a new user-defined chain by the given name.  There must be no
  target of that name already.
  .TP
--.BR "-X, --delete-chain " "[\fIchain\fP]"
-+.BR "\-X, \-\-delete-chain " "[\fIchain\fP]"
+-\fB-X\fP, \fB--delete-chain\fP [\fIchain\fP]
++\fB-X\fP, \fB\-\-delete-chain\fP [\fIchain\fP]
  Delete the optional user-defined chain specified.  There must be no references
  to the chain.  If there are, you must delete or replace the referring rules
  before the chain can be deleted.  The chain must be empty, i.e. not contain
  any rules.  If no argument is given, it will attempt to delete every
  non-builtin chain in the table.
  .TP
--.BI "-P, --policy " "chain target"
-+.BI "\-P, \-\-policy " "chain target"
- Set the policy for the chain to the given target.  See the section
- .B TARGETS
+-\fB-P\fP, \fB--policy\fP \fIchain target\fP
++\fB-P\fP, \fB\-\-policy\fP \fIchain target\fP
+ Set the policy for the chain to the given target.  See the section \fBTARGETS\fP
  for the legal targets.  Only built-in (non-user-defined) chains can have
  policies, and neither built-in nor user-defined chains can be policy
  targets.
  .TP
--.BI "-E, --rename-chain " "old-chain new-chain"
-+.BI "\-E, \-\-rename-chain " "old-chain new-chain"
+-\fB-E\fP, \fB--rename-chain\fP \fIold-chain new-chain\fP
++\fB-E\fP, \fB\-\-rename-chain\fP \fIold-chain new-chain\fP
  Rename the user specified chain to the user supplied name.  This is
  cosmetic, and has no effect on the structure of the table.
  .TP
--.B -h
-+.B \-h
- Help.
- Give a (currently very brief) description of the command syntax.
- .SS PARAMETERS
+@@ -219,7 +219,7 @@
  The following parameters make up a rule specification (as used in the
  add, delete, insert, replace and append commands).
  .TP
--.BR "-p, --protocol " "[!] \fIprotocol\fP"
-+.BR "\-p, \-\-protocol " "[!] \fIprotocol\fP"
+-[\fB!\fP] \fB-p\fP, \fB--protocol\fP \fIprotocol\fP
++[\fB!\fP] \fB-p\fP, \fB\-\-protocol\fP \fIprotocol\fP
  The protocol of the rule or of the packet to check.
- The specified protocol can be one of
- .IR tcp ,
-@@ -268,7 +268,7 @@
+ The specified protocol can be one of \fBtcp\fP, \fBudp\fP, \fBudplite\fP,
+ \fBicmp\fP, \fBesp\fP, \fBah\fP, \fBsctp\fP or \fBall\fP,
+@@ -231,7 +231,7 @@
  will match with all protocols and is taken as default when this
  option is omitted.
  .TP
--.BR "-s, --source " "[!] \fIaddress\fP[/\fImask\fP]"
-+.BR "\-s, \-\-source " "[!] \fIaddress\fP[/\fImask\fP]"
- Source specification.
- .I Address
+-[\fB!\fP] \fB-s\fP, \fB--source\fP \fIaddress\fP[\fB/\fP\fImask\fP]
++[\fB!\fP] \fB-s\fP, \fB\-\-source\fP \fIaddress\fP[\fB/\fP\fImask\fP]
+ Source specification. \fIAddress\fP
  can be either a network name, a hostname (please note that specifying
-@@ -284,18 +284,18 @@
- .IR 255.255.255.0 .
+ any name to be resolved with a remote query such as DNS is a really bad idea),
+@@ -241,15 +241,15 @@
+ specifying the number of 1's at the left side of the network mask.
+ Thus, a mask of \fI24\fP is equivalent to \fI255.255.255.0\fP.
  A "!" argument before the address specification inverts the sense of
- the address. The flag
--.B --src
-+.B \-\-src
- is an alias for this option.
+-the address. The flag \fB--src\fP is an alias for this option.
++the address. The flag \fB\-\-src\fP is an alias for this option.
  .TP
--.BR "-d, --destination " "[!] \fIaddress\fP[/\fImask\fP]"
-+.BR "\-d, \-\-destination " "[!] \fIaddress\fP[/\fImask\fP]"
+-[\fB!\fP] \fB-d\fP, \fB--destination\fP \fIaddress\fP[\fB/\fP\fImask\fP]
++[\fB!\fP] \fB-d\fP, \fB\-\-destination\fP \fIaddress\fP[\fB/\fP\fImask\fP]
  Destination specification. 
- See the description of the
--.B -s
-+.B \-s
+ See the description of the \fB-s\fP
  (source) flag for a detailed description of the syntax.  The flag
--.B --dst
-+.B \-\-dst
- is an alias for this option.
+-\fB--dst\fP is an alias for this option.
++\fB\-\-dst\fP is an alias for this option.
  .TP
--.BI "-j, --jump " "target"
-+.BI "\-j, \-\-jump " "target"
+-\fB-j\fP, \fB--jump\fP \fItarget\fP
++\fB-j\fP, \fB\-\-jump\fP \fItarget\fP
  This specifies the target of the rule; i.e., what to do if the packet
  matches it.  The target can be a user-defined chain (other than the
  one this rule is in), one of the special builtin targets which decide
-@@ -303,18 +303,18 @@
- .B EXTENSIONS
- below).  If this
- option is omitted in a rule (and
--.B -g
-+.B \-g
- is not used), then matching the rule will have no
+@@ -260,13 +260,13 @@
  effect on the packet's fate, but the counters on the rule will be
  incremented.
  .TP
--.BI "-g, --goto " "chain"
-+.BI "\-g, \-\-goto " "chain"
+-\fB-g\fP, \fB--goto\fP \fIchain\fP
++\fB-g\fP, \fB\-\-goto\fP \fIchain\fP
  This specifies that the processing should continue in a user
 -specified chain. Unlike the --jump option return will not continue
 +specified chain. Unlike the \-\-jump option return will not continue
@@ -2569,123 +2107,89 @@ Index: b/iptables.8.in
 ---jump.
 +\-\-jump.
  .TP
--.BR "-i, --in-interface " "[!] \fIname\fP"
-+.BR "\-i, \-\-in-interface " "[!] \fIname\fP"
+-[\fB!\fP] \fB-i\fP, \fB--in-interface\fP \fIname\fP
++[\fB!\fP] \fB-i\fP, \fB\-\-in-interface\fP \fIname\fP
  Name of an interface via which a packet was received (only for
- packets entering the 
- .BR INPUT ,
-@@ -326,7 +326,7 @@
+ packets entering the \fBINPUT\fP, \fBFORWARD\fP and \fBPREROUTING\fP
+ chains).  When the "!" argument is used before the interface name, the
+@@ -274,7 +274,7 @@
  interface which begins with this name will match.  If this option is
  omitted, any interface name will match.
  .TP
--.BR "-o, --out-interface " "[!] \fIname\fP"
-+.BR "\-o, \-\-out-interface " "[!] \fIname\fP"
+-[\fB!\fP] \fB-o\fP, \fB--out-interface\fP \fIname\fP
++[\fB!\fP] \fB-o\fP, \fB\-\-out-interface\fP \fIname\fP
  Name of an interface via which a packet is going to be sent (for packets
- entering the
- .BR FORWARD ,
-@@ -338,15 +338,15 @@
+ entering the \fBFORWARD\fP, \fBOUTPUT\fP and \fBPOSTROUTING\fP
+ chains).  When the "!" argument is used before the interface name, the
+@@ -282,7 +282,7 @@
  interface which begins with this name will match.  If this option is
  omitted, any interface name will match.
  .TP
--.B "[!] " "-f, --fragment"
-+.B "[!] " "\-f, \-\-fragment"
+-[\fB!\fP] \fB-f\fP, \fB--fragment\fP
++[\fB!\fP] \fB-f\fP, \fB\-\-fragment\fP
  This means that the rule only refers to second and further fragments
  of fragmented packets.  Since there is no way to tell the source or
  destination ports of such a packet (or ICMP type), such a packet will
- not match any rules which specify them.  When the "!" argument
--precedes the "-f" flag, the rule will only match head fragments, or
-+precedes the "\-f" flag, the rule will only match head fragments, or
+@@ -290,14 +290,14 @@
+ precedes the "-f" flag, the rule will only match head fragments, or
  unfragmented packets.
  .TP
--.BI "-c, --set-counters " "PKTS BYTES"
-+.BI "\-c, \-\-set-counters " "PKTS BYTES"
+-\fB-c\fP, \fB--set-counters\fP \fIpackets bytes\fP
++\fB-c\fP, \fB\-\-set-counters\fP \fIpackets bytes\fP
  This enables the administrator to initialize the packet and byte
- counters of a rule (during
- .B INSERT,
-@@ -356,57 +356,57 @@
+ counters of a rule (during \fBINSERT\fP, \fBAPPEND\fP, \fBREPLACE\fP
+ operations).
  .SS "OTHER OPTIONS"
  The following additional options can be specified:
  .TP
--.B "-v, --verbose"
-+.B "\-v, \-\-verbose"
+-\fB-v\fP, \fB--verbose\fP
++\fB-v\fP, \fB\-\-verbose\fP
  Verbose output.  This option makes the list command show the interface
  name, the rule options (if any), and the TOS masks.  The packet and
  byte counters are also listed, with the suffix 'K', 'M' or 'G' for
- 1000, 1,000,000 and 1,000,000,000 multipliers respectively (but see
- the
--.B -x
-+.B \-x
- flag to change this).
+@@ -306,34 +306,34 @@
  For appending, insertion, deletion and replacement, this causes
  detailed information on the rule or rules to be printed.
  .TP
--.B "-n, --numeric"
-+.B "\-n, \-\-numeric"
+-\fB-n\fP, \fB--numeric\fP
++\fB-n\fP, \fB\-\-numeric\fP
  Numeric output.
  IP addresses and port numbers will be printed in numeric format.
  By default, the program will try to display them as host names,
  network names, or services (whenever applicable).
  .TP
--.B "-x, --exact"
-+.B "\-x, \-\-exact"
+-\fB-x\fP, \fB--exact\fP
++\fB-x\fP, \fB\-\-exact\fP
  Expand numbers.
  Display the exact value of the packet and byte counters,
  instead of only the rounded number in K's (multiples of 1000)
  M's (multiples of 1000K) or G's (multiples of 1000M).  This option is
- only relevant for the 
--.B -L
-+.B \-L
- command.
+ only relevant for the \fB-L\fP command.
  .TP
 -.B "--line-numbers"
 +.B "\-\-line-numbers"
  When listing rules, add line numbers to the beginning of each rule,
  corresponding to that rule's position in the chain.
  .TP
--.B "--modprobe=command"
-+.B "\-\-modprobe=command"
- When adding or inserting rules into a chain, use
- .B command
+-\fB--modprobe=\fP\fIcommand\fP
++\fB\-\-modprobe=\fP\fIcommand\fP
+ When adding or inserting rules into a chain, use \fIcommand\fP
  to load any necessary modules (targets, match extensions, etc).
  .SH MATCH EXTENSIONS
  iptables can use extended packet matching modules.  These are loaded
- in two ways: implicitly, when
--.B -p
-+.B \-p
- or
--.B --protocol
-+.B \-\-protocol
- is specified, or with the
--.B -m
-+.B \-m
- or
--.B --match
-+.B \-\-match
+-in two ways: implicitly, when \fB-p\fP or \fB--protocol\fP
+-is specified, or with the \fB-m\fP or \fB--match\fP
++in two ways: implicitly, when \fB-p\fP or \fB\-\-protocol\fP
++is specified, or with the \fB-m\fP or \fB\-\-match\fP
  options, followed by the matching module name; after these, various
  extra command line options become available, depending on the specific
  module.  You can specify multiple extended match modules in one line,
- and you can use the
--.B -h
-+.B \-h
- or
--.B --help
-+.B \-\-help
+-and you can use the \fB-h\fP or \fB--help\fP
++and you can use the \fB-h\fP or \fB\-\-help\fP
  options after the module has been specified to receive help specific
  to that module.
  
-@@ -442,9 +442,9 @@
- would pass through all three.
- .PP
- The other main difference is that
--.B -i
-+.B \-i
- refers to the input interface;
--.B -o
-+.B \-o
- refers to the output interface, and both are available for packets
- entering the
- .B FORWARD
-@@ -456,9 +456,9 @@
+@@ -372,9 +372,9 @@
  confusion over the combination of IP masquerading and packet filtering
  seen previously.  So the following options are handled differently:
  .nf
@@ -2700,8 +2204,8 @@ Index: b/iptables.8.in
  .SH SEE ALSO
 Index: b/extensions/libxt_limit.man
 ===================================================================
---- a/extensions/libxt_limit.man	2008-07-12 10:05:38.336688315 -0400
-+++ b/extensions/libxt_limit.man	2008-07-12 10:21:10.968159269 -0400
+--- a/extensions/libxt_limit.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_limit.man	2009-01-12 13:19:09.206707928 -0500
 @@ -4,12 +4,12 @@
  .B LOG
  target to give limited logging, for example.
@@ -2719,8 +2223,8 @@ Index: b/extensions/libxt_limit.man
  up to this number; the default is 5.
 Index: b/extensions/libxt_mac.man
 ===================================================================
---- a/extensions/libxt_mac.man	2008-07-12 10:05:38.342688346 -0400
-+++ b/extensions/libxt_mac.man	2008-07-12 10:21:10.968159269 -0400
+--- a/extensions/libxt_mac.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_mac.man	2009-01-12 13:19:09.207707981 -0500
 @@ -1,5 +1,5 @@
  .TP
 -[\fB!\fP] \fB--mac-source\fP \fIaddress\fP
@@ -2728,3 +2232,302 @@ Index: b/extensions/libxt_mac.man
  Match source MAC address.  It must be of the form XX:XX:XX:XX:XX:XX.
  Note that this only makes sense for packets coming from an Ethernet device
  and entering the
+Index: b/extensions/libxt_RATEEST.man
+===================================================================
+--- a/extensions/libxt_RATEEST.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_RATEEST.man	2009-01-12 13:19:09.260430176 -0500
+@@ -1,12 +1,12 @@
+ The RATEEST target collects statistics, performs rate estimation calculation
+ and saves the results for later evaluation using the \fBrateest\fP match.
+ .TP
+-\fB--rateest-name\fP \fIname\fP
++\fB\-\-rateest-name\fP \fIname\fP
+ Count matched packets into the pool referred to by \fIname\fP, which is freely
+ choosable.
+ .TP
+-\fB--rateest-interval\fP \fIamount\fP{\fBs\fP|\fBms\fP|\fBus\fP}
++\fB\-\-rateest-interval\fP \fIamount\fP{\fBs\fP|\fBms\fP|\fBus\fP}
+ Rate measurement interval, in seconds, milliseconds or microseconds.
+ .TP
+-\fB--rateest-ewmalog\fP \fIvalue\fP
++\fB\-\-rateest-ewmalog\fP \fIvalue\fP
+ Rate measurement averaging time constant.
+Index: b/extensions/libxt_statistic.man
+===================================================================
+--- a/extensions/libxt_statistic.man	2008-10-08 12:31:58.000000000 -0400
++++ b/extensions/libxt_statistic.man	2009-01-12 13:19:09.260430176 -0500
+@@ -1,30 +1,30 @@
+ This module matches packets based on some statistic condition.
+ It supports two distinct modes settable with the 
+-.B --mode
++.B \-\-mode
+ option.
+ .PP
+ Supported options:
+ .TP
+-.BI "--mode " "mode"
++.BI "\-\-mode " "mode"
+ Set the matching mode of the matching rule, supported modes are
+ .B random
+ and
+ .B nth. 
+ .TP
+-.BI "--probability " "p"
++.BI "\-\-probability " "p"
+ Set the probability from 0 to 1 for a packet to be randomly
+ matched. It works only with the
+ .B random
+ mode.
+ .TP
+-.BI "--every " "n"
++.BI "\-\-every " "n"
+ Match one packet every nth packet. It works only with the
+ .B nth
+ mode (see also the 
+-.B --packet
++.B \-\-packet
+ option).
+ .TP
+-.BI "--packet " "p"
++.BI "\-\-packet " "p"
+ Set the initial counter value (0 <= p <= n-1, default 0) for the
+ .B nth 
+ mode.
+Index: b/ip6tables.8.in
+===================================================================
+--- a/ip6tables.8.in	2008-10-08 12:31:58.000000000 -0400
++++ b/ip6tables.8.in	2009-01-12 13:19:09.260707846 -0500
+@@ -86,7 +86,7 @@
+ at any time depends on the kernel configuration options and which
+ modules are present).
+ .TP
+-\fB-t\fP, \fB--table\fP \fItable\fP
++\fB-t\fP, \fB\-\-table\fP \fItable\fP
+ This option specifies the packet matching table which the command
+ should operate on.  If the kernel is configured with automatic module
+ loading, an attempt will be made to load the appropriate module for
+@@ -129,31 +129,31 @@
+ need to use only enough letters to ensure that
+ \fBip6tables\fP can differentiate it from all other options.
+ .TP
+-\fB-A\fP, \fB--append\fP \fIchain rule-specification\fP
++\fB-A\fP, \fB\-\-append\fP \fIchain rule-specification\fP
+ Append one or more rules to the end of the selected chain.
+ When the source and/or destination names resolve to more than one
+ address, a rule will be added for each possible address combination.
+ .TP
+-\fB-D\fP, \fB--delete\fP \fIchain rule-specification\fP
++\fB-D\fP, \fB\-\-delete\fP \fIchain rule-specification\fP
+ .ns
+ .TP
+-\fB-D\fP, \fB--delete\fP \fIchain rulenum\fP
++\fB-D\fP, \fB\-\-delete\fP \fIchain rulenum\fP
+ Delete one or more rules from the selected chain.  There are two
+ versions of this command: the rule can be specified as a number in the
+ chain (starting at 1 for the first rule) or a rule to match.
+ .TP
+-\fB-I\fP, \fB--insert\fP \fIchain\fP [\fIrulenum\fP] \fIrule-specification\fP
++\fB-I\fP, \fB\-\-insert\fP \fIchain\fP [\fIrulenum\fP] \fIrule-specification\fP
+ Insert one or more rules in the selected chain as the given rule
+ number.  So, if the rule number is 1, the rule or rules are inserted
+ at the head of the chain.  This is also the default if no rule number
+ is specified.
+ .TP
+-\fB-R\fP, \fB--replace\fP \fIchain rulenum rule-specification\fP
++\fB-R\fP, \fB\-\-replace\fP \fIchain rulenum rule-specification\fP
+ Replace a rule in the selected chain.  If the source and/or
+ destination names resolve to multiple addresses, the command will
+ fail.  Rules are numbered starting at 1.
+ .TP
+-\fB-L\fP, \fB--list\fP [\fIchain\fP]
++\fB-L\fP, \fB\-\-list\fP [\fIchain\fP]
+ List all rules in the selected chain.  If no chain is selected, all
+ chains are listed. Like every other ip6tables command, it applies to the
+ specified table (filter is the default).
+@@ -168,43 +168,43 @@
+  ip6tables -L -v
+ .fi
+ .TP
+-\fB-S\fP, \fB--list-rules\fP [\fIchain\fP]
++\fB-S\fP, \fB\-\-list-rules\fP [\fIchain\fP]
+ Print all rules in the selected chain.  If no chain is selected, all
+ chains are printed like ip6tables-save. Like every other ip6tables command,
+ it applies to the specified table (filter is the default).
+ .TP
+-\fB-F\fP, \fB--flush\fP [\fIchain\fP]
++\fB-F\fP, \fB\-\-flush\fP [\fIchain\fP]
+ Flush the selected chain (all the chains in the table if none is given).
+ This is equivalent to deleting all the rules one by one.
+ .TP
+-\fB-Z\fP, \fB--zero\fP [\fIchain\fP]
++\fB-Z\fP, \fB\-\-zero\fP [\fIchain\fP]
+ Zero the packet and byte counters in all chains.  It is legal to
+ specify the
+-\fB-L\fP, \fB--list\fP
++\fB-L\fP, \fB\-\-list\fP
+ (list) option as well, to see the counters immediately before they are
+ cleared. (See above.)
+ .TP
+-\fB-N\fP, \fB--new-chain\fP \fIchain\fP
++\fB-N\fP, \fB\-\-new-chain\fP \fIchain\fP
+ Create a new user-defined chain by the given name.  There must be no
+ target of that name already.
+ .TP
+-\fB-X\fP, \fB--delete-chain\fP [\fIchain\fP]
++\fB-X\fP, \fB\-\-delete-chain\fP [\fIchain\fP]
+ Delete the optional user-defined chain specified.  There must be no references
+ to the chain.  If there are, you must delete or replace the referring rules
+ before the chain can be deleted.  The chain must be empty, i.e. not contain
+ any rules.  If no argument is given, it will attempt to delete every
+ non-builtin chain in the table.
+ .TP
+-\fB-P\fP, \fB--policy\fP \fIchain target\fP
++\fB-P\fP, \fB\-\-policy\fP \fIchain target\fP
+ Set the policy for the chain to the given target.  See the section \fBTARGETS\fP
+ for the legal targets.  Only built-in (non-user-defined) chains can have
+ policies, and neither built-in nor user-defined chains can be policy
+ targets.
+ .TP
+-\fB-E\fP, \fB--rename-chain\fP \fIold-chain new-chain\fP
++\fB-E\fP, \fB\-\-rename-chain\fP \fIold-chain new-chain\fP
+ Rename the user specified chain to the user supplied name.  This is
+ cosmetic, and has no effect on the structure of the table.
+-.BI "-A, --append " "chain rule-specification"
++.BI "-A, \-\-append " "chain rule-specification"
+ Append one or more rules to the end of the selected chain.
+ When the source and/or destination names resolve to more than one
+ address, a rule will be added for each possible address combination.
+@@ -216,7 +216,7 @@
+ The following parameters make up a rule specification (as used in the
+ add, delete, insert, replace and append commands).
+ .TP
+-[\fB!\fP] \fB-p\fP, \fB--protocol\fP \fIprotocol\fP
++[\fB!\fP] \fB-p\fP, \fB\-\-protocol\fP \fIprotocol\fP
+ The protocol of the rule or of the packet to check.
+ The specified protocol can be one of \fBtcp\fP, \fBudp\fP, \fBudplite\fP,
+ \fBicmpv6\fP, \fBesp\fP, \fBmh\fP or \fBall\fP,
+@@ -231,7 +231,7 @@
+ will match with all protocols and is taken as default when this
+ option is omitted.
+ .TP
+-[\fB!\fP] \fB-s\fP, \fB--source\fP \fIaddress\fP[\fB/\fP\fImask\fP]
++[\fB!\fP] \fB-s\fP, \fB\-\-source\fP \fIaddress\fP[\fB/\fP\fImask\fP]
+ Source specification.
+ \fIAddress\fP can be either a hostname (please note that specifying
+ any name to be resolved with a remote query such as DNS is a really bad idea),
+@@ -240,16 +240,16 @@
+ The \fImask\fP is a plain number,
+ specifying the number of 1's at the left side of the network mask.
+ A "!" argument before the address specification inverts the sense of
+-the address. The flag \fB--src\fP
++the address. The flag \fB\-\-src\fP
+ is an alias for this option.
+ .TP
+-[\fB!\fP] \fB-d\fP, \fB--destination\fP \fIaddress\fP[\fB/\fP\fImask\fP]
++[\fB!\fP] \fB-d\fP, \fB\-\-destination\fP \fIaddress\fP[\fB/\fP\fImask\fP]
+ Destination specification. 
+ See the description of the \fB-s\fP
+ (source) flag for a detailed description of the syntax.  The flag
+-\fB--dst\fP is an alias for this option.
++\fB\-\-dst\fP is an alias for this option.
+ .TP
+-\fB-j\fP, \fB--jump\fP \fItarget\fP
++\fB-j\fP, \fB\-\-jump\fP \fItarget\fP
+ This specifies the target of the rule; i.e., what to do if the packet
+ matches it.  The target can be a user-defined chain (other than the
+ one this rule is in), one of the special builtin targets which decide
+@@ -260,13 +260,13 @@
+ effect on the packet's fate, but the counters on the rule will be
+ incremented.
+ .TP
+-\fB-g\fP, \fB--goto\fP \fIchain\fP
++\fB-g\fP, \fB\-\-goto\fP \fIchain\fP
+ This specifies that the processing should continue in a user
+-specified chain. Unlike the --jump option return will not continue
++specified chain. Unlike the \-\-jump option return will not continue
+ processing in this chain but instead in the chain that called us via
+---jump.
++\-\-jump.
+ .TP
+-[\fB!\fP] \fB-i\fP, \fB--in-interface\fP \fIname\fP
++[\fB!\fP] \fB-i\fP, \fB\-\-in-interface\fP \fIname\fP
+ Name of an interface via which a packet was received (only for
+ packets entering the \fBINPUT\fP, \fBFORWARD\fP and \fBPREROUTING\fP
+ chains).  When the "!" argument is used before the interface name, the
+@@ -274,7 +274,7 @@
+ interface which begins with this name will match.  If this option is
+ omitted, any interface name will match.
+ .TP
+-[\fB!\fP] \fB-o\fP, \fB--out-interface\fP \fIname\fP
++[\fB!\fP] \fB-o\fP, \fB\-\-out-interface\fP \fIname\fP
+ Name of an interface via which a packet is going to be sent (for packets
+ entering the \fBFORWARD\fP, \fBOUTPUT\fP and \fBPOSTROUTING\fP
+ chains).  When the "!" argument is used before the interface name, the
+@@ -283,7 +283,7 @@
+ omitted, any interface name will match.
+ .\" Currently not supported (header-based)
+ .\" .TP
+-.\" [\fB!\fP] \fB-f\fP, \fB--fragment\fP
++.\" [\fB!\fP] \fB-f\fP, \fB\-\-fragment\fP
+ .\" This means that the rule only refers to second and further fragments
+ .\" of fragmented packets.  Since there is no way to tell the source or
+ .\" destination ports of such a packet (or ICMP type), such a packet will
+@@ -291,14 +291,14 @@
+ .\" precedes the "-f" flag, the rule will only match head fragments, or
+ .\" unfragmented packets.
+ .TP
+-\fB-c\fP, \fB--set-counters\fP \fIpackets bytes\fP
++\fB-c\fP, \fB\-\-set-counters\fP \fIpackets bytes\fP
+ This enables the administrator to initialize the packet and byte
+ counters of a rule (during \fBINSERT\fP, \fBAPPEND\fP, \fBREPLACE\fP
+ operations).
+ .SS "OTHER OPTIONS"
+ The following additional options can be specified:
+ .TP
+-\fB-v\fP, \fB--verbose\fP
++\fB-v\fP, \fB\-\-verbose\fP
+ Verbose output.  This option makes the list command show the interface
+ name, the rule options (if any), and the TOS masks.  The packet and
+ byte counters are also listed, with the suffix 'K', 'M' or 'G' for
+@@ -307,34 +307,34 @@
+ For appending, insertion, deletion and replacement, this causes
+ detailed information on the rule or rules to be printed.
+ .TP
+-\fB-n\fP, \fB--numeric\fP
++\fB-n\fP, \fB\-\-numeric\fP
+ Numeric output.
+ IP addresses and port numbers will be printed in numeric format.
+ By default, the program will try to display them as host names,
+ network names, or services (whenever applicable).
+ .TP
+-\fB-x\fP, \fB--exact\fP
++\fB-x\fP, \fB\-\-exact\fP
+ Expand numbers.
+ Display the exact value of the packet and byte counters,
+ instead of only the rounded number in K's (multiples of 1000)
+ M's (multiples of 1000K) or G's (multiples of 1000M).  This option is
+ only relevant for the \fB-L\fP command.
+ .TP
+-.B "--line-numbers"
++.B "\-\-line-numbers"
+ When listing rules, add line numbers to the beginning of each rule,
+ corresponding to that rule's position in the chain.
+ .TP
+-\fB--modprobe=\fP\fIcommand\fP
++\fB\-\-modprobe=\fP\fIcommand\fP
+ When adding or inserting rules into a chain, use \fIcommand\fP
+ to load any necessary modules (targets, match extensions, etc).
+ .SH MATCH EXTENSIONS
+ ip6tables can use extended packet matching modules.  These are loaded
+-in two ways: implicitly, when \fB-p\fP or \fB--protocol\fP
+-is specified, or with the \fB-m\fP or \fB--match\fP
++in two ways: implicitly, when \fB-p\fP or \fB\-\-protocol\fP
++is specified, or with the \fB-m\fP or \fB\-\-match\fP
+ options, followed by the matching module name; after these, various
+ extra command line options become available, depending on the specific
+ module.  You can specify multiple extended match modules in one line,
+-and you can use the \fB-h\fP or \fB--help\fP
++and you can use the \fB-h\fP or \fB\-\-help\fP
+ options after the module has been specified to receive help specific
+ to that module.
+ 

@@ -11,7 +11,7 @@ chains, and user-defined chains which are only called from those
 chains.  The following option controls the nature of the error packet
 returned:
 .TP
-.BI "\-\-reject-with " "type"
+.BI "--reject-with " "type"
 The type given can be
 .nf
 .B " icmp6-no-route"

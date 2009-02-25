@@ -12,11 +12,14 @@
 #include <sys/types.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <time.h>
+#include <limits.h>
+
 #include <linux/netfilter/xt_time.h>
 #include <xtables.h>
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x))

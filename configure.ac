@@ -1,7 +1,7 @@
 define([_XTABLES_VERSION_MAJOR], 1)
 define([_XTABLES_VERSION_MINOR], 4)
-define([_XTABLES_VERSION_PATCH], 1)
-define([_XTABLES_VERSION_EXTRA], .1)
+define([_XTABLES_VERSION_PATCH], 2)
+define([_XTABLES_VERSION_EXTRA],)
 
 define([_XTABLES_VERSION],_XTABLES_VERSION_MAJOR._XTABLES_VERSION_MINOR._XTABLES_VERSION_PATCH[]_XTABLES_VERSION_EXTRA)
 
@@ -37,8 +37,10 @@ AC_ARG_ENABLE([devel],
 	[enable_devel="$enableval"], [enable_devel="yes"])
 AC_ARG_ENABLE([libipq],
 	AS_HELP_STRING([--enable-libipq], [Build and install libipq]))
+AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],
+	[Path to the pkgconfig directory [[LIBDIR/pkgconfig]]]),
+	[pkgconfigdir="$withval"], [pkgconfigdir='${libdir}/pkgconfig'])
 
-AC_CHECK_HEADER([netinet/ip6.h], [], [AC_MSG_ERROR(but we need that for IPv6)])
 AC_CHECK_HEADER([linux/dccp.h])
 
 blacklist_modules="";
@@ -47,10 +49,10 @@ if test "$ac_cv_header_linux_dccp_h" != "yes"; then
 fi;
 AC_SUBST([blacklist_modules])
 
-AM_CONDITIONAL([ENABLE_STATIC], [test "$enable_static" == "yes"])
-AM_CONDITIONAL([ENABLE_SHARED], [test "$enable_shared" == "yes"])
-AM_CONDITIONAL([ENABLE_DEVEL], [test "$enable_devel" == "yes"])
-AM_CONDITIONAL([ENABLE_LIBIPQ], [test "$enable_libipq" == "yes"])
+AM_CONDITIONAL([ENABLE_STATIC], [test "$enable_static" = "yes"])
+AM_CONDITIONAL([ENABLE_SHARED], [test "$enable_shared" = "yes"])
+AM_CONDITIONAL([ENABLE_DEVEL], [test "$enable_devel" = "yes"])
+AM_CONDITIONAL([ENABLE_LIBIPQ], [test "$enable_libipq" = "yes"])
 
 regular_CFLAGS="-D_LARGEFILE_SOURCE=1 -D_LARGE_FILES -D_FILE_OFFSET_BITS=64 \
 	-D_REENTRANT -Wall -Waggregate-return -Wmissing-declarations \
@@ -70,6 +72,7 @@ AC_SUBST([kinclude_CFLAGS])
 AC_SUBST([kbuilddir])
 AC_SUBST([ksourcedir])
 AC_SUBST([xtlibdir])
+AC_SUBST([pkgconfigdir])
 
 XTABLES_VERSION_MAJOR=_XTABLES_VERSION_MAJOR
 XTABLES_VERSION_MINOR=_XTABLES_VERSION_MINOR
@@ -80,4 +83,5 @@ AC_SUBST([XTABLES_VERSION_MINOR])
 AC_SUBST([XTABLES_VERSION_PATCH])
 AC_SUBST([XTABLES_VERSION_EXTRA])
 
-AC_OUTPUT([Makefile extensions/GNUmakefile libipq/Makefile include/xtables.h])
+AC_OUTPUT([Makefile extensions/GNUmakefile libipq/Makefile include/xtables.h
+	xtables.pc])

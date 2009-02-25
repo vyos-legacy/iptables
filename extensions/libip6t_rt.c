@@ -11,17 +11,16 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-                                        
+
 /*#define DEBUG	1*/
 
-/* Function which prints out usage message. */
 static void rt_help(void)
 {
 	printf(
 "rt match options:\n"
-" --rt-type [!] type            match the type\n"
-" --rt-segsleft [!] num[:num]   match the Segments Left field (range)\n"
-" --rt-len [!] length           total length of this header\n"
+"[!] --rt-type type             match the type\n"
+"[!] --rt-segsleft num[:num]    match the Segments Left field (range)\n"
+"[!] --rt-len length            total length of this header\n"
 " --rt-0-res                    check the reserved filed, too (type 0)\n"
 " --rt-0-addrs ADDR[,ADDR...]   Type=0 addresses (list, max: %d)\n"
 " --rt-0-not-strict             List of Type=0 addresses not a strict list\n",
@@ -136,7 +135,6 @@ parse_addresses(const char *addrstr, struct in6_addr *addrp)
 	return i;
 }
 
-/* Initialize the match. */
 static void rt_init(struct xt_entry_match *m)
 {
 	struct ip6t_rt *rtinfo = (struct ip6t_rt *)m->data;
@@ -150,8 +148,6 @@ static void rt_init(struct xt_entry_match *m)
 	rtinfo->addrnr = 0;
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int rt_parse(int c, char **argv, int invert, unsigned int *flags,
                     const void *entry, struct xt_entry_match **match)
 {
@@ -264,7 +260,6 @@ print_addresses(unsigned int addrnr, struct in6_addr *addrp)
 	}
 }
 
-/* Prints out the union ip6t_matchinfo. */
 static void rt_print(const void *ip, const struct xt_entry_match *match,
                      int numeric)
 {
@@ -291,7 +286,6 @@ static void rt_print(const void *ip, const struct xt_entry_match *match,
 		       rtinfo->invflags & ~IP6T_RT_INV_MASK);
 }
 
-/* Saves the union ip6t_matchinfo in parsable form to stdout. */
 static void rt_save(const void *ip, const struct xt_entry_match *match)
 {
 	const struct ip6t_rt *rtinfo = (struct ip6t_rt *)match->data;

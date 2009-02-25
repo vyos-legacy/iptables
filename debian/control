@@ -2,7 +2,7 @@ Source: iptables
 Section: net
 Priority: important
 Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
-Build-Depends: debhelper (>>7.0), linuxdoc-tools, quilt, autoconf, automake, libtool
+Build-Depends: debhelper (>>7.0), quilt, autoconf, automake, libtool
 Standards-Version: 3.8.0
 Homepage: http://www.netfilter.org/
 
@@ -11,7 +11,7 @@ Package: iptables
 Architecture: any
 Priority: important
 Section: net
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: administration tools for packet filtering and NAT
  These are the user-space administration tools for the Linux
  kernel's netfilter and iptables. netfilter and iptables provide
@@ -26,7 +26,8 @@ Description: administration tools for packet filtering and NAT
 Package: iptables-dev
 Architecture: any
 Priority: optional
-Depends:
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: iptables (<<1.4.2-2)
 Section: devel
 Description: development files for iptable's libipq
  Header files, static libs and documentation for libipq, iptables'

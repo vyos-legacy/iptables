@@ -1,5 +1,4 @@
-/* Shared library add-on to iptables to add policy support. */
-
+/* Shared library add-on to ip6tables to add policy support. */
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
@@ -14,7 +13,7 @@
 #include <ip6tables.h>
 
 #include <linux/netfilter_ipv6/ip6_tables.h>
-#include "../include/linux/netfilter_ipv6/ip6t_policy.h"
+#include <linux/netfilter_ipv6/ip6t_policy.h>
 
 /*
  * HACK: global pointer to current matchinfo for making

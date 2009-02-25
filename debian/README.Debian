@@ -1,9 +1,9 @@
 Documentation:
 ==============
 
-The HOWTOS included with the iptables packages are a bit dated.
-For more freshly outdated and possibly up-to-date documentation,
-have a look at: http://www.netfilter.org/documentation/
+The various netfilter and iptables HOWTOS can be found at:
+
+  http://www.netfilter.org/documentation/
 
 
 Bug Reports:

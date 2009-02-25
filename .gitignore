@@ -4,9 +4,18 @@
 *.oo
 *.so
 *.o
+*~
 .*.swp
 .deps
 .dirstamp
+*.la
+*.lo
+*.oo
+*.so
+*.o
+.deps
+.dirstamp
+.libs
 Makefile
 Makefile.in
 
@@ -33,6 +42,7 @@ Makefile.in
 /missing
 /stamp-h1
 /build-stamp
+/xtables.pc
 
 /ip6tables
 /ip6tables.8
@@ -47,16 +57,3 @@ Makefile.in
 /iptables-restore
 /iptables-static
 /iptables-xml
-
-/debian/files
-/debian/iptables-dev.debhelper.log
-/debian/iptables-dev.postinst.debhelper
-/debian/iptables-dev.prerm.debhelper
-/debian/iptables-dev
-/debian/iptables.debhelper.log
-/debian/iptables.postinst.debhelper
-/debian/iptables.prerm.debhelper
-/debian/iptables.substvars
-/debian/iptables
-/debian/tmp
-

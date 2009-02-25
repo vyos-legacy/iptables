@@ -21,7 +21,6 @@
 #define IPT_RECENT_NAME_LEN	200
 #endif /* IPT_RECENT_NAME_LEN */
 
-/* Options for this module */
 static const struct option recent_opts[] = {
 	{ .name = "set",      .has_arg = 0, .val = 201 }, 
 	{ .name = "rcheck",   .has_arg = 0, .val = 202 }, 
@@ -36,7 +35,6 @@ static const struct option recent_opts[] = {
 	{ .name = NULL }
 };
 
-/* Function which prints out usage message. */
 static void recent_help(void)
 {
 	printf(
@@ -61,8 +59,7 @@ static void recent_help(void)
 "    --rdest                     Match/Save the destination address of each packet in the recent list table.\n"
 RECENT_NAME " " RECENT_VER ": Stephen Frost <sfrost@snowman.net>.  http://snowman.net/projects/ipt_recent/\n");
 }
-  
-/* Initialize the match. */
+
 static void recent_init(struct xt_entry_match *match)
 {
 	struct ipt_recent_info *info = (struct ipt_recent_info *)(match)->data;
@@ -75,51 +72,57 @@ static void recent_init(struct xt_entry_match *match)
 	info->side = IPT_RECENT_SOURCE;
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
+#define RECENT_CMDS \
+	(IPT_RECENT_SET | IPT_RECENT_CHECK | \
+	IPT_RECENT_UPDATE | IPT_RECENT_REMOVE)
+
 static int recent_parse(int c, char **argv, int invert, unsigned int *flags,
                         const void *entry, struct xt_entry_match **match)
 {
 	struct ipt_recent_info *info = (struct ipt_recent_info *)(*match)->data;
 	switch (c) {
 		case 201:
-			if (*flags) exit_error(PARAMETER_PROBLEM,
+			if (*flags & RECENT_CMDS)
+				exit_error(PARAMETER_PROBLEM,
 					"recent: only one of `--set', `--rcheck' "
 					"`--update' or `--remove' may be set");
 			check_inverse(optarg, &invert, &optind, 0);
 			info->check_set |= IPT_RECENT_SET;
 			if (invert) info->invert = 1;
-			*flags = 1;
+			*flags |= IPT_RECENT_SET;
 			break;
 			
 		case 202:
-			if (*flags) exit_error(PARAMETER_PROBLEM,
+			if (*flags & RECENT_CMDS)
+				exit_error(PARAMETER_PROBLEM,
 					"recent: only one of `--set', `--rcheck' "
 					"`--update' or `--remove' may be set");
 			check_inverse(optarg, &invert, &optind, 0);
 			info->check_set |= IPT_RECENT_CHECK;
 			if(invert) info->invert = 1;
-			*flags = 1;
+			*flags |= IPT_RECENT_CHECK;
 			break;
 
 		case 203:
-			if (*flags) exit_error(PARAMETER_PROBLEM,
+			if (*flags & RECENT_CMDS)
+				exit_error(PARAMETER_PROBLEM,
 					"recent: only one of `--set', `--rcheck' "
 					"`--update' or `--remove' may be set");
 			check_inverse(optarg, &invert, &optind, 0);
 			info->check_set |= IPT_RECENT_UPDATE;
 			if (invert) info->invert = 1;
-			*flags = 1;
+			*flags |= IPT_RECENT_UPDATE;
 			break;
 
 		case 206:
-			if (*flags) exit_error(PARAMETER_PROBLEM,
+			if (*flags & RECENT_CMDS)
+				exit_error(PARAMETER_PROBLEM,
 					"recent: only one of `--set', `--rcheck' "
 					"`--update' or `--remove' may be set");
 			check_inverse(optarg, &invert, &optind, 0);
 			info->check_set |= IPT_RECENT_REMOVE;
 			if (invert) info->invert = 1;
-			*flags = 1;
+			*flags |= IPT_RECENT_REMOVE;
 			break;
 
 		case 204:
@@ -132,6 +135,7 @@ static int recent_parse(int c, char **argv, int invert, unsigned int *flags,
 
 		case 207:
 			info->check_set |= IPT_RECENT_TTL;
+			*flags |= IPT_RECENT_TTL;
 			break;
 
 		case 208:
@@ -154,17 +158,19 @@ static int recent_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 1;
 }
 
-/* Final check; must have specified a specific option. */
 static void recent_check(unsigned int flags)
 {
-
-	if (!flags)
+	if (!(flags & RECENT_CMDS))
 		exit_error(PARAMETER_PROBLEM,
 			"recent: you must specify one of `--set', `--rcheck' "
 			"`--update' or `--remove'");
+	if ((flags & IPT_RECENT_TTL) &&
+	    (flags & (IPT_RECENT_SET | IPT_RECENT_REMOVE)))
+		exit_error(PARAMETER_PROBLEM,
+		           "recent: --rttl may only be used with --rcheck or "
+		           "--update");
 }
 
-/* Prints out the matchinfo. */
 static void recent_print(const void *ip, const struct xt_entry_match *match,
                          int numeric)
 {
@@ -186,7 +192,6 @@ static void recent_print(const void *ip, const struct xt_entry_match *match,
 	if(info->side == IPT_RECENT_DEST) printf("side: dest");
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void recent_save(const void *ip, const struct xt_entry_match *match)
 {
 	struct ipt_recent_info *info = (struct ipt_recent_info *)match->data;
@@ -206,7 +211,6 @@ static void recent_save(const void *ip, const struct xt_entry_match *match)
 	if(info->side == IPT_RECENT_DEST) printf("--rdest ");
 }
 
-/* Structure for iptables to use to communicate with module */
 static struct xtables_match recent_mt_reg = {
     .name          = "recent",
     .version       = XTABLES_VERSION,

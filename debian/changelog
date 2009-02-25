@@ -1,3 +1,18 @@
+iptables (1.4.2-1+vyatta+2) unstable; urgency=low
+
+  [ Stephen Hemminger ]
+  * Apply debian patches (1.4.2)
+  * Add back development build rule
+
+  [ Mohit Mehta ]
+  * Add option to zero the packet and byte counters for a specific rule
+    using iptables
+  * Add option to zero the packet and byte counters for a ip6tables rule
+
+  [ Stephen Hemminger ]
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Wed, 25 Feb 2009 12:32:05 -0800
+
 iptables (1.4.2-1+vyatta+1) UNRELEASED; urgency=low
 
   [ Marc Boucher ]

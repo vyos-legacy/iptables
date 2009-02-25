@@ -1,3 +1,39 @@
+iptables (1.4.2-1+vyatta+1) UNRELEASED; urgency=low
+
+  [ Marc Boucher ]
+  * reorganized tree after kernel merge
+
+  [ Rusty Russell ]
+  * Makefile fixes for release.
+
+  [ Marc Boucher ]
+  * Corrected various typos etc..
+
+  [ James Morris ]
+  * James Morris' limits.h patch.
+
+  [ Bert Hubert ]
+  * bert hubert's Corrects missing spaces in iptables.8
+
+  [ James Morris ]
+  * James Morris's problem with libiptc when listing the builtin
+
+  [ Rusty Russell ]
+  * Testsuite update.
+  * libiptc caching to speed up find_label().
+  * Removed distrib: targets.
+  * Fix for match_different to correctly traverse the second rule
+
+  [ Marc Boucher ]
+  * Fixed save() to properly interpret ports in host byte order and use
+    ':'
+  * Fixed typo.
+
+  [ Rusty Russell ]
+  * Fixed version, added distclean, and fixed distrib target.
+
+ -- Stephen Hemminger <shemminger@vyatta.com>  Wed, 25 Feb 2009 12:11:52 -0800
+
 iptables (1.4.1.1-2+vyatta+6) unstable; urgency=low
 
   * Add option to zero the packet and byte counters for a ip6tables rule

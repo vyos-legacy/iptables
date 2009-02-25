@@ -7,6 +7,13 @@ install :=  --exclude=-multi
 	dh $@
 
 binary binary-arch binary-indep: install
+	dh binary --before dh_gencontrol
+	if [ -f "../.VYATTA_DEV_BUILD" ]; then \
+		dh_gencontrol -- -v999.dev; \
+	else \
+		dh_gencontrol; \
+	fi
+	dh binary --after dh_gencontrol
 
 ifneq ($(USE_BUILD_DIR),TRUE)
 

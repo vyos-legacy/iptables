@@ -112,3 +112,6 @@ config.status: include/xtables.h.in
 # so add appropriate protection that it does not let `make` fail.
 install-exec-hook:
 	-/sbin/ldconfig || :;
+
+test check:
+	echo "Are we on the air? Hello, Mom!"

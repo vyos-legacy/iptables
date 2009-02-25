@@ -1,5 +1,5 @@
 BUILD_DIR := debian/build
-BUILD_DIR_TARGETS := build install patch unpatch
+BUILD_DIR_TARGETS := build install
 
 $(BUILD_DIR_TARGETS): builddir
 	$(MAKE) -f debian/rules -C $(BUILD_DIR) $@ USE_BUILD_DIR=TRUE

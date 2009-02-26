@@ -1,0 +1,3 @@
+This module takes no options, it matches packets who destination address
+matches the address of the incoming interface.
+This is regarded as experimental.

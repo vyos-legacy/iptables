@@ -1,3 +1,9 @@
+iptables (1.4.2-6+vyatta+1) unstable; urgency=low
+
+  * match debian version
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Wed, 25 Feb 2009 16:23:05 -0800
+
 iptables (1.4.2-1+vyatta+2) unstable; urgency=low
 
   [ Stephen Hemminger ]

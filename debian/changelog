@@ -1,3 +1,10 @@
+iptables (1.4.2-6+vyatta+2) unstable; urgency=low
+
+  * Need to remove files before package build
+  * Add strict end-system match extension
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Wed, 25 Feb 2009 18:12:37 -0800
+
 iptables (1.4.2-6+vyatta+1) unstable; urgency=low
 
   * match debian version

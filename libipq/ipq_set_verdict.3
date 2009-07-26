@@ -56,18 +56,13 @@ Accept the packet and continue traversal within the kernel.
 .TP
 .B NF_DROP
 Drop the packet.
-.br
 .TP
-.B NF_QUEUE
+\fBNF_QUEUE\fP
 Requeue the packet.
-.br
-.TP
-.B NF_STOLEN
-Similar to NF_DROP, but leave all located resources available.
-.br
-.TP
-.B NF_REPEAT
-Recall the hook again.
+.PP
+\fBNF_STOLEN\fP and \fBNF_REPEAT\fP are kernel-internal constants and should
+not be used from userspace as their exact side effects have not been
+investigated.
 .PP
 The
 .I data_len

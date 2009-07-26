@@ -53,10 +53,11 @@ static int __TCPMSS_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '1':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "TCPMSS target: Only one option may be specified");
-		if (string_to_number(optarg, 0, 65535 - hdrsize, &mssval) == -1)
-			exit_error(PARAMETER_PROBLEM, "Bad TCPMSS value `%s'", optarg);
+		if (!xtables_strtoui(optarg, NULL, &mssval,
+		    0, UINT16_MAX - hdrsize))
+			xtables_error(PARAMETER_PROBLEM, "Bad TCPMSS value \"%s\"", optarg);
 		
 		mssinfo->mss = mssval;
 		*flags = 1;
@@ -64,7 +65,7 @@ static int __TCPMSS_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "TCPMSS target: Only one option may be specified");
 		mssinfo->mss = XT_TCPMSS_CLAMP_PMTU;
 		*flags = 1;
@@ -92,7 +93,7 @@ static int TCPMSS_parse6(int c, char **argv, int invert, unsigned int *flags,
 static void TCPMSS_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "TCPMSS target: At least one parameter is required");
 }
 
@@ -119,7 +120,7 @@ static void TCPMSS_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target tcpmss_target = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "TCPMSS",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_tcpmss_info)),
@@ -133,7 +134,7 @@ static struct xtables_target tcpmss_target = {
 };
 
 static struct xtables_target tcpmss_target6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "TCPMSS",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_tcpmss_info)),

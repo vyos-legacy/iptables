@@ -1,0 +1,18 @@
+Author: ljlane
+Description: extraneous slash caused this lintian warning:
+  W: iptables: manpage-has-errors-from-man usr/share/man/man8/iptables.8.gz 220: cannot use newline as a starting delimiter
+
+
+Index: b/iptables.8.in
+===================================================================
+--- a/iptables.8.in	2009-03-25 16:56:36.857213399 -0400
++++ b/iptables.8.in	2009-03-25 16:57:06.740337882 -0400
+@@ -217,7 +217,7 @@
+ Rename the user specified chain to the user supplied name.  This is
+ cosmetic, and has no effect on the structure of the table.
+ .TP
+-\fB\-\h\fP
++\fB\-h\fP
+ Help.
+ Give a (currently very brief) description of the command syntax.
+ .SS PARAMETERS

@@ -48,16 +48,15 @@ parse_dscp(const char *s, struct xt_dscp_info *dinfo)
 {
 	unsigned int dscp;
        
-	if (string_to_number(s, 0, 255, &dscp) == -1)
-		exit_error(PARAMETER_PROBLEM,
+	if (!xtables_strtoui(s, NULL, &dscp, 0, UINT8_MAX))
+		xtables_error(PARAMETER_PROBLEM,
 			   "Invalid dscp `%s'\n", s);
 
 	if (dscp > XT_DSCP_MAX)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "DSCP `%d` out of range\n", dscp);
 
-    	dinfo->dscp = (u_int8_t )dscp;
-    	return;
+	dinfo->dscp = dscp;
 }
 
 
@@ -67,7 +66,7 @@ parse_class(const char *s, struct xt_dscp_info *dinfo)
 	unsigned int dscp = class_to_dscp(s);
 
 	/* Assign the value */
-	dinfo->dscp = (u_int8_t)dscp;
+	dinfo->dscp = dscp;
 }
 
 
@@ -81,9 +80,9 @@ dscp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case 'F':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "DSCP match: Only use --dscp ONCE!");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_dscp(argv[optind-1], dinfo);
 		if (invert)
 			dinfo->invert = 1;
@@ -92,9 +91,9 @@ dscp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case 'G':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 					"DSCP match: Only use --dscp-class ONCE!");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_class(argv[optind - 1], dinfo);
 		if (invert)
 			dinfo->invert = 1;
@@ -111,17 +110,8 @@ dscp_parse(int c, char **argv, int invert, unsigned int *flags,
 static void dscp_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "DSCP match: Parameter --dscp is required");
-}
-
-static void
-print_dscp(u_int8_t dscp, int invert, int numeric)
-{
-	if (invert)
-		printf("! ");
-
- 	printf("0x%02x ", dscp);
 }
 
 static void
@@ -129,8 +119,7 @@ dscp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
 	const struct xt_dscp_info *dinfo =
 		(const struct xt_dscp_info *)match->data;
-	printf("DSCP match ");
-	print_dscp(dinfo->dscp, dinfo->invert, numeric);
+	printf("DSCP match %s0x%02x", dinfo->invert ? "!" : "", dinfo->dscp);
 }
 
 static void dscp_save(const void *ip, const struct xt_entry_match *match)
@@ -138,12 +127,11 @@ static void dscp_save(const void *ip, const struct xt_entry_match *match)
 	const struct xt_dscp_info *dinfo =
 		(const struct xt_dscp_info *)match->data;
 
-	printf("--dscp ");
-	print_dscp(dinfo->dscp, dinfo->invert, 1);
+	printf("%s--dscp 0x%02x ", dinfo->invert ? "! " : "", dinfo->dscp);
 }
 
 static struct xtables_match dscp_match = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name 		= "dscp",
 	.version 	= XTABLES_VERSION,
 	.size 		= XT_ALIGN(sizeof(struct xt_dscp_info)),
@@ -157,7 +145,7 @@ static struct xtables_match dscp_match = {
 };
 
 static struct xtables_match dscp_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name 		= "dscp",
 	.version 	= XTABLES_VERSION,
 	.size 		= XT_ALIGN(sizeof(struct xt_dscp_info)),

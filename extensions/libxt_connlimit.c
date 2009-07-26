@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <getopt.h>
-#include <iptables.h>
+#include <xtables.h>
 #include <linux/netfilter/xt_connlimit.h>
 
 static void connlimit_help(void)
@@ -26,7 +26,9 @@ static const struct option connlimit_opts[] = {
 static void connlimit_init(struct xt_entry_match *match)
 {
 	struct xt_connlimit_info *info = (void *)match->data;
-	info->v4_mask = 0xFFFFFFFFUL;
+
+	/* This will also initialize the v4 mask correctly */
+	memset(info->v6_mask, 0xFF, sizeof(info->v6_mask));
 }
 
 static void prefix_to_netmask(u_int32_t *mask, unsigned int prefix_len)
@@ -60,29 +62,29 @@ static int connlimit_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case 'A':
 		if (*flags & 0x1)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				"--connlimit-above may be given only once");
 		*flags |= 0x1;
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		info->limit   = strtoul(argv[optind-1], NULL, 0);
 		info->inverse = invert;
 		break;
 	case 'M':
 		if (*flags & 0x2)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				"--connlimit-mask may be given only once");
 
 		*flags |= 0x2;
 		i = strtoul(argv[optind-1], &err, 0);
-		if (family == AF_INET6) {
+		if (family == NFPROTO_IPV6) {
 			if (i > 128 || *err != '\0')
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					"--connlimit-mask must be between "
 					"0 and 128");
 			prefix_to_netmask(info->v6_mask, i);
 		} else {
 			if (i > 32 || *err != '\0')
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					"--connlimit-mask must be between "
 					"0 and 32");
 			if (i == 0)
@@ -103,7 +105,7 @@ static int connlimit_parse4(int c, char **argv, int invert,
                             struct xt_entry_match **match)
 {
 	return connlimit_parse(c, argv, invert, flags,
-	       (void *)(*match)->data, AF_INET);
+	       (void *)(*match)->data, NFPROTO_IPV4);
 }
 
 static int connlimit_parse6(int c, char **argv, int invert,
@@ -111,13 +113,13 @@ static int connlimit_parse6(int c, char **argv, int invert,
                             struct xt_entry_match **match)
 {
 	return connlimit_parse(c, argv, invert, flags,
-	       (void *)(*match)->data, AF_INET6);
+	       (void *)(*match)->data, NFPROTO_IPV6);
 }
 
 static void connlimit_check(unsigned int flags)
 {
 	if (!(flags & 0x1))
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			"You must specify \"--connlimit-above\"");
 }
 
@@ -179,7 +181,7 @@ static void connlimit_save6(const void *ip, const struct xt_entry_match *match)
 
 static struct xtables_match connlimit_match = {
 	.name          = "connlimit",
-	.family        = AF_INET,
+	.family        = NFPROTO_IPV4,
 	.version       = XTABLES_VERSION,
 	.size          = XT_ALIGN(sizeof(struct xt_connlimit_info)),
 	.userspacesize = offsetof(struct xt_connlimit_info, data),
@@ -194,7 +196,7 @@ static struct xtables_match connlimit_match = {
 
 static struct xtables_match connlimit_match6 = {
 	.name          = "connlimit",
-	.family        = AF_INET6,
+	.family        = NFPROTO_IPV6,
 	.version       = XTABLES_VERSION,
 	.size          = XT_ALIGN(sizeof(struct xt_connlimit_info)),
 	.userspacesize = offsetof(struct xt_connlimit_info, data),

@@ -7,9 +7,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <iptables.h>
-#include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter/nf_nat.h>
+#include <xtables.h>
+#include <net/netfilter/nf_nat.h>
 
 #define MODULENAME "NETMAP"
 
@@ -54,7 +53,7 @@ netmask2bits(u_int32_t netmask)
 
 static void NETMAP_init(struct xt_entry_target *t)
 {
-	struct ip_nat_multi_range *mr = (struct ip_nat_multi_range *)t->data;
+	struct nf_nat_multi_range *mr = (struct nf_nat_multi_range *)t->data;
 
 	/* Actually, it's 0, but it's ignored at the moment. */
 	mr->rangesize = 1;
@@ -63,7 +62,7 @@ static void NETMAP_init(struct xt_entry_target *t)
 
 /* Parses network address */
 static void
-parse_to(char *arg, struct ip_nat_range *range)
+parse_to(char *arg, struct nf_nat_range *range)
 {
 	char *slash;
 	const struct in_addr *ip;
@@ -75,28 +74,28 @@ parse_to(char *arg, struct ip_nat_range *range)
 	if (slash)
 		*slash = '\0';
 
-	ip = numeric_to_ipaddr(arg);
+	ip = xtables_numeric_to_ipaddr(arg);
 	if (!ip)
-		exit_error(PARAMETER_PROBLEM, "Bad IP address `%s'\n",
+		xtables_error(PARAMETER_PROBLEM, "Bad IP address \"%s\"\n",
 			   arg);
 	range->min_ip = ip->s_addr;
 	if (slash) {
 		if (strchr(slash+1, '.')) {
-			ip = numeric_to_ipmask(slash+1);
+			ip = xtables_numeric_to_ipmask(slash+1);
 			if (!ip)
-				exit_error(PARAMETER_PROBLEM, "Bad netmask `%s'\n",
+				xtables_error(PARAMETER_PROBLEM, "Bad netmask \"%s\"\n",
 					   slash+1);
 			netmask = ip->s_addr;
 		}
 		else {
-			if (string_to_number(slash+1, 0, 32, &bits) == -1)
-				exit_error(PARAMETER_PROBLEM, "Bad netmask `%s'\n",
+			if (!xtables_strtoui(slash+1, NULL, &bits, 0, 32))
+				xtables_error(PARAMETER_PROBLEM, "Bad netmask \"%s\"\n",
 					   slash+1);
 			netmask = bits2netmask(bits);
 		}
 		/* Don't allow /0 (/1 is probably insane, too) */
 		if (netmask == 0)
-			exit_error(PARAMETER_PROBLEM, "Netmask needed\n");
+			xtables_error(PARAMETER_PROBLEM, "Netmask needed\n");
 	}
 	else
 		netmask = ~0;
@@ -104,7 +103,7 @@ parse_to(char *arg, struct ip_nat_range *range)
 	if (range->min_ip & ~netmask) {
 		if (slash)
 			*slash = '/';
-		exit_error(PARAMETER_PROBLEM, "Bad network address `%s'\n",
+		xtables_error(PARAMETER_PROBLEM, "Bad network address \"%s\"\n",
 			   arg);
 	}
 	range->max_ip = range->min_ip | ~netmask;
@@ -113,13 +112,13 @@ parse_to(char *arg, struct ip_nat_range *range)
 static int NETMAP_parse(int c, char **argv, int invert, unsigned int *flags,
                         const void *entry, struct xt_entry_target **target)
 {
-	struct ip_nat_multi_range *mr
-		= (struct ip_nat_multi_range *)(*target)->data;
+	struct nf_nat_multi_range *mr
+		= (struct nf_nat_multi_range *)(*target)->data;
 
 	switch (c) {
 	case '1':
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --%s", NETMAP_opts[0].name);
 
 		parse_to(optarg, &mr->range[0]);
@@ -134,25 +133,24 @@ static int NETMAP_parse(int c, char **argv, int invert, unsigned int *flags,
 static void NETMAP_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   MODULENAME" needs --%s", NETMAP_opts[0].name);
 }
 
 static void NETMAP_print(const void *ip, const struct xt_entry_target *target,
                          int numeric)
 {
-	struct ip_nat_multi_range *mr
-		= (struct ip_nat_multi_range *)target->data;
-	struct ip_nat_range *r = &mr->range[0];
+	const struct nf_nat_multi_range *mr = (const void *)target->data;
+	const struct nf_nat_range *r = &mr->range[0];
 	struct in_addr a;
 	int bits;
 
 	a.s_addr = r->min_ip;
-	printf("%s", ipaddr_to_numeric(&a));
+	printf("%s", xtables_ipaddr_to_numeric(&a));
 	a.s_addr = ~(r->min_ip ^ r->max_ip);
 	bits = netmask2bits(a.s_addr);
 	if (bits < 0)
-		printf("/%s", ipaddr_to_numeric(&a));
+		printf("/%s", xtables_ipaddr_to_numeric(&a));
 	else
 		printf("/%d", bits);
 }
@@ -166,9 +164,9 @@ static void NETMAP_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target netmap_tg_reg = {
 	.name		= MODULENAME,
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET,
-	.size		= XT_ALIGN(sizeof(struct ip_nat_multi_range)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ip_nat_multi_range)),
+	.family		= NFPROTO_IPV4,
+	.size		= XT_ALIGN(sizeof(struct nf_nat_multi_range)),
+	.userspacesize	= XT_ALIGN(sizeof(struct nf_nat_multi_range)),
 	.help		= NETMAP_help,
 	.init		= NETMAP_init,
 	.parse		= NETMAP_parse,

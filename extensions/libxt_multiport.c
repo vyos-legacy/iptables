@@ -8,6 +8,9 @@
 #include <xtables.h>
 #include <libiptc/libiptc.h>
 #include <libiptc/libip6tc.h>
+#include <limits.h> /* INT_MAX in ip_tables.h/ip6_tables.h */
+#include <linux/netfilter_ipv4/ip_tables.h>
+#include <linux/netfilter_ipv6/ip6_tables.h>
 #include <linux/netfilter/xt_multiport.h>
 
 /* Function which prints out usage message. */
@@ -75,15 +78,15 @@ parse_multi_ports(const char *portstring, u_int16_t *ports, const char *proto)
 	unsigned int i;
 
 	buffer = strdup(portstring);
-	if (!buffer) exit_error(OTHER_PROBLEM, "strdup failed");
+	if (!buffer) xtables_error(OTHER_PROBLEM, "strdup failed");
 
 	for (cp=buffer, i=0; cp && i<XT_MULTI_PORTS; cp=next,i++)
 	{
 		next=strchr(cp, ',');
 		if (next) *next++='\0';
-		ports[i] = parse_port(cp, proto);
+		ports[i] = xtables_parse_port(cp, proto);
 	}
-	if (cp) exit_error(PARAMETER_PROBLEM, "too many ports specified");
+	if (cp) xtables_error(PARAMETER_PROBLEM, "too many ports specified");
 	free(buffer);
 	return i;
 }
@@ -98,7 +101,7 @@ parse_multi_ports_v1(const char *portstring,
 	u_int16_t m;
 
 	buffer = strdup(portstring);
-	if (!buffer) exit_error(OTHER_PROBLEM, "strdup failed");
+	if (!buffer) xtables_error(OTHER_PROBLEM, "strdup failed");
 
 	for (i=0; i<XT_MULTI_PORTS; i++)
 		multiinfo->pflags[i] = 0;
@@ -109,22 +112,22 @@ parse_multi_ports_v1(const char *portstring,
 		range = strchr(cp, ':');
 		if (range) {
 			if (i == XT_MULTI_PORTS-1)
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "too many ports specified");
 			*range++ = '\0';
 		}
-		multiinfo->ports[i] = parse_port(cp, proto);
+		multiinfo->ports[i] = xtables_parse_port(cp, proto);
 		if (range) {
 			multiinfo->pflags[i] = 1;
-			multiinfo->ports[++i] = parse_port(range, proto);
+			multiinfo->ports[++i] = xtables_parse_port(range, proto);
 			if (multiinfo->ports[i-1] >= multiinfo->ports[i])
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "invalid portrange specified");
 			m <<= 1;
 		}
  	}
 	multiinfo->count = i;
- 	if (cp) exit_error(PARAMETER_PROBLEM, "too many ports specified");
+	if (cp) xtables_error(PARAMETER_PROBLEM, "too many ports specified");
  	free(buffer);
 }
 
@@ -134,17 +137,17 @@ check_proto(u_int16_t pnum, u_int8_t invflags)
 	char *proto;
 
 	if (invflags & XT_INV_PROTO)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "multiport only works with TCP, UDP, UDPLITE, SCTP and DCCP");
 
 	if ((proto = proto_to_name(pnum)) != NULL)
 		return proto;
 	else if (!pnum)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "multiport needs `-p tcp', `-p udp', `-p udplite', "
 			   "`-p sctp' or `-p dccp'");
 	else
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "multiport only works with TCP, UDP, UDPLITE, SCTP and DCCP");
 }
 
@@ -161,7 +164,7 @@ __multiport_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		check_inverse(argv[optind-1], &invert, &optind, 0);
+		xtables_check_inverse(argv[optind-1], &invert, &optind, 0);
 		proto = check_proto(pnum, invflags);
 		multiinfo->count = parse_multi_ports(argv[optind-1],
 						     multiinfo->ports, proto);
@@ -169,7 +172,7 @@ __multiport_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '2':
-		check_inverse(argv[optind-1], &invert, &optind, 0);
+		xtables_check_inverse(argv[optind-1], &invert, &optind, 0);
 		proto = check_proto(pnum, invflags);
 		multiinfo->count = parse_multi_ports(argv[optind-1],
 						     multiinfo->ports, proto);
@@ -177,7 +180,7 @@ __multiport_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '3':
-		check_inverse(argv[optind-1], &invert, &optind, 0);
+		xtables_check_inverse(argv[optind-1], &invert, &optind, 0);
 		proto = check_proto(pnum, invflags);
 		multiinfo->count = parse_multi_ports(argv[optind-1],
 						     multiinfo->ports, proto);
@@ -189,11 +192,11 @@ __multiport_parse(int c, char **argv, int invert, unsigned int *flags,
 	}
 
 	if (invert)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "multiport does not support invert");
 
 	if (*flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "multiport can only have one option");
 	*flags = 1;
 	return 1;
@@ -212,7 +215,7 @@ static int
 multiport_parse6(int c, char **argv, int invert, unsigned int *flags,
                  const void *e, struct xt_entry_match **match)
 {
-	const struct ip6t_entry *entry = (const struct ip6t_entry *)e;
+	const struct ip6t_entry *entry = e;
 	return __multiport_parse(c, argv, invert, flags, match,
 	       entry->ipv6.proto, entry->ipv6.invflags);
 }
@@ -228,21 +231,21 @@ __multiport_parse_v1(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		check_inverse(argv[optind-1], &invert, &optind, 0);
+		xtables_check_inverse(argv[optind-1], &invert, &optind, 0);
 		proto = check_proto(pnum, invflags);
 		parse_multi_ports_v1(argv[optind-1], multiinfo, proto);
 		multiinfo->flags = XT_MULTIPORT_SOURCE;
 		break;
 
 	case '2':
-		check_inverse(argv[optind-1], &invert, &optind, 0);
+		xtables_check_inverse(argv[optind-1], &invert, &optind, 0);
 		proto = check_proto(pnum, invflags);
 		parse_multi_ports_v1(argv[optind-1], multiinfo, proto);
 		multiinfo->flags = XT_MULTIPORT_DESTINATION;
 		break;
 
 	case '3':
-		check_inverse(argv[optind-1], &invert, &optind, 0);
+		xtables_check_inverse(argv[optind-1], &invert, &optind, 0);
 		proto = check_proto(pnum, invflags);
 		parse_multi_ports_v1(argv[optind-1], multiinfo, proto);
 		multiinfo->flags = XT_MULTIPORT_EITHER;
@@ -256,7 +259,7 @@ __multiport_parse_v1(int c, char **argv, int invert, unsigned int *flags,
 		multiinfo->invert = 1;
 
 	if (*flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "multiport can only have one option");
 	*flags = 1;
 	return 1;
@@ -275,7 +278,7 @@ static int
 multiport_parse6_v1(int c, char **argv, int invert, unsigned int *flags,
                     const void *e, struct xt_entry_match **match)
 {
-	const struct ip6t_entry *entry = (const struct ip6t_entry *)e;
+	const struct ip6t_entry *entry = e;
 	return __multiport_parse_v1(c, argv, invert, flags, match,
 	       entry->ipv6.proto, entry->ipv6.invflags);
 }
@@ -284,7 +287,7 @@ multiport_parse6_v1(int c, char **argv, int invert, unsigned int *flags,
 static void multiport_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM, "multiport expection an option");
+		xtables_error(PARAMETER_PROBLEM, "multiport expection an option");
 }
 
 static char *
@@ -355,7 +358,7 @@ static void multiport_print(const void *ip_void,
 static void multiport_print6(const void *ip_void,
                              const struct xt_entry_match *match, int numeric)
 {
-	const struct ip6t_ip6 *ip = (const struct ip6t_ip6 *)ip_void;
+	const struct ip6t_ip6 *ip = ip_void;
 	__multiport_print(match, numeric, ip->proto);
 }
 
@@ -410,7 +413,7 @@ static void multiport_print_v1(const void *ip_void,
 static void multiport_print6_v1(const void *ip_void,
                                 const struct xt_entry_match *match, int numeric)
 {
-	const struct ip6t_ip6 *ip = (const struct ip6t_ip6 *)ip_void;
+	const struct ip6t_ip6 *ip = ip_void;
 	__multiport_print_v1(match, numeric, ip->proto);
 }
 
@@ -453,7 +456,7 @@ static void multiport_save(const void *ip_void,
 static void multiport_save6(const void *ip_void,
                             const struct xt_entry_match *match)
 {
-	const struct ip6t_ip6 *ip = (const struct ip6t_ip6 *)ip_void;
+	const struct ip6t_ip6 *ip = ip_void;
 	__multiport_save(match, ip->proto);
 }
 
@@ -463,6 +466,9 @@ static void __multiport_save_v1(const struct xt_entry_match *match,
 	const struct xt_multiport_v1 *multiinfo
 		= (const struct xt_multiport_v1 *)match->data;
 	unsigned int i;
+
+	if (multiinfo->invert)
+		printf("! ");
 
 	switch (multiinfo->flags) {
 	case XT_MULTIPORT_SOURCE:
@@ -477,9 +483,6 @@ static void __multiport_save_v1(const struct xt_entry_match *match,
 		printf("--ports ");
 		break;
 	}
-
-	if (multiinfo->invert)
-		printf("! ");
 
 	for (i=0; i < multiinfo->count; i++) {
 		printf("%s", i ? "," : "");
@@ -502,12 +505,12 @@ static void multiport_save_v1(const void *ip_void,
 static void multiport_save6_v1(const void *ip_void,
                                const struct xt_entry_match *match)
 {
-	const struct ip6t_ip6 *ip = (const struct ip6t_ip6 *)ip_void;
+	const struct ip6t_ip6 *ip = ip_void;
 	__multiport_save_v1(match, ip->proto);
 }
 
 static struct xtables_match multiport_match = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "multiport",
 	.revision	= 0,
 	.version	= XTABLES_VERSION,
@@ -522,7 +525,7 @@ static struct xtables_match multiport_match = {
 };
 
 static struct xtables_match multiport_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "multiport",
 	.revision	= 0,
 	.version	= XTABLES_VERSION,
@@ -537,7 +540,7 @@ static struct xtables_match multiport_match6 = {
 };
 
 static struct xtables_match multiport_match_v1 = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "multiport",
 	.version	= XTABLES_VERSION,
 	.revision	= 1,
@@ -552,7 +555,7 @@ static struct xtables_match multiport_match_v1 = {
 };
 
 static struct xtables_match multiport_match6_v1 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "multiport",
 	.version	= XTABLES_VERSION,
 	.revision	= 1,

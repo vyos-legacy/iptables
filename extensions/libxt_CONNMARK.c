@@ -90,8 +90,8 @@ static void connmark_tg_init(struct xt_entry_target *target)
 	 * Need these defaults for --save-mark/--restore-mark if no
 	 * --ctmark or --nfmask is given.
 	 */
-	info->ctmask = ~0U;
-	info->nfmask = ~0U;
+	info->ctmask = UINT32_MAX;
+	info->nfmask = UINT32_MAX;
 }
 
 static int
@@ -111,34 +111,34 @@ CONNMARK_parse(int c, char **argv, int invert, unsigned int *flags,
 		    markinfo->mask = strtoul(end+1, &end, 0);
 
 		if (*end != '\0' || end == optarg)
-			exit_error(PARAMETER_PROBLEM, "Bad MARK value `%s'", optarg);
+			xtables_error(PARAMETER_PROBLEM, "Bad MARK value \"%s\"", optarg);
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "CONNMARK target: Can't specify --set-mark twice");
 		*flags = 1;
 		break;
 	case '2':
 		markinfo->mode = XT_CONNMARK_SAVE;
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "CONNMARK target: Can't specify --save-mark twice");
 		*flags = 1;
 		break;
 	case '3':
 		markinfo->mode = XT_CONNMARK_RESTORE;
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "CONNMARK target: Can't specify --restore-mark twice");
 		*flags = 1;
 		break;
 	case '4':
 		if (!*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "CONNMARK target: Can't specify --mask without a operation");
 		markinfo->mask = strtoul(optarg, &end, 0);
 
 		if (*end != '\0' || end == optarg)
-			exit_error(PARAMETER_PROBLEM, "Bad MASK value `%s'", optarg);
+			xtables_error(PARAMETER_PROBLEM, "Bad MASK value \"%s\"", optarg);
 		break;
 	default:
 		return 0;
@@ -152,20 +152,20 @@ static int connmark_tg_parse(int c, char **argv, int invert,
                              struct xt_entry_target **target)
 {
 	struct xt_connmark_tginfo1 *info = (void *)(*target)->data;
-	unsigned int value, mask = ~0U;
+	unsigned int value, mask = UINT32_MAX;
 	char *end;
 
 	switch (c) {
 	case '=': /* --set-xmark */
 	case '-': /* --set-mark */
-		param_act(P_ONE_ACTION, "CONNMARK", *flags & F_MARK);
-		if (!strtonum(optarg, &end, &value, 0, ~0U))
-			param_act(P_BAD_VALUE, "CONNMARK", "--set-xmark/--set-mark", optarg);
+		xtables_param_act(XTF_ONE_ACTION, "CONNMARK", *flags & F_MARK);
+		if (!xtables_strtoui(optarg, &end, &value, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--set-xmark/--set-mark", optarg);
 		if (*end == '/')
-			if (!strtonum(end + 1, &end, &mask, 0, ~0U))
-				param_act(P_BAD_VALUE, "CONNMARK", "--set-xmark/--set-mark", optarg);
+			if (!xtables_strtoui(end + 1, &end, &mask, 0, UINT32_MAX))
+				xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--set-xmark/--set-mark", optarg);
 		if (*end != '\0')
-			param_act(P_BAD_VALUE, "CONNMARK", "--set-xmark/--set-mark", optarg);
+			xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--set-xmark/--set-mark", optarg);
 		info->mode   = XT_CONNMARK_SET;
 		info->ctmark = value;
 		info->ctmask = mask;
@@ -175,9 +175,9 @@ static int connmark_tg_parse(int c, char **argv, int invert,
 		return true;
 
 	case '&': /* --and-mark */
-		param_act(P_ONE_ACTION, "CONNMARK", *flags & F_MARK);
-		if (!strtonum(optarg, NULL, &mask, 0, ~0U))
-			param_act(P_BAD_VALUE, "CONNMARK", "--and-mark", optarg);
+		xtables_param_act(XTF_ONE_ACTION, "CONNMARK", *flags & F_MARK);
+		if (!xtables_strtoui(optarg, NULL, &mask, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--and-mark", optarg);
 		info->mode   = XT_CONNMARK_SET;
 		info->ctmark = 0;
 		info->ctmask = ~mask;
@@ -185,9 +185,9 @@ static int connmark_tg_parse(int c, char **argv, int invert,
 		return true;
 
 	case '|': /* --or-mark */
-		param_act(P_ONE_ACTION, "CONNMARK", *flags & F_MARK);
-		if (!strtonum(optarg, NULL, &value, 0, ~0U))
-			param_act(P_BAD_VALUE, "CONNMARK", "--or-mark", optarg);
+		xtables_param_act(XTF_ONE_ACTION, "CONNMARK", *flags & F_MARK);
+		if (!xtables_strtoui(optarg, NULL, &value, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--or-mark", optarg);
 		info->mode   = XT_CONNMARK_SET;
 		info->ctmark = value;
 		info->ctmask = value;
@@ -195,9 +195,9 @@ static int connmark_tg_parse(int c, char **argv, int invert,
 		return true;
 
 	case '^': /* --xor-mark */
-		param_act(P_ONE_ACTION, "CONNMARK", *flags & F_MARK);
-		if (!strtonum(optarg, NULL, &value, 0, ~0U))
-			param_act(P_BAD_VALUE, "CONNMARK", "--xor-mark", optarg);
+		xtables_param_act(XTF_ONE_ACTION, "CONNMARK", *flags & F_MARK);
+		if (!xtables_strtoui(optarg, NULL, &value, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--xor-mark", optarg);
 		info->mode   = XT_CONNMARK_SET;
 		info->ctmark = value;
 		info->ctmask = 0;
@@ -205,44 +205,44 @@ static int connmark_tg_parse(int c, char **argv, int invert,
 		return true;
 
 	case 'S': /* --save-mark */
-		param_act(P_ONE_ACTION, "CONNMARK", *flags & F_MARK);
+		xtables_param_act(XTF_ONE_ACTION, "CONNMARK", *flags & F_MARK);
 		info->mode = XT_CONNMARK_SAVE;
 		*flags |= F_MARK | F_SR_MARK;
 		return true;
 
 	case 'R': /* --restore-mark */
-		param_act(P_ONE_ACTION, "CONNMARK", *flags & F_MARK);
+		xtables_param_act(XTF_ONE_ACTION, "CONNMARK", *flags & F_MARK);
 		info->mode = XT_CONNMARK_RESTORE;
 		*flags |= F_MARK | F_SR_MARK;
 		return true;
 
 	case 'n': /* --nfmask */
 		if (!(*flags & F_SR_MARK))
-			exit_error(PARAMETER_PROBLEM, "CONNMARK: --save-mark "
+			xtables_error(PARAMETER_PROBLEM, "CONNMARK: --save-mark "
 			           "or --restore-mark is required for "
 			           "--nfmask");
-		if (!strtonum(optarg, NULL, &value, 0, ~0U))
-			param_act(P_BAD_VALUE, "CONNMARK", "--nfmask", optarg);
+		if (!xtables_strtoui(optarg, NULL, &value, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--nfmask", optarg);
 		info->nfmask = value;
 		return true;
 
 	case 'c': /* --ctmask */
 		if (!(*flags & F_SR_MARK))
-			exit_error(PARAMETER_PROBLEM, "CONNMARK: --save-mark "
+			xtables_error(PARAMETER_PROBLEM, "CONNMARK: --save-mark "
 			           "or --restore-mark is required for "
 			           "--ctmask");
-		if (!strtonum(optarg, NULL, &value, 0, ~0U))
-			param_act(P_BAD_VALUE, "CONNMARK", "--ctmask", optarg);
+		if (!xtables_strtoui(optarg, NULL, &value, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--ctmask", optarg);
 		info->ctmask = value;
 		return true;
 
 	case 'm': /* --mask */
 		if (!(*flags & F_SR_MARK))
-			exit_error(PARAMETER_PROBLEM, "CONNMARK: --save-mark "
+			xtables_error(PARAMETER_PROBLEM, "CONNMARK: --save-mark "
 			           "or --restore-mark is required for "
 			           "--mask");
-		if (!strtonum(optarg, NULL, &value, 0, ~0U))
-			param_act(P_BAD_VALUE, "CONNMARK", "--mask", optarg);
+		if (!xtables_strtoui(optarg, NULL, &value, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "CONNMARK", "--mask", optarg);
 		info->nfmask = info->ctmask = value;
 		return true;
 	}
@@ -253,7 +253,7 @@ static int connmark_tg_parse(int c, char **argv, int invert,
 static void connmark_tg_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "CONNMARK target: No operation specified");
 }
 
@@ -317,7 +317,7 @@ connmark_tg_print(const void *ip, const struct xt_entry_target *target,
 			       info->ctmark, info->ctmask);
 		break;
 	case XT_CONNMARK_SAVE:
-		if (info->nfmask == ~0U && info->ctmask == ~0U)
+		if (info->nfmask == UINT32_MAX && info->ctmask == UINT32_MAX)
 			printf("CONNMARK save ");
 		else if (info->nfmask == info->ctmask)
 			printf("CONNMARK save mask 0x%x ", info->nfmask);
@@ -326,7 +326,7 @@ connmark_tg_print(const void *ip, const struct xt_entry_target *target,
 			       info->nfmask, info->ctmask);
 		break;
 	case XT_CONNMARK_RESTORE:
-		if (info->ctmask == ~0U && info->nfmask == ~0U)
+		if (info->ctmask == UINT32_MAX && info->nfmask == UINT32_MAX)
 			printf("CONNMARK restore ");
 		else if (info->ctmask == info->nfmask)
 			printf("CONNMARK restore mask 0x%x ", info->ctmask);
@@ -399,7 +399,7 @@ connmark_tg_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target connmark_target = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "CONNMARK",
 	.revision	= 0,
 	.version	= XTABLES_VERSION,
@@ -415,7 +415,7 @@ static struct xtables_target connmark_target = {
 };
 
 static struct xtables_target connmark_target6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "CONNMARK",
 	.revision	= 0,
 	.version	= XTABLES_VERSION,
@@ -434,7 +434,7 @@ static struct xtables_target connmark_tg_reg = {
 	.version        = XTABLES_VERSION,
 	.name           = "CONNMARK",
 	.revision       = 1,
-	.family         = AF_INET,
+	.family         = NFPROTO_IPV4,
 	.size           = XT_ALIGN(sizeof(struct xt_connmark_tginfo1)),
 	.userspacesize  = XT_ALIGN(sizeof(struct xt_connmark_tginfo1)),
 	.help           = connmark_tg_help,
@@ -450,7 +450,7 @@ static struct xtables_target connmark_tg6_reg = {
 	.version        = XTABLES_VERSION,
 	.name           = "CONNMARK",
 	.revision       = 1,
-	.family         = AF_INET6,
+	.family         = NFPROTO_IPV6,
 	.size           = XT_ALIGN(sizeof(struct xt_connmark_tginfo1)),
 	.userspacesize  = XT_ALIGN(sizeof(struct xt_connmark_tginfo1)),
 	.help           = connmark_tg_help,

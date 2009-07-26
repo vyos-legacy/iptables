@@ -1,11 +1,14 @@
+Author: ljlane
+Descripton: Add test and check targets to make /usr/bin/dh happy.
+
 Index: b/Makefile.am
 ===================================================================
---- a/Makefile.am	2009-01-19 13:47:16.364543604 -0500
-+++ b/Makefile.am	2009-01-19 13:51:05.854572498 -0500
-@@ -112,3 +112,6 @@
- # so add appropriate protection that it does not let `make` fail.
+--- a/Makefile.am	2009-04-06 14:36:50.302284885 -0400
++++ b/Makefile.am	2009-04-06 14:36:55.451284922 -0400
+@@ -123,3 +123,6 @@
+ # Using if..fi avoids an ugly "error (ignored)" message :)
  install-exec-hook:
- 	-/sbin/ldconfig || :;
+ 	-if test -z "${DESTDIR}"; then /sbin/ldconfig; fi;
 +
 +test check:
 +	echo "Are we on the air? Hello, Mom!"

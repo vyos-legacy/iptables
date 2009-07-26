@@ -26,10 +26,10 @@ parse_length(const char *s)
 {
 	unsigned int len;
 	
-	if (string_to_number(s, 0, 0xFFFF, &len) == -1)
-		exit_error(PARAMETER_PROBLEM, "length invalid: `%s'\n", s);
+	if (!xtables_strtoui(s, NULL, &len, 0, UINT32_MAX))
+		xtables_error(PARAMETER_PROBLEM, "length invalid: \"%s\"\n", s);
 	else
-		return (u_int16_t )len;
+		return len;
 }
 
 /* If a single value is provided, min and max are both set to the value */
@@ -52,7 +52,7 @@ parse_lengths(const char *s, struct xt_length_info *info)
 	free(buffer);
 	
 	if (info->min > info->max)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "length min. range value `%u' greater than max. "
 		           "range value `%u'", info->min, info->max);
 	
@@ -67,10 +67,10 @@ length_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 		case '1':
 			if (*flags)
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 				           "length: `--length' may only be "
 				           "specified once");
-			check_inverse(optarg, &invert, &optind, 0);
+			xtables_check_inverse(optarg, &invert, &optind, 0);
 			parse_lengths(argv[optind-1], info);
 			if (invert)
 				info->invert = 1;
@@ -86,37 +86,35 @@ length_parse(int c, char **argv, int invert, unsigned int *flags,
 static void length_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "length: You must specify `--length'");
-}
-
-static void
-print_length(struct xt_length_info *info)
-{
-	if (info->invert)
-		printf("! ");
-	
-	if (info->max == info->min)
-		printf("%u ", info->min);
-	else
-		printf("%u:%u ", info->min, info->max);
 }
 
 static void
 length_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	printf("length ");
-	print_length((struct xt_length_info *)match->data);
+	const struct xt_length_info *info = (void *)match->data;
+
+	printf("length %s", info->invert ? "!" : "");
+	if (info->min == info->max)
+		printf("%u ", info->min);
+	else
+		printf("%u:%u ", info->min, info->max);
 }
 
 static void length_save(const void *ip, const struct xt_entry_match *match)
 {
-	printf("--length ");
-	print_length((struct xt_length_info *)match->data);
+	const struct xt_length_info *info = (void *)match->data;
+
+	printf("%s--length ", info->invert ? "! " : "");
+	if (info->min == info->max)
+		printf("%u ", info->min);
+	else
+		printf("%u:%u ", info->min, info->max);
 }
 
 static struct xtables_match length_match = {
-	.family		= AF_UNSPEC,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "length",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_length_info)),

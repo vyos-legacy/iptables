@@ -29,19 +29,19 @@ static int mark_mt_parse(int c, char **argv, int invert, unsigned int *flags,
                          const void *entry, struct xt_entry_match **match)
 {
 	struct xt_mark_mtinfo1 *info = (void *)(*match)->data;
-	unsigned int mark, mask = ~0U;
+	unsigned int mark, mask = UINT32_MAX;
 	char *end;
 
 	switch (c) {
 	case '1': /* --mark */
-		param_act(P_ONLY_ONCE, "mark", "--mark", *flags & F_MARK);
-		if (!strtonum(optarg, &end, &mark, 0, ~0U))
-			param_act(P_BAD_VALUE, "mark", "--mark", optarg);
+		xtables_param_act(XTF_ONLY_ONCE, "mark", "--mark", *flags & F_MARK);
+		if (!xtables_strtoui(optarg, &end, &mark, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "mark", "--mark", optarg);
 		if (*end == '/')
-			if (!strtonum(end + 1, &end, &mask, 0, ~0U))
-				param_act(P_BAD_VALUE, "mark", "--mark", optarg);
+			if (!xtables_strtoui(end + 1, &end, &mask, 0, UINT32_MAX))
+				xtables_param_act(XTF_BAD_VALUE, "mark", "--mark", optarg);
 		if (*end != '\0')
-			param_act(P_BAD_VALUE, "mark", "--mark", optarg);
+			xtables_param_act(XTF_BAD_VALUE, "mark", "--mark", optarg);
 
 		if (invert)
 			info->invert = true;
@@ -53,8 +53,6 @@ static int mark_mt_parse(int c, char **argv, int invert, unsigned int *flags,
 	return false;
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 mark_parse(int c, char **argv, int invert, unsigned int *flags,
            const void *entry, struct xt_entry_match **match)
@@ -64,14 +62,14 @@ mark_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 		char *end;
 	case '1':
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		markinfo->mark = strtoul(optarg, &end, 0);
 		if (*end == '/') {
 			markinfo->mask = strtoul(end+1, &end, 0);
 		} else
 			markinfo->mask = 0xffffffff;
 		if (*end != '\0' || end == optarg)
-			exit_error(PARAMETER_PROBLEM, "Bad MARK value `%s'", optarg);
+			xtables_error(PARAMETER_PROBLEM, "Bad MARK value \"%s\"", optarg);
 		if (invert)
 			markinfo->invert = 1;
 		*flags = 1;
@@ -94,7 +92,7 @@ static void print_mark(unsigned int mark, unsigned int mask)
 static void mark_mt_check(unsigned int flags)
 {
 	if (flags == 0)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "mark match: The --mark option is required");
 }
 
@@ -109,11 +107,10 @@ mark_mt_print(const void *ip, const struct xt_entry_match *match, int numeric)
 	print_mark(info->mark, info->mask);
 }
 
-/* Prints out the matchinfo. */
 static void
 mark_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct xt_mark_info *info = (struct xt_mark_info *)match->data;
+	const struct xt_mark_info *info = (const void *)match->data;
 
 	printf("MARK match ");
 
@@ -128,17 +125,16 @@ static void mark_mt_save(const void *ip, const struct xt_entry_match *match)
 	const struct xt_mark_mtinfo1 *info = (const void *)match->data;
 
 	if (info->invert)
-		printf("!");
+		printf("! ");
 
 	printf("--mark ");
 	print_mark(info->mark, info->mask);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void
 mark_save(const void *ip, const struct xt_entry_match *match)
 {
-	struct xt_mark_info *info = (struct xt_mark_info *)match->data;
+	const struct xt_mark_info *info = (const void *)match->data;
 
 	if (info->invert)
 		printf("! ");
@@ -148,7 +144,7 @@ mark_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match mark_match = {
-	.family		= AF_UNSPEC,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "mark",
 	.revision	= 0,
 	.version	= XTABLES_VERSION,
@@ -166,7 +162,7 @@ static struct xtables_match mark_mt_reg = {
 	.version        = XTABLES_VERSION,
 	.name           = "mark",
 	.revision       = 1,
-	.family         = AF_UNSPEC,
+	.family         = NFPROTO_UNSPEC,
 	.size           = XT_ALIGN(sizeof(struct xt_mark_mtinfo1)),
 	.userspacesize  = XT_ALIGN(sizeof(struct xt_mark_mtinfo1)),
 	.help           = mark_mt_help,

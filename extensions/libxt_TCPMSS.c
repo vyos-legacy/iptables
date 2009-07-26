@@ -16,7 +16,6 @@ struct mssinfo {
 	struct xt_tcpmss_info mss;
 };
 
-/* Function which prints out usage message. */
 static void __TCPMSS_help(int hdrsize)
 {
 	printf(
@@ -42,8 +41,6 @@ static const struct option TCPMSS_opts[] = {
 	{ .name = NULL }
 };
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int __TCPMSS_parse(int c, char **argv, int invert, unsigned int *flags,
                           const void *entry, struct xt_entry_target **target,
                           int hdrsize)
@@ -56,10 +53,11 @@ static int __TCPMSS_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '1':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "TCPMSS target: Only one option may be specified");
-		if (string_to_number(optarg, 0, 65535 - hdrsize, &mssval) == -1)
-			exit_error(PARAMETER_PROBLEM, "Bad TCPMSS value `%s'", optarg);
+		if (!xtables_strtoui(optarg, NULL, &mssval,
+		    0, UINT16_MAX - hdrsize))
+			xtables_error(PARAMETER_PROBLEM, "Bad TCPMSS value \"%s\"", optarg);
 		
 		mssinfo->mss = mssval;
 		*flags = 1;
@@ -67,7 +65,7 @@ static int __TCPMSS_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "TCPMSS target: Only one option may be specified");
 		mssinfo->mss = XT_TCPMSS_CLAMP_PMTU;
 		*flags = 1;
@@ -95,11 +93,10 @@ static int TCPMSS_parse6(int c, char **argv, int invert, unsigned int *flags,
 static void TCPMSS_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "TCPMSS target: At least one parameter is required");
 }
 
-/* Prints out the targinfo. */
 static void TCPMSS_print(const void *ip, const struct xt_entry_target *target,
                          int numeric)
 {
@@ -111,7 +108,6 @@ static void TCPMSS_print(const void *ip, const struct xt_entry_target *target,
 		printf("TCPMSS set %u ", mssinfo->mss);
 }
 
-/* Saves the union ipt_targinfo in parsable form to stdout. */
 static void TCPMSS_save(const void *ip, const struct xt_entry_target *target)
 {
 	const struct xt_tcpmss_info *mssinfo =
@@ -124,7 +120,7 @@ static void TCPMSS_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target tcpmss_target = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "TCPMSS",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_tcpmss_info)),
@@ -138,7 +134,7 @@ static struct xtables_target tcpmss_target = {
 };
 
 static struct xtables_target tcpmss_target6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "TCPMSS",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_tcpmss_info)),

@@ -4,18 +4,18 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <netinet/in.h>
 #include <xtables.h>
 #include <linux/netfilter/xt_tcpudp.h>
 
-/* Function which prints out usage message. */
 static void udp_help(void)
 {
 	printf(
 "udp match options:\n"
-" --source-port [!] port[:port]\n"
+"[!] --source-port port[:port]\n"
 " --sport ...\n"
 "				match source port(s)\n"
-" --destination-port [!] port[:port]\n"
+"[!] --destination-port port[:port]\n"
 " --dport ...\n"
 "				match destination port(s)\n");
 }
@@ -36,22 +36,21 @@ parse_udp_ports(const char *portstring, u_int16_t *ports)
 
 	buffer = strdup(portstring);
 	if ((cp = strchr(buffer, ':')) == NULL)
-		ports[0] = ports[1] = parse_port(buffer, "udp");
+		ports[0] = ports[1] = xtables_parse_port(buffer, "udp");
 	else {
 		*cp = '\0';
 		cp++;
 
-		ports[0] = buffer[0] ? parse_port(buffer, "udp") : 0;
-		ports[1] = cp[0] ? parse_port(cp, "udp") : 0xFFFF;
+		ports[0] = buffer[0] ? xtables_parse_port(buffer, "udp") : 0;
+		ports[1] = cp[0] ? xtables_parse_port(cp, "udp") : 0xFFFF;
 
 		if (ports[0] > ports[1])
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "invalid portrange (min > max)");
 	}
 	free(buffer);
 }
 
-/* Initialize the match. */
 static void udp_init(struct xt_entry_match *m)
 {
 	struct xt_udp *udpinfo = (struct xt_udp *)m->data;
@@ -62,8 +61,6 @@ static void udp_init(struct xt_entry_match *m)
 #define UDP_SRC_PORTS 0x01
 #define UDP_DST_PORTS 0x02
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 udp_parse(int c, char **argv, int invert, unsigned int *flags,
           const void *entry, struct xt_entry_match **match)
@@ -73,9 +70,9 @@ udp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & UDP_SRC_PORTS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--source-port' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_udp_ports(argv[optind-1], udpinfo->spts);
 		if (invert)
 			udpinfo->invflags |= XT_UDP_INV_SRCPT;
@@ -84,9 +81,9 @@ udp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & UDP_DST_PORTS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--destination-port' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_udp_ports(argv[optind-1], udpinfo->dpts);
 		if (invert)
 			udpinfo->invflags |= XT_UDP_INV_DSTPT;
@@ -143,7 +140,6 @@ print_ports(const char *name, u_int16_t min, u_int16_t max,
 	}
 }
 
-/* Prints out the union ipt_matchinfo. */
 static void
 udp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
@@ -161,7 +157,6 @@ udp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 		       udp->invflags & ~XT_UDP_INV_MASK);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void udp_save(const void *ip, const struct xt_entry_match *match)
 {
 	const struct xt_udp *udpinfo = (struct xt_udp *)match->data;
@@ -196,7 +191,7 @@ static void udp_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match udp_match = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "udp",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_udp)),
@@ -210,7 +205,7 @@ static struct xtables_match udp_match = {
 };
 
 static struct xtables_match udp_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "udp",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_udp)),

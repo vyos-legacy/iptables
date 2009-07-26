@@ -1,0 +1,16 @@
+Author: ljlane
+Description: esacped apostrophes in man page for this lintian warning:
+  W: iptables: manpage-has-errors-from-man usr/share/man/man8/ip6tables.8.gz 1823: warning: `precedence'' not defined
+
+
+Index: b/extensions/libxt_TOS.man
+===================================================================
+--- a/extensions/libxt_TOS.man	2009-03-25 16:50:32.801338397 -0400
++++ b/extensions/libxt_TOS.man	2009-03-25 16:50:45.886316101 -0400
+@@ -1,5 +1,5 @@
+ This module sets the Type of Service field in the IPv4 header (including the
+-'precedence' bits) or the Priority field in the IPv6 header. Note that TOS
++\'precedence\' bits) or the Priority field in the IPv6 header. Note that TOS
+ shares the same bits as DSCP and ECN. The TOS target is only valid in the
+ \fBmangle\fR table.
+ .TP

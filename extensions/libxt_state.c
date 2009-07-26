@@ -12,7 +12,6 @@
 #define XT_STATE_UNTRACKED (1 << (IP_CT_NUMBER + 1))
 #endif
 
-/* Function which prints out usage message. */
 static void
 state_help(void)
 {
@@ -52,16 +51,17 @@ state_parse_states(const char *arg, struct xt_state_info *sinfo)
 
 	while ((comma = strchr(arg, ',')) != NULL) {
 		if (comma == arg || !state_parse_state(arg, comma-arg, sinfo))
-			exit_error(PARAMETER_PROBLEM, "Bad state `%s'", arg);
+			xtables_error(PARAMETER_PROBLEM, "Bad state \"%s\"", arg);
 		arg = comma+1;
 	}
-
+	if (!*arg)
+		xtables_error(PARAMETER_PROBLEM, "\"--state\" requires a list of "
+					      "states with no spaces, e.g. "
+					      "ESTABLISHED,RELATED");
 	if (strlen(arg) == 0 || !state_parse_state(arg, strlen(arg), sinfo))
-		exit_error(PARAMETER_PROBLEM, "Bad state `%s'", arg);
+		xtables_error(PARAMETER_PROBLEM, "Bad state \"%s\"", arg);
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 state_parse(int c, char **argv, int invert, unsigned int *flags,
       const void *entry,
@@ -71,7 +71,7 @@ state_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 
 		state_parse_states(argv[optind-1], sinfo);
 		if (invert)
@@ -86,11 +86,10 @@ state_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 1;
 }
 
-/* Final check; must have specified --state. */
 static void state_final_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM, "You must specify `--state'");
+		xtables_error(PARAMETER_PROBLEM, "You must specify \"--state\"");
 }
 
 static void state_print_state(unsigned int statemask)
@@ -120,29 +119,27 @@ static void state_print_state(unsigned int statemask)
 	printf(" ");
 }
 
-/* Prints out the matchinfo. */
 static void
 state_print(const void *ip,
       const struct xt_entry_match *match,
       int numeric)
 {
-	struct xt_state_info *sinfo = (struct xt_state_info *)match->data;
+	const struct xt_state_info *sinfo = (const void *)match->data;
 
 	printf("state ");
 	state_print_state(sinfo->statemask);
 }
 
-/* Saves the matchinfo in parsable form to stdout. */
 static void state_save(const void *ip, const struct xt_entry_match *match)
 {
-	struct xt_state_info *sinfo = (struct xt_state_info *)match->data;
+	const struct xt_state_info *sinfo = (const void *)match->data;
 
 	printf("--state ");
 	state_print_state(sinfo->statemask);
 }
 
 static struct xtables_match state_match = { 
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "state",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_state_info)),
@@ -156,7 +153,7 @@ static struct xtables_match state_match = {
 };
 
 static struct xtables_match state_match6 = { 
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "state",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_state_info)),

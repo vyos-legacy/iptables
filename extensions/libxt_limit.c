@@ -1,7 +1,7 @@
 /* Shared library add-on to iptables to add limit support.
  *
- * Jérôme de Vivie   <devivie@info.enserb.u-bordeaux.fr>
- * Hervé Eychenne    <rv@wallfire.org>
+ * JÃ©rÃ´me de Vivie   <devivie@info.enserb.u-bordeaux.fr>
+ * HervÃ© Eychenne    <rv@wallfire.org>
  */
 
 #include <stdio.h>
@@ -12,12 +12,11 @@
 #include <stddef.h>
 #include <linux/netfilter/x_tables.h>
 /* For 64bit kernel / 32bit userspace */
-#include "../include/linux/netfilter/xt_limit.h"
+#include <linux/netfilter/xt_limit.h>
 
 #define XT_LIMIT_AVG	"3/hour"
 #define XT_LIMIT_BURST	5
 
-/* Function which prints out usage message. */
 static void limit_help(void)
 {
 	printf(
@@ -65,13 +64,12 @@ int parse_rate(const char *rate, u_int32_t *val)
 	/* This would get mapped to infinite (1/day is minimum they
            can specify, so we're ok at that end). */
 	if (r / mult > XT_LIMIT_SCALE)
-		exit_error(PARAMETER_PROBLEM, "Rate too fast `%s'\n", rate);
+		xtables_error(PARAMETER_PROBLEM, "Rate too fast \"%s\"\n", rate);
 
 	*val = XT_LIMIT_SCALE * mult / r;
 	return 1;
 }
 
-/* Initialize the match. */
 static void limit_init(struct xt_entry_match *m)
 {
 	struct xt_rateinfo *r = (struct xt_rateinfo *)m->data;
@@ -83,12 +81,10 @@ static void limit_init(struct xt_entry_match *m)
 
 /* FIXME: handle overflow:
 	if (r->avg*r->burst/r->burst != r->avg)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "Sorry: burst too large for that avg rate.\n");
 */
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 limit_parse(int c, char **argv, int invert, unsigned int *flags,
             const void *entry, struct xt_entry_match **match)
@@ -98,16 +94,16 @@ limit_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch(c) {
 	case '%':
-		if (check_inverse(argv[optind-1], &invert, &optind, 0)) break;
+		if (xtables_check_inverse(argv[optind-1], &invert, &optind, 0)) break;
 		if (!parse_rate(optarg, &r->avg))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "bad rate `%s'", optarg);
 		break;
 
 	case '$':
-		if (check_inverse(argv[optind-1], &invert, &optind, 0)) break;
-		if (string_to_number(optarg, 0, 10000, &num) == -1)
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(argv[optind-1], &invert, &optind, 0)) break;
+		if (!xtables_strtoui(optarg, NULL, &num, 0, 10000))
+			xtables_error(PARAMETER_PROBLEM,
 				   "bad --limit-burst `%s'", optarg);
 		r->burst = num;
 		break;
@@ -117,7 +113,7 @@ limit_parse(int c, char **argv, int invert, unsigned int *flags,
 	}
 
 	if (invert)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "limit does not support invert");
 
 	return 1;
@@ -136,28 +132,25 @@ static void print_rate(u_int32_t period)
 {
 	unsigned int i;
 
-	for (i = 1; i < sizeof(rates)/sizeof(struct rates); i++) {
+	for (i = 1; i < ARRAY_SIZE(rates); ++i)
 		if (period > rates[i].mult
             || rates[i].mult/period < rates[i].mult%period)
 			break;
-	}
 
 	printf("%u/%s ", rates[i-1].mult / period, rates[i-1].name);
 }
 
-/* Prints out the matchinfo. */
 static void
 limit_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct xt_rateinfo *r = (struct xt_rateinfo *)match->data;
+	const struct xt_rateinfo *r = (const void *)match->data;
 	printf("limit: avg "); print_rate(r->avg);
 	printf("burst %u ", r->burst);
 }
 
-/* FIXME: Make minimalist: only print rate if not default --RR */
 static void limit_save(const void *ip, const struct xt_entry_match *match)
 {
-	struct xt_rateinfo *r = (struct xt_rateinfo *)match->data;
+	const struct xt_rateinfo *r = (const void *)match->data;
 
 	printf("--limit "); print_rate(r->avg);
 	if (r->burst != XT_LIMIT_BURST)
@@ -165,7 +158,7 @@ static void limit_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match limit_match = {
-	.family		= AF_UNSPEC,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "limit",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_rateinfo)),

@@ -5,13 +5,12 @@
  * This program is distributed under the terms of GNU GPL
  */
 
+#include <getopt.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <ip6tables.h>
+#include <xtables.h>
 
-#include <linux/netfilter_ipv6/ip6_tables.h>
 #include <linux/netfilter_ipv6/ip6t_HL.h>
 
 #define IP6T_HL_USED	1
@@ -32,20 +31,20 @@ static int HL_parse(int c, char **argv, int invert, unsigned int *flags,
 	unsigned int value;
 
 	if (*flags & IP6T_HL_USED) {
-		exit_error(PARAMETER_PROBLEM, 
+		xtables_error(PARAMETER_PROBLEM,
 				"Can't specify HL option twice");
 	}
 
 	if (!optarg) 
-		exit_error(PARAMETER_PROBLEM, 
+		xtables_error(PARAMETER_PROBLEM,
 				"HL: You must specify a value");
 
-	if (check_inverse(optarg, &invert, NULL, 0))
-		exit_error(PARAMETER_PROBLEM,
+	if (xtables_check_inverse(optarg, &invert, NULL, 0))
+		xtables_error(PARAMETER_PROBLEM,
 				"HL: unexpected `!'");
 	
-	if (string_to_number(optarg, 0, 255, &value) == -1)	
-		exit_error(PARAMETER_PROBLEM,	
+	if (!xtables_strtoui(optarg, NULL, &value, 0, UINT8_MAX))
+		xtables_error(PARAMETER_PROBLEM,
 		           "HL: Expected value between 0 and 255");
 
 	switch (c) {
@@ -56,7 +55,7 @@ static int HL_parse(int c, char **argv, int invert, unsigned int *flags,
 
 		case '2':
 			if (value == 0) {
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					"HL: decreasing by 0?");
 			}
 
@@ -65,7 +64,7 @@ static int HL_parse(int c, char **argv, int invert, unsigned int *flags,
 
 		case '3':
 			if (value == 0) {
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					"HL: increasing by 0?");
 			}
 
@@ -86,7 +85,7 @@ static int HL_parse(int c, char **argv, int invert, unsigned int *flags,
 static void HL_check(unsigned int flags)
 {
 	if (!(flags & IP6T_HL_USED))
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 				"HL: You must specify an action");
 }
 
@@ -141,7 +140,7 @@ static const struct option HL_opts[] = {
 static struct xtables_target hl_tg6_reg = {
 	.name 		= "HL",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET6,
+	.family		= NFPROTO_IPV6,
 	.size		= XT_ALIGN(sizeof(struct ip6t_HL_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ip6t_HL_info)),
 	.help		= HL_help,

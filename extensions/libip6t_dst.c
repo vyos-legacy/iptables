@@ -1,22 +1,21 @@
-/* Shared library add-on to ip6tables to add Hop-by-Hop and Dst headers support. */
+/* Shared library add-on to ip6tables to add Dst header support. */
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
-#include <ip6tables.h>
+#include <xtables.h>
 #include <linux/netfilter_ipv6/ip6t_opts.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-/* Function which prints out usage message. */
 static void dst_help(void)
 {
 	printf(
 "dst match options:\n"
-"  --dst-len [!] length          total length of this header\n"
+"[!] --dst-len length            total length of this header\n"
 "  --dst-opts TYPE[:LEN][,TYPE[:LEN]...]\n"
 "                                Options and its length (list, max: %d)\n",
 IP6T_OPTS_OPTSNR);
@@ -38,19 +37,19 @@ parse_opts_num(const char *idstr, const char *typestr)
 	id = strtoul(idstr, &ep, 0);
 
 	if ( idstr == ep ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "dst: no valid digits in %s `%s'", typestr, idstr);
 	}
 	if ( id == ULONG_MAX  && errno == ERANGE ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "%s `%s' specified too big: would overflow",
 			   typestr, idstr);
 	}
 	if ( *idstr != '\0'  && *ep != '\0' ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "dst: error parsing %s `%s'", typestr, idstr);
 	}
-	return (u_int32_t) id;
+	return id;
 }
 
 static int
@@ -61,7 +60,7 @@ parse_options(const char *optsstr, u_int16_t *opts)
 	
 	buffer = strdup(optsstr);
         if (!buffer)
-		exit_error(OTHER_PROBLEM, "strdup failed");
+		xtables_error(OTHER_PROBLEM, "strdup failed");
 			
         for (cp = buffer, i = 0; cp && i < IP6T_OPTS_OPTSNR; cp = next, i++)
         {
@@ -74,18 +73,17 @@ parse_options(const char *optsstr, u_int16_t *opts)
 
                 if (range) {
                         if (i == IP6T_OPTS_OPTSNR-1)
-                                exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
                                            "too many ports specified");
                         *range++ = '\0';
                 }
 
-                opts[i] = (u_int16_t)((parse_opts_num(cp,"opt") & 0x000000FF)<<8); 
+		opts[i] = (parse_opts_num(cp, "opt") & 0xFF) << 8;
                 if (range) {
 			if (opts[i] == 0)
-        			exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					"PAD0 hasn't got length");
-                        opts[i] |= (u_int16_t)(parse_opts_num(range,"length") &
-					0x000000FF);
+			opts[i] |= parse_opts_num(range, "length") & 0xFF;
                 } else
                         opts[i] |= (0x00FF);
 
@@ -96,7 +94,7 @@ parse_options(const char *optsstr, u_int16_t *opts)
 	}
 
         if (cp)
-		exit_error(PARAMETER_PROBLEM, "too many addresses specified");
+		xtables_error(PARAMETER_PROBLEM, "too many addresses specified");
 
 	free(buffer);
 
@@ -107,7 +105,6 @@ parse_options(const char *optsstr, u_int16_t *opts)
 	return i;
 }
 
-/* Initialize the match. */
 static void dst_init(struct xt_entry_match *m)
 {
 	struct ip6t_opts *optinfo = (struct ip6t_opts *)m->data;
@@ -118,8 +115,6 @@ static void dst_init(struct xt_entry_match *m)
 	optinfo->optsnr = 0;
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int dst_parse(int c, char **argv, int invert, unsigned int *flags,
                      const void *entry, struct xt_entry_match **match)
 {
@@ -128,9 +123,9 @@ static int dst_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & IP6T_OPTS_LEN)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--dst-len' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		optinfo->hdrlen = parse_opts_num(argv[optind-1], "length");
 		if (invert)
 			optinfo->invflags |= IP6T_OPTS_INV_LEN;
@@ -139,11 +134,11 @@ static int dst_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '2':
 		if (*flags & IP6T_OPTS_OPTS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--dst-opts' allowed");
-                check_inverse(optarg, &invert, &optind, 0);
+                xtables_check_inverse(optarg, &invert, &optind, 0);
                 if (invert)
-                        exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				" '!' not allowed with `--dst-opts'");
 		optinfo->optsnr = parse_options(argv[optind-1], optinfo->opts);
 		optinfo->flags |= IP6T_OPTS_OPTS;
@@ -151,10 +146,10 @@ static int dst_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '3':
 		if (*flags & IP6T_OPTS_NSTRICT)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--dst-not-strict' allowed");
 		if ( !(*flags & IP6T_OPTS_OPTS) )
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "`--dst-opts ...' required before "
 				   "`--dst-not-strict'");
 		optinfo->flags |= IP6T_OPTS_NSTRICT;
@@ -182,7 +177,6 @@ print_options(unsigned int optsnr, u_int16_t *optsp)
 	}
 }
 
-/* Prints out the union ip6t_matchinfo. */
 static void dst_print(const void *ip, const struct xt_entry_match *match,
                       int numeric)
 {
@@ -207,13 +201,12 @@ static void dst_print(const void *ip, const struct xt_entry_match *match,
 		       optinfo->invflags & ~IP6T_OPTS_INV_MASK);
 }
 
-/* Saves the union ip6t_matchinfo in parsable form to stdout. */
 static void dst_save(const void *ip, const struct xt_entry_match *match)
 {
 	const struct ip6t_opts *optinfo = (struct ip6t_opts *)match->data;
 
 	if (optinfo->flags & IP6T_OPTS_LEN) {
-		printf("--dst-len %s%u ",
+		printf("%s--dst-len %u ",
 			(optinfo->invflags & IP6T_OPTS_INV_LEN) ? "! " : "", 
 			optinfo->hdrlen);
 	}
@@ -230,7 +223,7 @@ static void dst_save(const void *ip, const struct xt_entry_match *match)
 static struct xtables_match dst_mt6_reg = {
 	.name          = "dst",
 	.version       = XTABLES_VERSION,
-	.family        = PF_INET6,
+	.family        = NFPROTO_IPV6,
 	.size          = XT_ALIGN(sizeof(struct ip6t_opts)),
 	.userspacesize = XT_ALIGN(sizeof(struct ip6t_opts)),
 	.help          = dst_help,

@@ -8,7 +8,6 @@
 #include <xtables.h>
 #include <linux/netfilter/xt_tcpmss.h>
 
-/* Function which prints out usage message. */
 static void tcpmss_help(void)
 {
 	printf(
@@ -27,10 +26,10 @@ parse_tcp_mssvalue(const char *mssvalue)
 {
 	unsigned int mssvaluenum;
 
-	if (string_to_number(mssvalue, 0, 65535, &mssvaluenum) != -1)
-		return (u_int16_t)mssvaluenum;
+	if (xtables_strtoui(mssvalue, NULL, &mssvaluenum, 0, UINT16_MAX))
+		return mssvaluenum;
 
-	exit_error(PARAMETER_PROBLEM,
+	xtables_error(PARAMETER_PROBLEM,
 		   "Invalid mss `%s' specified", mssvalue);
 }
 
@@ -54,8 +53,6 @@ parse_tcp_mssvalues(const char *mssvaluestring,
 	free(buffer);
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 tcpmss_parse(int c, char **argv, int invert, unsigned int *flags,
              const void *entry, struct xt_entry_match **match)
@@ -66,9 +63,9 @@ tcpmss_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--mss' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_tcp_mssvalues(argv[optind-1],
 				    &mssinfo->mss_min, &mssinfo->mss_max);
 		if (invert)
@@ -81,51 +78,38 @@ tcpmss_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 1;
 }
 
-static void
-print_tcpmss(u_int16_t mss_min, u_int16_t mss_max, int invert, int numeric)
-{
-	if (invert)
-		printf("! ");
-
-	if (mss_min == mss_max)
-		printf("%u ", mss_min);
-	else
-		printf("%u:%u ", mss_min, mss_max);
-}
-
-/* Final check; must have specified --mss. */
 static void tcpmss_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "tcpmss match: You must specify `--mss'");
 }
 
-/* Prints out the matchinfo. */
 static void
 tcpmss_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	const struct xt_tcpmss_match_info *mssinfo =
-		(const struct xt_tcpmss_match_info *)match->data;
+	const struct xt_tcpmss_match_info *info = (void *)match->data;
 
-	printf("tcpmss match ");
-	print_tcpmss(mssinfo->mss_min, mssinfo->mss_max,
-		     mssinfo->invert, numeric);
+	printf("tcpmss match %s", info->invert ? "!" : "");
+	if (info->mss_min == info->mss_max)
+		printf("%u ", info->mss_min);
+	else
+		printf("%u:%u ", info->mss_min, info->mss_max);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void tcpmss_save(const void *ip, const struct xt_entry_match *match)
 {
-	const struct xt_tcpmss_match_info *mssinfo =
-		(const struct xt_tcpmss_match_info *)match->data;
+	const struct xt_tcpmss_match_info *info = (void *)match->data;
 
-	printf("--mss ");
-	print_tcpmss(mssinfo->mss_min, mssinfo->mss_max,
-		     mssinfo->invert, 0);
+	printf("%s--mss ", info->invert ? "! " : "");
+	if (info->mss_min == info->mss_max)
+		printf("%u ", info->mss_min);
+	else
+		printf("%u:%u ", info->mss_min, info->mss_max);
 }
 
 static struct xtables_match tcpmss_match = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "tcpmss",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_tcpmss_match_info)),
@@ -139,7 +123,7 @@ static struct xtables_match tcpmss_match = {
 };
 
 static struct xtables_match tcpmss_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "tcpmss",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_tcpmss_match_info)),

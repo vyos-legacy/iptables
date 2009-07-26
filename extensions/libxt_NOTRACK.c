@@ -7,14 +7,11 @@
 #include <xtables.h>
 #include <linux/netfilter/x_tables.h>
 
-/* Function which prints out usage message. */
 static void NOTRACK_help(void)
 {
 	printf("NOTRACK target takes no options\n");
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 NOTRACK_parse(int c, char **argv, int invert, unsigned int *flags,
               const void *entry, struct xt_entry_target **target)
@@ -23,7 +20,7 @@ NOTRACK_parse(int c, char **argv, int invert, unsigned int *flags,
 }
 
 static struct xtables_target notrack_target = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "NOTRACK",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(0),
@@ -33,7 +30,7 @@ static struct xtables_target notrack_target = {
 };
 
 static struct xtables_target notrack_target6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "NOTRACK",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(0),

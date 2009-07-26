@@ -99,7 +99,7 @@ RATEEST_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case RATEEST_OPT_NAME:
 		if (*flags & (1 << c))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "RATEEST: can't specify --rateest-name twice");
 		*flags |= 1 << c;
 
@@ -108,24 +108,24 @@ RATEEST_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case RATEEST_OPT_INTERVAL:
 		if (*flags & (1 << c))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "RATEEST: can't specify --rateest-interval twice");
 		*flags |= 1 << c;
 
 		if (RATEEST_get_time(&interval, optarg) < 0)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "RATEEST: bad interval value `%s'", optarg);
 
 		break;
 
 	case RATEEST_OPT_EWMALOG:
 		if (*flags & (1 << c))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "RATEEST: can't specify --rateest-ewmalog twice");
 		*flags |= 1 << c;
 
 		if (RATEEST_get_time(&ewma_log, optarg) < 0)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "RATEEST: bad ewmalog value `%s'", optarg);
 
 		break;
@@ -143,11 +143,11 @@ RATEEST_final_check(unsigned int flags)
 	struct xt_rateest_target_info *info = RATEEST_info;
 
 	if (!(flags & (1 << RATEEST_OPT_NAME)))
-		exit_error(PARAMETER_PROBLEM, "RATEEST: no name specified");
+		xtables_error(PARAMETER_PROBLEM, "RATEEST: no name specified");
 	if (!(flags & (1 << RATEEST_OPT_INTERVAL)))
-		exit_error(PARAMETER_PROBLEM, "RATEEST: no interval specified");
+		xtables_error(PARAMETER_PROBLEM, "RATEEST: no interval specified");
 	if (!(flags & (1 << RATEEST_OPT_EWMALOG)))
-		exit_error(PARAMETER_PROBLEM, "RATEEST: no ewmalog specified");
+		xtables_error(PARAMETER_PROBLEM, "RATEEST: no ewmalog specified");
 
 	for (info->interval = 0; info->interval <= 5; info->interval++) {
 		if (interval <= (1 << info->interval) * (TIME_UNITS_PER_SEC / 4))
@@ -155,7 +155,7 @@ RATEEST_final_check(unsigned int flags)
 	}
 
 	if (info->interval > 5)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "RATEEST: interval value is too large");
 	info->interval -= 2;
 
@@ -167,14 +167,14 @@ RATEEST_final_check(unsigned int flags)
 	info->ewma_log--;
 
 	if (info->ewma_log == 0 || info->ewma_log >= 31)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "RATEEST: ewmalog value is out of range");
 }
 
 static void
 __RATEEST_print(const struct xt_entry_target *target, const char *prefix)
 {
-	struct xt_rateest_target_info *info = (void *)target->data;
+	const struct xt_rateest_target_info *info = (const void *)target->data;
 	unsigned int local_interval;
 	unsigned int local_ewma_log;
 
@@ -202,7 +202,7 @@ RATEEST_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target rateest_tg_reg = {
-	.family		= AF_UNSPEC,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "RATEEST",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_rateest_target_info)),

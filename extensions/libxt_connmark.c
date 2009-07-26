@@ -49,19 +49,19 @@ connmark_mt_parse(int c, char **argv, int invert, unsigned int *flags,
                   const void *entry, struct xt_entry_match **match)
 {
 	struct xt_connmark_mtinfo1 *info = (void *)(*match)->data;
-	unsigned int mark, mask = ~0U;
+	unsigned int mark, mask = UINT32_MAX;
 	char *end;
 
 	switch (c) {
 	case '1': /* --mark */
-		param_act(P_ONLY_ONCE, "connmark", "--mark", *flags & F_MARK);
-		if (!strtonum(optarg, &end, &mark, 0, ~0U))
-			param_act(P_BAD_VALUE, "connmark", "--mark", optarg);
+		xtables_param_act(XTF_ONLY_ONCE, "connmark", "--mark", *flags & F_MARK);
+		if (!xtables_strtoui(optarg, &end, &mark, 0, UINT32_MAX))
+			xtables_param_act(XTF_BAD_VALUE, "connmark", "--mark", optarg);
 		if (*end == '/')
-			if (!strtonum(end + 1, &end, &mask, 0, ~0U))
-				param_act(P_BAD_VALUE, "connmark", "--mark", optarg);
+			if (!xtables_strtoui(end + 1, &end, &mask, 0, UINT32_MAX))
+				xtables_param_act(XTF_BAD_VALUE, "connmark", "--mark", optarg);
 		if (*end != '\0')
-			param_act(P_BAD_VALUE, "connmark", "--mark", optarg);
+			xtables_param_act(XTF_BAD_VALUE, "connmark", "--mark", optarg);
 
 		if (invert)
 			info->invert = true;
@@ -73,8 +73,6 @@ connmark_mt_parse(int c, char **argv, int invert, unsigned int *flags,
 	return false;
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 connmark_parse(int c, char **argv, int invert, unsigned int *flags,
                const void *entry, struct xt_entry_match **match)
@@ -84,7 +82,7 @@ connmark_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 		char *end;
 	case '1':
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 
 		markinfo->mark = strtoul(optarg, &end, 0);
 		markinfo->mask = 0xffffffffUL;
@@ -93,7 +91,7 @@ connmark_parse(int c, char **argv, int invert, unsigned int *flags,
 			markinfo->mask = strtoul(end+1, &end, 0);
 
 		if (*end != '\0' || end == optarg)
-			exit_error(PARAMETER_PROBLEM, "Bad MARK value `%s'", optarg);
+			xtables_error(PARAMETER_PROBLEM, "Bad MARK value \"%s\"", optarg);
 		if (invert)
 			markinfo->invert = 1;
 		*flags = 1;
@@ -116,15 +114,14 @@ static void print_mark(unsigned int mark, unsigned int mask)
 static void connmark_mt_check(unsigned int flags)
 {
 	if (flags == 0)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "connmark: The --mark option is required");
 }
 
-/* Prints out the matchinfo. */
 static void
 connmark_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct xt_connmark_info *info = (struct xt_connmark_info *)match->data;
+	const struct xt_connmark_info *info = (const void *)match->data;
 
 	printf("CONNMARK match ");
 	if (info->invert)
@@ -143,10 +140,9 @@ connmark_mt_print(const void *ip, const struct xt_entry_match *match, int numeri
 	print_mark(info->mark, info->mask);
 }
 
-/* Saves the matchinfo in parsable form to stdout. */
 static void connmark_save(const void *ip, const struct xt_entry_match *match)
 {
-	struct xt_connmark_info *info = (struct xt_connmark_info *)match->data;
+	const struct xt_connmark_info *info = (const void *)match->data;
 
 	if (info->invert)
 		printf("! ");
@@ -168,7 +164,7 @@ connmark_mt_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match connmark_mt_reg_v0 = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "connmark",
 	.revision	= 0,
 	.version	= XTABLES_VERSION,
@@ -183,7 +179,7 @@ static struct xtables_match connmark_mt_reg_v0 = {
 };
 
 static struct xtables_match connmark_mt6_reg_v0 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "connmark",
 	.revision	= 0,
 	.version	= XTABLES_VERSION,
@@ -201,7 +197,7 @@ static struct xtables_match connmark_mt_reg = {
 	.version        = XTABLES_VERSION,
 	.name           = "connmark",
 	.revision       = 1,
-	.family         = AF_INET,
+	.family         = NFPROTO_IPV4,
 	.size           = XT_ALIGN(sizeof(struct xt_connmark_mtinfo1)),
 	.userspacesize  = XT_ALIGN(sizeof(struct xt_connmark_mtinfo1)),
 	.help           = connmark_mt_help,
@@ -216,7 +212,7 @@ static struct xtables_match connmark_mt6_reg = {
 	.version        = XTABLES_VERSION,
 	.name           = "connmark",
 	.revision       = 1,
-	.family         = AF_INET6,
+	.family         = NFPROTO_IPV6,
 	.size           = XT_ALIGN(sizeof(struct xt_connmark_mtinfo1)),
 	.userspacesize  = XT_ALIGN(sizeof(struct xt_connmark_mtinfo1)),
 	.help           = connmark_mt_help,

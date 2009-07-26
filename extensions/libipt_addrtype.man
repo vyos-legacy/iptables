@@ -2,7 +2,7 @@ This module matches packets based on their
 .B address type.
 Address types are used within the kernel networking stack and categorize
 addresses into various groups.  The exact definition of that group depends on the specific layer three protocol.
-.TP
+.PP
 The following address types are possible:
 .TP
 .BI "UNSPEC"
@@ -40,13 +40,13 @@ FIXME
 .TP
 .BI "XRESOLVE"
 .TP
-[\fB!\fP] \fB\-\-src-type\fP \fItype\fP
+[\fB!\fP] \fB\-\-src\-type\fP \fItype\fP
 Matches if the source address is of given type
 .TP
-[\fB!\fP] \fB\-\-dst-type\fP \fItype\fP
+[\fB!\fP] \fB\-\-dst\-type\fP \fItype\fP
 Matches if the destination address is of given type
 .TP
-.BI "\-\-limit-iface-in"
+.BI "\-\-limit\-iface\-in"
 The address type checking can be limited to the interface the packet is coming
 in. This option is only valid in the
 .BR PREROUTING ,
@@ -54,16 +54,16 @@ in. This option is only valid in the
 and
 .B FORWARD
 chains. It cannot be specified with the
-.B "\-\-limit-iface-out"
+\fB\-\-limit\-iface\-out\fP
 option.
 .TP
-.BI "\-\-limit-iface-out"
-The address type checiking can be limited to the interface the packet is going
+\fB\-\-limit\-iface\-out\fP
+The address type checking can be limited to the interface the packet is going
 out. This option is only valid in the
 .BR POSTROUTING ,
 .B OUTPUT
 and
 .B FORWARD
 chains. It cannot be specified with the
-.B \-\-limit-iface-in
+\fB\-\-limit\-iface\-in\fP
 option.

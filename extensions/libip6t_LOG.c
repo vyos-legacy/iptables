@@ -1,12 +1,11 @@
-/* Shared library add-on to iptables to add LOG support. */
+/* Shared library add-on to ip6tables to add LOG support. */
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
 #include <syslog.h>
 #include <getopt.h>
-#include <ip6tables.h>
-#include <linux/netfilter_ipv6/ip6_tables.h>
+#include <xtables.h>
 #include <linux/netfilter_ipv6/ip6t_LOG.h>
 
 #ifndef IP6T_LOG_UID	/* Old kernel */
@@ -17,7 +16,6 @@
 
 #define LOG_DEFAULT_LEVEL LOG_WARNING
 
-/* Function which prints out usage message. */
 static void LOG_help(void)
 {
 	printf(
@@ -40,7 +38,6 @@ static const struct option LOG_opts[] = {
 	{ .name = NULL }
 };
 
-/* Initialize the target. */
 static void LOG_init(struct xt_entry_target *t)
 {
 	struct ip6t_log_info *loginfo = (struct ip6t_log_info *)t->data;
@@ -72,28 +69,25 @@ parse_level(const char *level)
 	unsigned int lev = -1;
 	unsigned int set = 0;
 
-	if (string_to_number(level, 0, 7, &lev) == -1) {
+	if (!xtables_strtoui(level, NULL, &lev, 0, 7)) {
 		unsigned int i = 0;
 
-		for (i = 0;
-		     i < sizeof(ip6t_log_names) / sizeof(struct ip6t_log_names);
-		     i++) {
+		for (i = 0; i < ARRAY_SIZE(ip6t_log_names); ++i)
 			if (strncasecmp(level, ip6t_log_names[i].name,
 					strlen(level)) == 0) {
 				if (set++)
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 						   "log-level `%s' ambiguous",
 						   level);
 				lev = ip6t_log_names[i].level;
 			}
-		}
 
 		if (!set)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "log-level `%s' unknown", level);
 	}
 
-	return (u_int8_t)lev;
+	return lev;
 }
 
 #define IP6T_LOG_OPT_LEVEL 0x01
@@ -103,8 +97,6 @@ parse_level(const char *level)
 #define IP6T_LOG_OPT_IPOPT 0x10
 #define IP6T_LOG_OPT_UID 0x20
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
                      const void *entry, struct xt_entry_target **target)
 {
@@ -113,11 +105,11 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '!':
 		if (*flags & IP6T_LOG_OPT_LEVEL)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-level twice");
 
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --log-level");
 
 		loginfo->level = parse_level(optarg);
@@ -126,24 +118,24 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '#':
 		if (*flags & IP6T_LOG_OPT_PREFIX)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-prefix twice");
 
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --log-prefix");
 
 		if (strlen(optarg) > sizeof(loginfo->prefix) - 1)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Maximum prefix length %u for --log-prefix",
 				   (unsigned int)sizeof(loginfo->prefix) - 1);
 
 		if (strlen(optarg) == 0)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "No prefix specified for --log-prefix");
 
 		if (strlen(optarg) != strlen(strtok(optarg, "\n")))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Newlines not allowed in --log-prefix");
 
 		strcpy(loginfo->prefix, optarg);
@@ -152,7 +144,7 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '1':
 		if (*flags & IP6T_LOG_OPT_TCPSEQ)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-tcp-sequence "
 				   "twice");
 
@@ -162,7 +154,7 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & IP6T_LOG_OPT_TCPOPT)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-tcp-options twice");
 
 		loginfo->logflags |= IP6T_LOG_TCPOPT;
@@ -171,7 +163,7 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '3':
 		if (*flags & IP6T_LOG_OPT_IPOPT)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-ip-options twice");
 
 		loginfo->logflags |= IP6T_LOG_IPOPT;
@@ -180,7 +172,7 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '4':
 		if (*flags & IP6T_LOG_OPT_UID)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-uid twice");
 
 		loginfo->logflags |= IP6T_LOG_UID;
@@ -194,7 +186,6 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 1;
 }
 
-/* Prints out the targinfo. */
 static void LOG_print(const void *ip, const struct xt_entry_target *target,
                       int numeric)
 {
@@ -207,15 +198,12 @@ static void LOG_print(const void *ip, const struct xt_entry_target *target,
 		printf("flags %u level %u ",
 		       loginfo->logflags, loginfo->level);
 	else {
-		for (i = 0;
-		     i < sizeof(ip6t_log_names) / sizeof(struct ip6t_log_names);
-		     i++) {
+		for (i = 0; i < ARRAY_SIZE(ip6t_log_names); ++i)
 			if (loginfo->level == ip6t_log_names[i].level) {
 				printf("level %s ", ip6t_log_names[i].name);
 				break;
 			}
-		}
-		if (i == sizeof(ip6t_log_names) / sizeof(struct ip6t_log_names))
+		if (i == ARRAY_SIZE(ip6t_log_names))
 			printf("UNKNOWN level %u ", loginfo->level);
 		if (loginfo->logflags & IP6T_LOG_TCPSEQ)
 			printf("tcp-sequence ");
@@ -233,7 +221,6 @@ static void LOG_print(const void *ip, const struct xt_entry_target *target,
 		printf("prefix `%s' ", loginfo->prefix);
 }
 
-/* Saves the union ip6t_targinfo in parsable form to stdout. */
 static void LOG_save(const void *ip, const struct xt_entry_target *target)
 {
 	const struct ip6t_log_info *loginfo
@@ -258,7 +245,7 @@ static void LOG_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target log_tg6_reg = {
     .name          = "LOG",
     .version       = XTABLES_VERSION,
-    .family        = PF_INET6,
+    .family        = NFPROTO_IPV6,
     .size          = XT_ALIGN(sizeof(struct ip6t_log_info)),
     .userspacesize = XT_ALIGN(sizeof(struct ip6t_log_info)),
     .help          = LOG_help,

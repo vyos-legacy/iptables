@@ -12,12 +12,11 @@
 #include <xtables.h>
 #include <linux/netfilter/xt_mac.h>
 
-/* Function which prints out usage message. */
 static void mac_help(void)
 {
 	printf(
 "mac match options:\n"
-" --mac-source [!] XX:XX:XX:XX:XX:XX\n"
+"[!] --mac-source XX:XX:XX:XX:XX:XX\n"
 "				Match source MAC address\n");
 }
 
@@ -32,7 +31,7 @@ parse_mac(const char *mac, struct xt_mac_info *info)
 	unsigned int i = 0;
 
 	if (strlen(mac) != ETH_ALEN*3-1)
-		exit_error(PARAMETER_PROBLEM, "Bad mac address `%s'", mac);
+		xtables_error(PARAMETER_PROBLEM, "Bad mac address \"%s\"", mac);
 
 	for (i = 0; i < ETH_ALEN; i++) {
 		long number;
@@ -45,13 +44,11 @@ parse_mac(const char *mac, struct xt_mac_info *info)
 		    && number <= 255)
 			info->srcaddr[i] = number;
 		else
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Bad mac address `%s'", mac);
 	}
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 mac_parse(int c, char **argv, int invert, unsigned int *flags,
           const void *entry, struct xt_entry_match **match)
@@ -60,7 +57,7 @@ mac_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_mac(argv[optind-1], macinfo);
 		if (invert)
 			macinfo->invert = 1;
@@ -74,7 +71,7 @@ mac_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 1;
 }
 
-static void print_mac(unsigned char macaddress[ETH_ALEN])
+static void print_mac(const unsigned char macaddress[ETH_ALEN])
 {
 	unsigned int i;
 
@@ -84,38 +81,38 @@ static void print_mac(unsigned char macaddress[ETH_ALEN])
 	printf(" ");
 }
 
-/* Final check; must have specified --mac. */
 static void mac_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "You must specify `--mac-source'");
 }
 
-/* Prints out the matchinfo. */
 static void
 mac_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
+	const struct xt_mac_info *info = (void *)match->data;
 	printf("MAC ");
 
-	if (((struct xt_mac_info *)match->data)->invert)
+	if (info->invert)
 		printf("! ");
 	
-	print_mac(((struct xt_mac_info *)match->data)->srcaddr);
+	print_mac(info->srcaddr);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void mac_save(const void *ip, const struct xt_entry_match *match)
 {
-	if (((struct xt_mac_info *)match->data)->invert)
+	const struct xt_mac_info *info = (void *)match->data;
+
+	if (info->invert)
 		printf("! ");
 
 	printf("--mac-source ");
-	print_mac(((struct xt_mac_info *)match->data)->srcaddr);
+	print_mac(info->srcaddr);
 }
 
 static struct xtables_match mac_match = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
  	.name		= "mac",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_mac_info)),
@@ -129,7 +126,7 @@ static struct xtables_match mac_match = {
 };
 
 static struct xtables_match mac_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
  	.name		= "mac",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_mac_info)),

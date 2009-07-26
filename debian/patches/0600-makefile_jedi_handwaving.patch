@@ -1,20 +1,14 @@
+Author: ljlane
+Descripton: Add test and check targets to make /usr/bin/dh happy.
+
 Index: b/Makefile.am
 ===================================================================
---- a/Makefile.am	2008-07-12 08:57:59.299247757 -0400
-+++ b/Makefile.am	2008-07-12 08:58:51.541600527 -0400
-@@ -3,7 +3,7 @@
- AUTOMAKE_OPTIONS = foreign subdir-objects
- 
- AM_CFLAGS        = ${regular_CFLAGS} -I${top_builddir}/include -I${top_srcdir}/include ${kinclude_CFLAGS}
--SUBDIRS         := extensions
-+SUBDIRS         := extensions howtos
- if ENABLE_LIBIPQ
- SUBDIRS         += libipq
- endif
-@@ -102,3 +102,6 @@
- 	pushd /tmp/${PACKAGE_TARNAME}-${PACKAGE_VERSION} && ./autogen.sh && popd;
- 	tar -C /tmp -cjf ${PACKAGE_TARNAME}-${PACKAGE_VERSION}.tar.bz2 --owner=root --group=root ${PACKAGE_TARNAME}-${PACKAGE_VERSION}/;
- 	rm -Rf /tmp/${PACKAGE_TARNAME}-${PACKAGE_VERSION};
+--- a/Makefile.am	2009-04-06 14:36:50.302284885 -0400
++++ b/Makefile.am	2009-04-06 14:36:55.451284922 -0400
+@@ -123,3 +123,6 @@
+ # Using if..fi avoids an ugly "error (ignored)" message :)
+ install-exec-hook:
+ 	-if test -z "${DESTDIR}"; then /sbin/ldconfig; fi;
 +
-+check: recursive-check
-+	echo "makefile jedi handwaving"
++test check:
++	echo "Are we on the air? Hello, Mom!"

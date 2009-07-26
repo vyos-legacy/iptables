@@ -8,7 +8,6 @@
 #include <xtables.h>
 #include <linux/netfilter/xt_helper.h>
 
-/* Function which prints out usage message. */
 static void helper_help(void)
 {
 	printf(
@@ -21,8 +20,6 @@ static const struct option helper_opts[] = {
 	{ .name = NULL }
 };
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 helper_parse(int c, char **argv, int invert, unsigned int *flags,
              const void *entry, struct xt_entry_match **match)
@@ -32,9 +29,9 @@ helper_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 					"helper match: Only use --helper ONCE!");
-		check_inverse(optarg, &invert, &invert, 0);
+		xtables_check_inverse(optarg, &invert, &invert, 0);
 		strncpy(info->name, optarg, 29);
 		info->name[29] = '\0';
 		if (invert)
@@ -48,34 +45,31 @@ helper_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 1;
 }
 
-/* Final check; must have specified --helper. */
 static void helper_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "helper match: You must specify `--helper'");
 }
 
-/* Prints out the info. */
 static void
 helper_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct xt_helper_info *info = (struct xt_helper_info *)match->data;
+	const struct xt_helper_info *info = (const void *)match->data;
 
 	printf("helper match %s\"%s\" ", info->invert ? "! " : "", info->name);
 }
 
-/* Saves the union ipt_info in parsable form to stdout. */
 static void helper_save(const void *ip, const struct xt_entry_match *match)
 {
-	struct xt_helper_info *info = (struct xt_helper_info *)match->data;
+	const struct xt_helper_info *info = (const void *)match->data;
 
 	printf("%s--helper ",info->invert ? "! " : "");
-	save_string(info->name);
+	xtables_save_string(info->name);
 }
 
 static struct xtables_match helper_match = {
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.name		= "helper",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_helper_info)),
@@ -88,7 +82,7 @@ static struct xtables_match helper_match = {
 };
 
 static struct xtables_match helper_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.name		= "helper",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_helper_info)),

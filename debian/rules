@@ -1,29 +1,44 @@
 #!/usr/bin/make -f
 
-include /usr/share/quilt/quilt.make
-
-configure :=  --with-xtlibdir=/lib/xtables
-install :=  --exclude=multi
+configure :=  --with-xtlibdir=/lib/xtables --enable-libipq \
+	 --libdir=/lib
+install :=  --exclude=-multi
 
 %:
 	dh $@
 
-build: build-stamp
-build-stamp:
+binary binary-arch binary-indep: install
+
+ifneq ($(USE_BUILD_DIR),TRUE)
+
+include debian/builddir.mk
+
+else
+
+include /usr/share/quilt/quilt.make
+
+build: patch debian/stamp-build
+debian/stamp-build:
 	dh build --before dh_auto_configure
-	autoreconf
+	autoreconf -i
 	dh_auto_configure -- $(configure)
 	dh build --after dh_auto_configure
 	touch $@
 
-install: build
+install: build debian/stamp-install
+debian/stamp-install:
 	dh install --before dh_install
 	dh_install $(install)
-	### libxt_multiport.so was omitted somehow ...
-	cp -auv extensions/*.so debian/iptables/lib/xtables
+
+	#fixme# excluding the *-multi binaries fails on buildds
+	find debian/iptables/sbin -type f -name \*-multi | xargs -r rm -v
+
+	find
+
+	# BTS 509386
+	mv debian/iptables/usr/sbin/iptables-xml debian/iptables/usr/bin
+
 	dh install --after dh_install
+	touch $@
 
-clean:
-	dh clean
-
-binary: install
+endif

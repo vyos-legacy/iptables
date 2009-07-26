@@ -1,0 +1,231 @@
+Author: ljlane
+Description: Escape hyphens in libipq man pages. Addresses lintian warnings such as:
+  I: iptables: hyphen-used-as-minus-sign usr/share/man/man8/iptables.8.gz:440
+
+Index: b/libipq/ipq_create_handle.3
+===================================================================
+--- a/libipq/ipq_create_handle.3	2009-03-25 18:17:36.707926273 -0400
++++ b/libipq/ipq_create_handle.3	2009-03-25 19:53:09.386094650 -0400
+@@ -20,7 +20,7 @@
+ .\"
+ .\"
+ .SH NAME
+-ipq_create_handle, ipq_destroy_handle - create and destroy libipq handles.
++ipq_create_handle, ipq_destroy_handle \- create and destroy libipq handles.
+ .SH SYNOPSIS
+ .B #include <linux/netfilter.h>
+ .br
+@@ -65,7 +65,7 @@
+ .B ipq_destroy_handle
+ returns zero.
+ .br
+-On failure, -1 is returned.
++On failure, \-1 is returned.
+ .SH ERRORS
+ On failure, a descriptive error message will be available
+ via the
+Index: b/libipq/ipq_errstr.3
+===================================================================
+--- a/libipq/ipq_errstr.3	2009-03-25 18:17:36.716926411 -0400
++++ b/libipq/ipq_errstr.3	2009-03-25 19:53:09.386094650 -0400
+@@ -20,7 +20,7 @@
+ .\"
+ .\"
+ .SH NAME
+-ipq_errstr, ipq_perror - libipq error handling routines
++ipq_errstr, ipq_perror \- libipq error handling routines
+ .SH SYNOPSIS
+ .B #include <linux/netfilter.h>
+ .br
+Index: b/libipq/ipq_message_type.3
+===================================================================
+--- a/libipq/ipq_message_type.3	2009-03-25 18:17:36.744926164 -0400
++++ b/libipq/ipq_message_type.3	2009-03-25 19:53:09.386094650 -0400
+@@ -20,7 +20,7 @@
+ .\"
+ .\"
+ .SH NAME
+-ipq_message_type, ipq_get_packet, ipq_getmsgerr - query queue messages
++ipq_message_type, ipq_get_packet, ipq_getmsgerr \- query queue messages
+ .SH SYNOPSIS
+ .B #include <linux/netfilter.h>
+ .br
+Index: b/iptables-xml.8
+===================================================================
+--- a/iptables-xml.8	2009-03-25 18:17:36.782926972 -0400
++++ b/iptables-xml.8	2009-03-25 19:53:09.404176950 -0400
+@@ -21,7 +21,7 @@
+ .SH NAME
+ iptables-xml \- Convert iptables-save format to XML
+ .SH SYNOPSIS
+-.BR "iptables-xml " "[-c] [-v]"
++.BR "iptables-xml " "[\-c] [\-v]"
+ .br
+ .SH DESCRIPTION
+ .PP
+@@ -42,7 +42,7 @@
+ 
+ .PP
+ iptables-xml does a mechanistic conversion to a very expressive xml
+-format; the only semantic considerations are for -g and -j targets in
++format; the only semantic considerations are for \-g and \-j targets in
+ order to discriminate between <call> <goto> and <nane-of-target> as it
+ helps xml processing scripts if they can tell the difference between a
+ target like SNAT and another chain.
+Index: b/iptables.8.in
+===================================================================
+--- a/iptables.8.in	2009-03-25 19:53:07.752095031 -0400
++++ b/iptables.8.in	2009-03-25 19:53:09.404176950 -0400
+@@ -23,7 +23,7 @@
+ .\"
+ .\"
+ .SH NAME
+-iptables - administration tool for IPv4 packet filtering and NAT
++iptables \- administration tool for IPv4 packet filtering and NAT
+ .SH SYNOPSIS
+ \fBiptables\fP [\fB\-t\fP \fItable\fP] {\fB\-A\fP|\fB\-D\fP} \fIchain\fP \fIrule-specification\fP
+ .PP
+Index: b/libipq/ipq_read.3
+===================================================================
+--- a/libipq/ipq_read.3	2009-03-25 18:17:36.755926371 -0400
++++ b/libipq/ipq_read.3	2009-03-25 19:53:09.404176950 -0400
+@@ -20,7 +20,7 @@
+ .\"
+ .\"
+ .SH NAME
+-ipq_read - read queue messages from ip_queue and read into supplied buffer
++ipq_read \- read queue messages from ip_queue and read into supplied buffer
+ .SH SYNOPSIS
+ .B #include <linux/netfilter.h>
+ .br
+@@ -64,7 +64,7 @@
+ .BR ipq_get_msgerr
+ functions to access the queue message in the buffer.
+ .SH RETURN VALUE
+-On failure, -1 is returned.
++On failure, \-1 is returned.
+ .br
+ On success, a non-zero positive value is returned when no timeout
+ value is specified.
+Index: b/libipq/ipq_set_mode.3
+===================================================================
+--- a/libipq/ipq_set_mode.3	2009-03-25 18:17:36.761926153 -0400
++++ b/libipq/ipq_set_mode.3	2009-03-25 19:53:09.404176950 -0400
+@@ -20,7 +20,7 @@
+ .\"
+ .\"
+ .SH NAME
+-ipq_set_mode - set the ip_queue queuing mode
++ipq_set_mode \- set the ip_queue queuing mode
+ .SH SYNOPSIS
+ .B #include <linux/netfilter.h>
+ .br
+@@ -68,7 +68,7 @@
+ the ip_queue module does not know that a userspace application is ready to
+ communicate until it receives a message such as this.
+ .SH RETURN VALUE
+-On failure, -1 is returned.
++On failure, \-1 is returned.
+ .br
+ On success, a non-zero positive value is returned.
+ .SH ERRORS
+Index: b/libipq/ipq_set_verdict.3
+===================================================================
+--- a/libipq/ipq_set_verdict.3	2009-03-25 18:17:36.766925888 -0400
++++ b/libipq/ipq_set_verdict.3	2009-03-25 19:53:09.404176950 -0400
+@@ -20,7 +20,7 @@
+ .\"
+ .\"
+ .SH NAME
+-ipq_set_verdict - issue verdict and optionally modified packet to kernel
++ipq_set_verdict \- issue verdict and optionally modified packet to kernel
+ .SH SYNOPSIS
+ .B #include <linux/netfilter.h>
+ .br
+@@ -80,7 +80,7 @@
+ The application is responsible for recalculating any packet checksums
+ when modifying packets.
+ .SH RETURN VALUE
+-On failure, -1 is returned.
++On failure, \-1 is returned.
+ .br
+ On success, a non-zero positive value is returned.
+ .SH ERRORS
+Index: b/libipq/libipq.3
+===================================================================
+--- a/libipq/libipq.3	2009-03-25 18:17:36.774926139 -0400
++++ b/libipq/libipq.3	2009-03-25 19:53:09.405094454 -0400
+@@ -51,7 +51,7 @@
+ .br	
+ 	# modprobe ip_queue
+ .br	
+-	# iptables -A OUTPUT -p icmp -j QUEUE
++	# iptables \-A OUTPUT \-p icmp \-j QUEUE
+ .PP
+ will cause any locally generated ICMP packets (e.g. ping output) to
+ be sent to the ip_queue module, which will then attempt to deliver the
+Index: b/ip6tables.8.in
+===================================================================
+--- a/ip6tables.8.in	2009-03-25 18:17:36.793926226 -0400
++++ b/ip6tables.8.in	2009-03-25 19:53:09.405094454 -0400
+@@ -25,7 +25,7 @@
+ .\"
+ .\"
+ .SH NAME
+-ip6tables - IPv6 packet filter administration
++ip6tables \- IPv6 packet filter administration
+ .SH SYNOPSIS
+ \fBip6tables\fP [\fB\-t\fP \fItable\fP] {\fB\-A\fP|\fB\-D\fP} \fIchain
+ rule-specification\fP [\fIoptions...\fP]
+Index: b/ip6tables-save.8
+===================================================================
+--- a/ip6tables-save.8	2009-03-25 18:17:36.799926232 -0400
++++ b/ip6tables-save.8	2009-03-25 19:53:09.405094454 -0400
+@@ -19,7 +19,7 @@
+ .\"
+ .\"
+ .SH NAME
+-ip6tables-save - dump iptables rules to stdout
++ip6tables-save \- dump iptables rules to stdout
+ .SH SYNOPSIS
+ \fBip6tables\-save\fP [\fB\-M\fP \fImodprobe\fP] [\fB\-c\fP]
+ [\fB\-t\fP \fItable\fP
+Index: b/iptables-save.8
+===================================================================
+--- a/iptables-save.8	2009-03-25 18:17:36.805926297 -0400
++++ b/iptables-save.8	2009-03-25 19:53:09.405094454 -0400
+@@ -19,7 +19,7 @@
+ .\"
+ .\"
+ .SH NAME
+-iptables-save - dump iptables rules to stdout
++iptables-save \- dump iptables rules to stdout
+ .SH SYNOPSIS
+ \fBiptables\-save\fP [\fB\-M\fP \fImodprobe\fP] [\fB\-c\fP]
+ [\fB\-t\fP \fItable\fP]
+Index: b/extensions/libxt_NFLOG.man
+===================================================================
+--- a/extensions/libxt_NFLOG.man	2009-03-25 19:54:34.000219646 -0400
++++ b/extensions/libxt_NFLOG.man	2009-03-25 19:54:42.725094369 -0400
+@@ -9,7 +9,7 @@
+ non-terminating target, i.e. rule traversal continues at the next rule.
+ .TP
+ \fB\-\-nflog\-group\fP \fInlgroup\fP
+-The netlink group (1 - 2^32\-1) to which packets are (only applicable for
++The netlink group (1 \- 2^32\-1) to which packets are (only applicable for
+ nfnetlink_log). The default value is 0.
+ .TP
+ \fB\-\-nflog\-prefix\fP \fIprefix\fP
+Index: b/extensions/libxt_connbytes.man
+===================================================================
+--- a/extensions/libxt_connbytes.man	2009-03-25 19:53:32.460219599 -0400
++++ b/extensions/libxt_connbytes.man	2009-03-25 19:53:45.251192185 -0400
+@@ -8,7 +8,7 @@
+ scheduled using a lower priority band in traffic control.
+ .PP
+ The transferred bytes per connection can also be viewed through
+-`conntrack -L` and accessed via ctnetlink.
++`conntrack \-L` and accessed via ctnetlink.
+ .PP
+ NOTE that for connections which have no accounting information, the match will
+ always return false. The "net.netfilter.nf_conntrack_acct" sysctl flag controls

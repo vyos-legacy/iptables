@@ -9,9 +9,8 @@
 #else
 #include <linux/if_ether.h>
 #endif
-#include <ip6tables.h>
+#include <xtables.h>
 
-/* Function which prints out usage message. */
 static void eui64_help(void)
 {
 	printf(
@@ -20,8 +19,6 @@ static void eui64_help(void)
 " This module checks for EUI64 IPv6 addresses\n");
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int eui64_parse(int c, char **argv, int invert, unsigned int *flags,
                        const void *entry, struct xt_entry_match **match)
 {
@@ -31,7 +28,7 @@ static int eui64_parse(int c, char **argv, int invert, unsigned int *flags,
 static struct xtables_match eui64_mt6_reg = {
 	.name 		= "eui64",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET6,
+	.family		= NFPROTO_IPV6,
 	.size		= XT_ALIGN(sizeof(int)),
 	.userspacesize	= XT_ALIGN(sizeof(int)),
 	.help		= eui64_help,

@@ -1,3 +1,125 @@
+iptables (1.4.4-1) unstable; urgency=low
+
+  * New upstream release
+  * Upstream added Ian Bruce's man page errors fix. Thanks. 
+    Closes: #531677
+  * Upstream added Piotr Lewandowski's iptables(8) typo fix. Thanks.
+    Closes: #528457
+  * Upstream fixed intraposition vs extraposition deprecation warning.
+    Thanks. Closes: #528736 
+  * Added ip6tables-apply symlinks for martin f krafft. Closes: #524862
+
+ -- Laurence J. Lane <ljlane@debian.org>  Thu, 18 Jun 2009 08:14:55 -0400
+
+iptables (1.4.3.2-2) unstable; urgency=low
+
+  * added iptables dependency to iptables-dev. Reported by Sebastian
+    Harl. Thanks. Closes:# 524766 
+
+ -- Laurence J. Lane <ljlane@debian.org>  Sun, 19 Apr 2009 14:57:46 -0400
+
+iptables (1.4.3.2-1) unstable; urgency=low
+
+  * New upstream release
+  * Fixed negation extrapositoned stuff. Reported by Dr. Markus Waldeck.
+    Fixed upstream. Thanks. Closes: #522309
+
+ -- Laurence J. Lane <ljlane@debian.org>  Mon, 06 Apr 2009 14:30:59 -0400
+
+iptables (1.4.3.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Fixed sparc64 ULOG problems reported by Andrey Chernomyrdin. Fixed
+    upstream. Thanks.  Closes: #232401
+  * Fixed sparc64 limit match problem reported by Arno van Amersfoort.
+    Fixed upstream. Thanks. Closes: #468170
+  * Fixed "Unknown arg %s" problem reported by Guillem Cantallops Ramis.
+    Fixed upstream. Thanks.  Closes: #469548
+  * Fixed iptables-save output problem reported by Ivan Vilata i Balaguer.
+    Fixed upstream. Closes: #514869 
+  * Fixed iptables-save quoting problem reported by
+    =?UTF-8?B?0YHRgtGA0L7QvdC90Lg=?= Closes: #519584.
+    Fixed upstream. Thanks. Closes: #519584
+  * Fixed ip6tables(1) icmp codes problem reported by Dameon Wagner.
+    Fixed upstream. Thanks. Closes: #515752
+  * Fixed string match non-null terminator reported by Franck Joncourt.
+    Fixed upstream. Thanks. Closes: #513516
+  * Added libiptc upstream. Requested by many. Closes: #473533
+  * Fixed tcmpss inversion. Patch by Jan Engelhardt. Thanks. 
+
+ -- Laurence J. Lane <ljlane@debian.org>  Fri, 27 Mar 2009 17:02:43 -0400
+
+iptables (1.4.2-6) unstable; urgency=high
+
+  * added missing conntrack numeric fix. Reported by Bernhard Miklautz.
+    Fixed in upstream git repo. Thanks. Closes: #502548
+
+ -- Laurence J. Lane <ljlane@debian.org>  Mon, 09 Feb 2009 14:31:24 -0500
+
+iptables (1.4.2-5) unstable; urgency=low
+
+  * fixed libxt_multiport man page typo. Reported and patched by
+    Marc Fournier. Thanks. Closes: #511891 
+  * fixed iptables-restore.8 formatting. Reported and patched by
+    shaulkarl. Thanks. Closes: #512281
+  * fixed libxt_owner spacing. Reported by Dr. Markus Waldeck. Patched
+    upstream by Daniel Drake. Thanks. Closes: #512320
+
+ -- Laurence J. Lane <ljlane@debian.org>  Mon, 19 Jan 2009 13:32:05 -0500
+
+iptables (1.4.2-4) unstable; urgency=low
+
+  * fixed debian/rules binary targets. Reported by Philipp Kern.
+    Thanks. Closes: #511723
+  * fixed debian/rules build and install stamps.
+
+ -- Laurence J. Lane <ljlane@debian.org>  Tue, 13 Jan 2009 19:07:08 -0500
+
+iptables (1.4.2-3) unstable; urgency=low
+
+  * added debian/builddir.mk support
+  * corrected 1.4.2-1 changelog entry: 's@moved iptables@&-xml@'.
+    Reported by jidanni. Thanks.
+  * lintian override left out of 1.4.2-2 
+
+ -- Laurence J. Lane <ljlane@debian.org>  Fri, 09 Jan 2009 15:36:33 -0500
+
+iptables (1.4.2-2) unstable; urgency=low
+
+  * lintian cleanups:
+    - moved libxtables.so to iptables-dev package 
+    - added override for libxtables
+    - added ${misc:Depends} for debhelper 
+    - changelog utf8 conversion
+
+ -- Laurence J. Lane <ljlane@debian.org>  Sat, 03 Jan 2009 22:20:58 -0500
+
+iptables (1.4.2-1) unstable; urgency=low
+
+  * New upstream release. Reported by Torsten Werner. Thanks.
+    closes: #503229
+  * moved iptables-xml from /usr/sbin to /usr/bin. Reported by Alexey
+    Feldgendler. Thanks. closes: #509386  
+  * -multi bins were included in buildd generated packages. Reported
+    by Alexey Feldgendler. closes: 509385
+  * added missing iptables.xslt. Reported by Carl Fürstenberg. Thanks.
+    closes: #501615. 
+
+ -- Laurence J. Lane <ljlane@debian.org>  Fri, 02 Jan 2009 17:19:08 -0500
+
+iptables (1.4.1.1-4) unstable; urgency=low
+
+  * removed howtos. closes: #500674
+
+ -- Laurence J. Lane <ljlane@debian.org>  Tue, 30 Sep 2008 12:10:15 -0400
+
+iptables (1.4.1.1-3) unstable; urgency=low
+
+  * added missing libipq. Fixes numerous FTBS reported by Steve Langasek
+    and others. Thanks. closes: #494216
+
+ -- Laurence J. Lane <ljlane@debian.org>  Sun, 24 Aug 2008 19:52:26 -0400
+
 iptables (1.4.1.1-2) unstable; urgency=low
 
   * fixed /bin/dash unnerving in howtos/Makefile. Reported by Daniel
@@ -101,7 +223,7 @@ iptables (1.3.6.0debian1-1) unstable; urgency=low
     + adds support port range match to libip6t_multiport
     + adds endian annotation types to fix compilation for
       kernels > 2.6.18
-  * ipv6 updates in SVN by Rémi Denis-Courmont fixes the ip6tables port
+  * ipv6 updates in SVN by RÃ©mi Denis-Courmont fixes the ip6tables port
     range bug reported by Alexander Dreweke. Thanks. closes: #329775
   * debian/control: added info about missing kernel extensions
   * bumped standards version to 3.7.2, no changes
@@ -146,7 +268,7 @@ iptables (1.3.5.0debian1-1) unstable; urgency=low
     mport, nth, osf, pool, psd, quota, random, time
   * replaced debian/copyright GPL paste with stubs
   * updated debian/copyright source URLs
-  * Thanks for the invaluable help Rémi Denis-Courmont.
+  * Thanks for the invaluable help RÃ©mi Denis-Courmont.
 
  -- Laurence J. Lane <ljlane@debian.org>  Sun, 20 Aug 2006 21:29:33 -0400
 

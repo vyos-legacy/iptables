@@ -4,14 +4,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <iptables.h>
+#include <xtables.h>
+#include <limits.h> /* INT_MAX in ip_tables.h */
 #include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter/nf_nat.h>
+#include <net/netfilter/nf_nat.h>
 
 #define IPT_REDIRECT_OPT_DEST	0x01
 #define IPT_REDIRECT_OPT_RANDOM	0x02
 
-/* Function which prints out usage message. */
 static void REDIRECT_help(void)
 {
 	printf(
@@ -26,10 +26,9 @@ static const struct option REDIRECT_opts[] = {
 	{ .name = NULL }
 };
 
-/* Initialize the target. */
 static void REDIRECT_init(struct xt_entry_target *t)
 {
-	struct ip_nat_multi_range *mr = (struct ip_nat_multi_range *)t->data;
+	struct nf_nat_multi_range *mr = (struct nf_nat_multi_range *)t->data;
 
 	/* Actually, it's 0, but it's ignored at the moment. */
 	mr->rangesize = 1;
@@ -38,7 +37,7 @@ static void REDIRECT_init(struct xt_entry_target *t)
 
 /* Parses ports */
 static void
-parse_ports(const char *arg, struct ip_nat_multi_range *mr)
+parse_ports(const char *arg, struct nf_nat_multi_range *mr)
 {
 	const char *dash;
 	int port;
@@ -46,14 +45,14 @@ parse_ports(const char *arg, struct ip_nat_multi_range *mr)
 	mr->range[0].flags |= IP_NAT_RANGE_PROTO_SPECIFIED;
 
 	if (strchr(arg, '.'))
-		exit_error(PARAMETER_PROBLEM, "IP address not permitted\n");
+		xtables_error(PARAMETER_PROBLEM, "IP address not permitted\n");
 
 	port = atoi(arg);
 	if (port == 0)
-		port = service_to_port(arg, NULL);
+		port = xtables_service_to_port(arg, NULL);
 
 	if (port == 0 || port > 65535)
-		exit_error(PARAMETER_PROBLEM, "Port `%s' not valid\n", arg);
+		xtables_error(PARAMETER_PROBLEM, "Port \"%s\" not valid\n", arg);
 
 	dash = strchr(arg, '-');
 	if (!dash) {
@@ -65,29 +64,29 @@ parse_ports(const char *arg, struct ip_nat_multi_range *mr)
 
 		maxport = atoi(dash + 1);
 		if (maxport == 0 || maxport > 65535)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Port `%s' not valid\n", dash+1);
 		if (maxport < port)
 			/* People are stupid. */
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Port range `%s' funky\n", arg);
 		mr->range[0].min.tcp.port = htons(port);
 		mr->range[0].max.tcp.port = htons(maxport);
 	}
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int REDIRECT_parse(int c, char **argv, int invert, unsigned int *flags,
                           const void *e, struct xt_entry_target **target)
 {
 	const struct ipt_entry *entry = e;
-	struct ip_nat_multi_range *mr
-		= (struct ip_nat_multi_range *)(*target)->data;
+	struct nf_nat_multi_range *mr
+		= (struct nf_nat_multi_range *)(*target)->data;
 	int portok;
 
 	if (entry->ip.proto == IPPROTO_TCP
 	    || entry->ip.proto == IPPROTO_UDP
+	    || entry->ip.proto == IPPROTO_SCTP
+	    || entry->ip.proto == IPPROTO_DCCP
 	    || entry->ip.proto == IPPROTO_ICMP)
 		portok = 1;
 	else
@@ -96,11 +95,11 @@ static int REDIRECT_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (!portok)
-			exit_error(PARAMETER_PROBLEM,
-				   "Need TCP or UDP with port specification");
+			xtables_error(PARAMETER_PROBLEM,
+				   "Need TCP, UDP, SCTP or DCCP with port specification");
 
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --to-ports");
 
 		parse_ports(optarg, mr);
@@ -122,13 +121,11 @@ static int REDIRECT_parse(int c, char **argv, int invert, unsigned int *flags,
 	}
 }
 
-/* Prints out the targinfo. */
 static void REDIRECT_print(const void *ip, const struct xt_entry_target *target,
                            int numeric)
 {
-	struct ip_nat_multi_range *mr
-		= (struct ip_nat_multi_range *)target->data;
-	struct ip_nat_range *r = &mr->range[0];
+	const struct nf_nat_multi_range *mr = (const void *)target->data;
+	const struct nf_nat_range *r = &mr->range[0];
 
 	if (r->flags & IP_NAT_RANGE_PROTO_SPECIFIED) {
 		printf("redir ports ");
@@ -141,12 +138,10 @@ static void REDIRECT_print(const void *ip, const struct xt_entry_target *target,
 	}
 }
 
-/* Saves the union ipt_targinfo in parsable form to stdout. */
 static void REDIRECT_save(const void *ip, const struct xt_entry_target *target)
 {
-	struct ip_nat_multi_range *mr
-		= (struct ip_nat_multi_range *)target->data;
-	struct ip_nat_range *r = &mr->range[0];
+	const struct nf_nat_multi_range *mr = (const void *)target->data;
+	const struct nf_nat_range *r = &mr->range[0];
 
 	if (r->flags & IP_NAT_RANGE_PROTO_SPECIFIED) {
 		printf("--to-ports ");
@@ -162,9 +157,9 @@ static void REDIRECT_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target redirect_tg_reg = {
 	.name		= "REDIRECT",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET,
-	.size		= XT_ALIGN(sizeof(struct ip_nat_multi_range)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ip_nat_multi_range)),
+	.family		= NFPROTO_IPV4,
+	.size		= XT_ALIGN(sizeof(struct nf_nat_multi_range)),
+	.userspacesize	= XT_ALIGN(sizeof(struct nf_nat_multi_range)),
 	.help		= REDIRECT_help,
 	.init		= REDIRECT_init,
  	.parse		= REDIRECT_parse,

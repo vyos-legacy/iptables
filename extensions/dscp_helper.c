@@ -51,13 +51,13 @@ class_to_dscp(const char *name)
 {
 	unsigned int i;
 
-	for (i = 0; i < sizeof(ds_classes) / sizeof(struct ds_class); i++) {
+	for (i = 0; i < ARRAY_SIZE(ds_classes); i++) {
 		if (!strncasecmp(name, ds_classes[i].name,
 					strlen(ds_classes[i].name)))
 			return ds_classes[i].dscp;
 	}
 
-	exit_error(PARAMETER_PROBLEM,
+	xtables_error(PARAMETER_PROBLEM,
 			"Invalid DSCP value `%s'\n", name);
 }
 
@@ -68,13 +68,11 @@ dscp_to_name(unsigned int dscp)
 {
 	int i;
 
-	for (i = 0; i < sizeof(ds_classes) / sizeof(struct ds_class); i++) {
+	for (i = 0; i < ARRAY_SIZE(ds_classes); ++i) 
 		if (dscp == ds_classes[i].dscp)
 			return ds_classes[i].name;
-	}
 
-
-	exit_error(PARAMETER_PROBLEM,
+	xtables_error(PARAMETER_PROBLEM,
 			"Invalid DSCP value `%d'\n", dscp);
 }
 #endif

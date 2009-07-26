@@ -5,16 +5,15 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
-#include <ip6tables.h>
+#include <xtables.h>
 #include <linux/netfilter_ipv6/ip6t_ah.h>
-                                        
-/* Function which prints out usage message. */
+
 static void ah_help(void)
 {
 	printf(
 "ah match options:\n"
-" --ahspi [!] spi[:spi]         match spi (range)\n"
-" --ahlen [!] length            total length of this header\n"
+"[!] --ahspi spi[:spi]          match spi (range)\n"
+"[!] --ahlen length             total length of this header\n"
 " --ahres                       check the reserved filed, too\n");
 }
 
@@ -34,19 +33,19 @@ parse_ah_spi(const char *spistr, const char *typestr)
 	spi = strtoul(spistr, &ep, 0);
 
 	if ( spistr == ep )
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "AH no valid digits in %s `%s'", typestr, spistr);
 
 	if ( spi == ULONG_MAX  && errno == ERANGE )
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "%s `%s' specified too big: would overflow",
 			   typestr, spistr);
 
 	if ( *spistr != '\0'  && *ep != '\0' )
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "AH error parsing %s `%s'", typestr, spistr);
 
-	return (u_int32_t) spi;
+	return spi;
 }
 
 static void
@@ -68,7 +67,6 @@ parse_ah_spis(const char *spistring, u_int32_t *spis)
 	free(buffer);
 }
 
-/* Initialize the match. */
 static void ah_init(struct xt_entry_match *m)
 {
 	struct ip6t_ah *ahinfo = (struct ip6t_ah *)m->data;
@@ -78,8 +76,6 @@ static void ah_init(struct xt_entry_match *m)
 	ahinfo->hdrres = 0;
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int ah_parse(int c, char **argv, int invert, unsigned int *flags,
                     const void *entry, struct xt_entry_match **match)
 {
@@ -88,9 +84,9 @@ static int ah_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & IP6T_AH_SPI)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--ahspi' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_ah_spis(argv[optind-1], ahinfo->spis);
 		if (invert)
 			ahinfo->invflags |= IP6T_AH_INV_SPI;
@@ -98,9 +94,9 @@ static int ah_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '2':
 		if (*flags & IP6T_AH_LEN)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--ahlen' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		ahinfo->hdrlen = parse_ah_spi(argv[optind-1], "length");
 		if (invert)
 			ahinfo->invflags |= IP6T_AH_INV_LEN;
@@ -108,7 +104,7 @@ static int ah_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '3':
 		if (*flags & IP6T_AH_RES)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--ahres' allowed");
 		ahinfo->hdrres = 1;
 		*flags |= IP6T_AH_RES;
@@ -143,7 +139,6 @@ print_len(const char *name, u_int32_t len, int invert)
 		printf("%s:%s%u ", name, inv, len);
 }
 
-/* Prints out the union ip6t_matchinfo. */
 static void ah_print(const void *ip, const struct xt_entry_match *match,
                      int numeric)
 {
@@ -163,14 +158,13 @@ static void ah_print(const void *ip, const struct xt_entry_match *match,
 		       ah->invflags & ~IP6T_AH_INV_MASK);
 }
 
-/* Saves the union ip6t_matchinfo in parsable form to stdout. */
 static void ah_save(const void *ip, const struct xt_entry_match *match)
 {
 	const struct ip6t_ah *ahinfo = (struct ip6t_ah *)match->data;
 
 	if (!(ahinfo->spis[0] == 0
 	    && ahinfo->spis[1] == 0xFFFFFFFF)) {
-		printf("--ahspi %s", 
+		printf("%s--ahspi ",
 			(ahinfo->invflags & IP6T_AH_INV_SPI) ? "! " : "");
 		if (ahinfo->spis[0]
 		    != ahinfo->spis[1])
@@ -183,7 +177,7 @@ static void ah_save(const void *ip, const struct xt_entry_match *match)
 	}
 
 	if (ahinfo->hdrlen != 0 || (ahinfo->invflags & IP6T_AH_INV_LEN) ) {
-		printf("--ahlen %s%u ", 
+		printf("%s--ahlen %u ", 
 			(ahinfo->invflags & IP6T_AH_INV_LEN) ? "! " : "", 
 			ahinfo->hdrlen);
 	}
@@ -195,7 +189,7 @@ static void ah_save(const void *ip, const struct xt_entry_match *match)
 static struct xtables_match ah_mt6_reg = {
 	.name          = "ah",
 	.version       = XTABLES_VERSION,
-	.family        = PF_INET6,
+	.family        = NFPROTO_IPV6,
 	.size          = XT_ALIGN(sizeof(struct ip6t_ah)),
 	.userspacesize = XT_ALIGN(sizeof(struct ip6t_ah)),
 	.help          = ah_help,

@@ -10,13 +10,12 @@
 #include <linux/types.h>
 #include <linux/pkt_sched.h>
 
-/* Function which prints out usage message. */
 static void
 CLASSIFY_help(void)
 {
 	printf(
 "CLASSIFY target options:\n"
-"  --set-class [MAJOR:MINOR]    Set skb->priority value\n");
+"--set-class MAJOR:MINOR    Set skb->priority value (always hexadecimal!)\n");
 }
 
 static const struct option CLASSIFY_opts[] = {
@@ -35,8 +34,6 @@ static int CLASSIFY_string_to_priority(const char *s, unsigned int *p)
 	return 0;
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 CLASSIFY_parse(int c, char **argv, int invert, unsigned int *flags,
       const void *entry,
@@ -48,10 +45,10 @@ CLASSIFY_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (CLASSIFY_string_to_priority(optarg, &clinfo->priority))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Bad class value `%s'", optarg);
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "CLASSIFY: Can't specify --set-class twice");
 		*flags = 1;
 		break;
@@ -67,7 +64,7 @@ static void
 CLASSIFY_final_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "CLASSIFY: Parameter --set-class is required");
 }
 
@@ -77,7 +74,6 @@ CLASSIFY_print_class(unsigned int priority, int numeric)
 	printf("%x:%x ", TC_H_MAJ(priority)>>16, TC_H_MIN(priority));
 }
 
-/* Prints out the targinfo. */
 static void
 CLASSIFY_print(const void *ip,
       const struct xt_entry_target *target,
@@ -89,7 +85,6 @@ CLASSIFY_print(const void *ip,
 	CLASSIFY_print_class(clinfo->priority, numeric);
 }
 
-/* Saves the union ipt_targinfo in parsable form to stdout. */
 static void
 CLASSIFY_save(const void *ip, const struct xt_entry_target *target)
 {
@@ -101,7 +96,7 @@ CLASSIFY_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target classify_target = { 
-	.family		= AF_UNSPEC,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "CLASSIFY",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_classify_target_info)),

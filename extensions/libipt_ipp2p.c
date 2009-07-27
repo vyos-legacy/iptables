@@ -103,42 +103,42 @@ parse(int c, char **argv, int invert, unsigned int *flags,
     switch (c) {
 	case '1':		/*cmd: ipp2p*/
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified once!");
 
 /*	    if ((*flags & SHORT_HAND_DATA) == SHORT_HAND_DATA)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p-data' may only be "
 				"specified alone!");
 */
 
 	    if ((*flags) != 0)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
 	    *flags += SHORT_HAND_IPP2P;
 	    info->cmd = *flags;
 	    break;
 	    
 	case '2':		/*cmd: edk*/
 	    if ((*flags & IPP2P_EDK) == IPP2P_EDK)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--edk' may only be "
 				"specified once");
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
 /*	    if ((*flags & SHORT_HAND_DATA) == SHORT_HAND_DATA)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p-data' may only be "
 				"specified alone!");*/
             if ((*flags & IPP2P_DATA_EDK) == IPP2P_DATA_EDK)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: use `--edk' OR `--edk-data' but not both of them!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
 	    *flags += IPP2P_EDK;
 	    info->cmd = *flags;	    
 	    break;
@@ -146,21 +146,21 @@ parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '7':		/*cmd: dc*/
             if ((*flags & IPP2P_DC) == IPP2P_DC)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--dc' may only be "
                                 "specified once!");
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
 /*	    if ((*flags & SHORT_HAND_DATA) == SHORT_HAND_DATA)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p-data' may only be "
 				"specified alone!");*/
             if ((*flags & IPP2P_DATA_DC) == IPP2P_DATA_DC)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: use `--dc' OR `--dc-data' but not both of them!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_DC;
 	    info->cmd = *flags;
 	    break;
@@ -168,70 +168,70 @@ parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '9':		/*cmd: gnu*/
             if ((*flags & IPP2P_GNU) == IPP2P_GNU)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--gnu' may only be "
                                 "specified once!");
 /*	    if ((*flags & SHORT_HAND_DATA) == SHORT_HAND_DATA)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p-data' may only be "
 				"specified alone!");*/
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
             if ((*flags & IPP2P_DATA_GNU) == IPP2P_DATA_GNU)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: use `--gnu' OR `--gnu-data' but not both of them!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_GNU;
 	    info->cmd = *flags;
 	    break;
 
 	case 'a':		/*cmd: kazaa*/
             if ((*flags & IPP2P_KAZAA) == IPP2P_KAZAA)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--kazaa' may only be "
                                 "specified once!");
 /*	    if ((*flags & SHORT_HAND_DATA) == SHORT_HAND_DATA)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p-data' may only be "
 				"specified alone!");*/
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
             if ((*flags & IPP2P_DATA_KAZAA) == IPP2P_DATA_KAZAA)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: use `--kazaa' OR `--kazaa-data' but not both of them!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_KAZAA;
 	    info->cmd = *flags;
 	    break;																											
 
 	case 'b':		/*cmd: bit*/
             if ((*flags & IPP2P_BIT) == IPP2P_BIT)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--bit' may only be "
                                 "specified once!");
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_BIT;
 	    info->cmd = *flags;
 	    break;																											
 
 	case 'c':		/*cmd: apple*/
             if ((*flags & IPP2P_APPLE) == IPP2P_APPLE)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--apple' may only be "
                                 "specified once!");
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_APPLE;
 	    info->cmd = *flags;
 	    break;																											
@@ -239,14 +239,14 @@ parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case 'd':		/*cmd: soul*/
             if ((*flags & IPP2P_SOUL) == IPP2P_SOUL)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--soul' may only be "
                                 "specified once!");
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_SOUL;
 	    info->cmd = *flags;
 	    break;																											
@@ -254,67 +254,67 @@ parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case 'e':		/*cmd: winmx*/
             if ((*flags & IPP2P_WINMX) == IPP2P_WINMX)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--winmx' may only be "
                                 "specified once!");
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_WINMX;
 	    info->cmd = *flags;
 	    break;																											
 
 	case 'f':		/*cmd: ares*/
             if ((*flags & IPP2P_ARES) == IPP2P_ARES)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--ares' may only be "
                                 "specified once!");
 	    if ((*flags & SHORT_HAND_IPP2P) == SHORT_HAND_IPP2P)
-		    xtables_error(PARAMETER_PROBLEM,
+		    exit_error(PARAMETER_PROBLEM,
 				"ipp2p: `--ipp2p' may only be "
 				"specified alone!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_ARES;
 	    info->cmd = *flags;
 	    break;																											
 	
 	case 'g':		/*cmd: mute*/
             if ((*flags & IPP2P_MUTE) == IPP2P_MUTE)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--mute' may only be "
                                 "specified once!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_MUTE;
 	    info->cmd = *flags;
 	    break;																											
 	case 'h':		/*cmd: waste*/
             if ((*flags & IPP2P_WASTE) == IPP2P_WASTE)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--waste' may only be "
                                 "specified once!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_WASTE;
 	    info->cmd = *flags;
 	    break;																											
 	case 'i':		/*cmd: xdcc*/
             if ((*flags & IPP2P_XDCC) == IPP2P_XDCC)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
                                 "ipp2p: `--ares' may only be "
                                 "specified once!");
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
             *flags += IPP2P_XDCC;
 	    info->cmd = *flags;
 	    break;																											
 
 	case 'j':		/*cmd: debug*/
-	    if (invert) xtables_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
+	    if (invert) exit_error(PARAMETER_PROBLEM, "ipp2p: invert [!] is not allowed!");
 	    info->debug = 1;
 	    break;																											
 
 	default:
-//            xtables_error(PARAMETER_PROBLEM,
+//            exit_error(PARAMETER_PROBLEM,
 //	    "\nipp2p-parameter problem: for ipp2p usage type: iptables -m ipp2p --help\n");
 	    return 0;
     }
@@ -326,7 +326,7 @@ static void
 final_check(unsigned int flags)
 {
     if (!flags)
-            xtables_error(PARAMETER_PROBLEM,
+            exit_error(PARAMETER_PROBLEM,
 	    "\nipp2p-parameter problem: for ipp2p usage type: iptables -m ipp2p --help\n");
 }
 

@@ -2000,7 +2000,7 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 		ret = zero_entries(chain, options&OPT_VERBOSE, *handle);
 		break;
 	case CMD_ZERO_NUM:
-		ret = iptc_zero_counter(chain, rulenum, *handle);
+		ret = iptc_zero_counter(chain, rulenum, handle);
 		break;
 	case CMD_LIST:
 	case CMD_LIST|CMD_ZERO:

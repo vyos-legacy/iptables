@@ -1,0 +1,23 @@
+Index: b/libipq/ipq_set_verdict.3
+===================================================================
+--- a/libipq/ipq_set_verdict.3	2008-10-08 12:31:58.000000000 -0400
++++ b/libipq/ipq_set_verdict.3	2009-01-12 13:19:06.683707656 -0500
+@@ -56,6 +56,18 @@
+ .TP
+ .B NF_DROP
+ Drop the packet.
++.br
++.TP
++.B NF_QUEUE
++Requeue the packet.
++.br
++.TP
++.B NF_STOLEN
++Similar to NF_DROP, but leave all located resources available.
++.br
++.TP
++.B NF_REPEAT
++Recall the hook again.
+ .PP
+ The
+ .I data_len

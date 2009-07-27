@@ -31,14 +31,14 @@ parse_range(const char *arg, struct xt_connbytes_info *si)
 
 	si->count.from = strtoul(arg,&colon,10);
 	if (*colon != ':') 
-		xtables_error(PARAMETER_PROBLEM, "Bad range \"%s\"", arg);
+		exit_error(PARAMETER_PROBLEM, "Bad range `%s'", arg);
 	si->count.to = strtoul(colon+1,&p,10);
 	if (p == colon+1) {
 		/* second number omited */
 		si->count.to = 0xffffffff;
 	}
 	if (si->count.from > si->count.to)
-		xtables_error(PARAMETER_PROBLEM, "%llu should be less than %llu",
+		exit_error(PARAMETER_PROBLEM, "%llu should be less than %llu",
 			   (unsigned long long)si->count.from,
 			   (unsigned long long)si->count.to);
 }
@@ -52,7 +52,7 @@ connbytes_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		if (xtables_check_inverse(optarg, &invert, &optind, 0))
+		if (check_inverse(optarg, &invert, &optind, 0))
 			optind++;
 
 		parse_range(argv[optind-1], sinfo);
@@ -71,7 +71,7 @@ connbytes_parse(int c, char **argv, int invert, unsigned int *flags,
 		else if (!strcmp(optarg, "both"))
 			sinfo->direction = XT_CONNBYTES_DIR_BOTH;
 		else
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Unknown --connbytes-dir `%s'", optarg);
 
 		*flags |= 2;
@@ -84,7 +84,7 @@ connbytes_parse(int c, char **argv, int invert, unsigned int *flags,
 		else if (!strcmp(optarg, "avgpkt"))
 			sinfo->what = XT_CONNBYTES_AVGPKT;
 		else
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Unknown --connbytes-mode `%s'", optarg);
 		*flags |= 4;
 		break;
@@ -98,11 +98,11 @@ connbytes_parse(int c, char **argv, int invert, unsigned int *flags,
 static void connbytes_check(unsigned int flags)
 {
 	if (flags != 7)
-		xtables_error(PARAMETER_PROBLEM, "You must specify `--connbytes'"
+		exit_error(PARAMETER_PROBLEM, "You must specify `--connbytes'"
 			   "`--connbytes-dir' and `--connbytes-mode'");
 }
 
-static void print_mode(const struct xt_connbytes_info *sinfo)
+static void print_mode(struct xt_connbytes_info *sinfo)
 {
 	switch (sinfo->what) {
 		case XT_CONNBYTES_PKTS:
@@ -120,7 +120,7 @@ static void print_mode(const struct xt_connbytes_info *sinfo)
 	}
 }
 
-static void print_direction(const struct xt_connbytes_info *sinfo)
+static void print_direction(struct xt_connbytes_info *sinfo)
 {
 	switch (sinfo->direction) {
 		case XT_CONNBYTES_DIR_ORIGINAL:
@@ -141,7 +141,7 @@ static void print_direction(const struct xt_connbytes_info *sinfo)
 static void
 connbytes_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	const struct xt_connbytes_info *sinfo = (const void *)match->data;
+	struct xt_connbytes_info *sinfo = (struct xt_connbytes_info *)match->data;
 
 	if (sinfo->count.from > sinfo->count.to) 
 		printf("connbytes ! %llu:%llu ",
@@ -161,7 +161,7 @@ connbytes_print(const void *ip, const struct xt_entry_match *match, int numeric)
 
 static void connbytes_save(const void *ip, const struct xt_entry_match *match)
 {
-	const struct xt_connbytes_info *sinfo = (const void *)match->data;
+	struct xt_connbytes_info *sinfo = (struct xt_connbytes_info *)match->data;
 
 	if (sinfo->count.from > sinfo->count.to) 
 		printf("! --connbytes %llu:%llu ",
@@ -180,7 +180,7 @@ static void connbytes_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match connbytes_match = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name 		= "connbytes",
 	.version 	= XTABLES_VERSION,
 	.size 		= XT_ALIGN(sizeof(struct xt_connbytes_info)),
@@ -194,7 +194,7 @@ static struct xtables_match connbytes_match = {
 };
 
 static struct xtables_match connbytes_match6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name 		= "connbytes",
 	.version 	= XTABLES_VERSION,
 	.size 		= XT_ALIGN(sizeof(struct xt_connbytes_info)),

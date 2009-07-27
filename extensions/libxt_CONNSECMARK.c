@@ -38,7 +38,7 @@ CONNSECMARK_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & CONNSECMARK_SAVE)
-			xtables_error(PARAMETER_PROBLEM, PFX
+			exit_error(PARAMETER_PROBLEM, PFX
 				   "Can't specify --save twice");
 		info->mode = CONNSECMARK_SAVE;
 		*flags |= CONNSECMARK_SAVE;
@@ -46,7 +46,7 @@ CONNSECMARK_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & CONNSECMARK_RESTORE)
-			xtables_error(PARAMETER_PROBLEM, PFX
+			exit_error(PARAMETER_PROBLEM, PFX
 				   "Can't specify --restore twice");
 		info->mode = CONNSECMARK_RESTORE;
 		*flags |= CONNSECMARK_RESTORE;
@@ -62,14 +62,14 @@ CONNSECMARK_parse(int c, char **argv, int invert, unsigned int *flags,
 static void CONNSECMARK_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM, PFX "parameter required");
+		exit_error(PARAMETER_PROBLEM, PFX "parameter required");
 
 	if (flags == (CONNSECMARK_SAVE|CONNSECMARK_RESTORE))
-		xtables_error(PARAMETER_PROBLEM, PFX "only one flag of --save "
+		exit_error(PARAMETER_PROBLEM, PFX "only one flag of --save "
 		           "or --restore is allowed");
 }
 
-static void print_connsecmark(const struct xt_connsecmark_target_info *info)
+static void print_connsecmark(struct xt_connsecmark_target_info *info)
 {
 	switch (info->mode) {
 	case CONNSECMARK_SAVE:
@@ -81,7 +81,7 @@ static void print_connsecmark(const struct xt_connsecmark_target_info *info)
 		break;
 		
 	default:
-		xtables_error(OTHER_PROBLEM, PFX "invalid mode %hhu\n", info->mode);
+		exit_error(OTHER_PROBLEM, PFX "invalid mode %hhu\n", info->mode);
 	}
 }
 
@@ -89,7 +89,7 @@ static void
 CONNSECMARK_print(const void *ip, const struct xt_entry_target *target,
                   int numeric)
 {
-	const struct xt_connsecmark_target_info *info =
+	struct xt_connsecmark_target_info *info =
 		(struct xt_connsecmark_target_info*)(target)->data;
 
 	printf("CONNSECMARK ");
@@ -99,7 +99,7 @@ CONNSECMARK_print(const void *ip, const struct xt_entry_target *target,
 static void
 CONNSECMARK_save(const void *ip, const struct xt_entry_target *target)
 {
-	const struct xt_connsecmark_target_info *info =
+	struct xt_connsecmark_target_info *info =
 		(struct xt_connsecmark_target_info*)target->data;
 
 	printf("--");
@@ -107,7 +107,7 @@ CONNSECMARK_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target connsecmark_target = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "CONNSECMARK",
 	.version	= XTABLES_VERSION,
 	.revision	= 0,
@@ -122,7 +122,7 @@ static struct xtables_target connsecmark_target = {
 };
 
 static struct xtables_target connsecmark_target6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name		= "CONNSECMARK",
 	.version	= XTABLES_VERSION,
 	.revision	= 0,

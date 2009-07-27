@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-#include <xtables.h>
+#include <iptables.h>
+#include <linux/netfilter_ipv4/ip_tables.h>
 
 static void MIRROR_help(void)
 {
@@ -20,7 +21,7 @@ static int MIRROR_parse(int c, char **argv, int invert, unsigned int *flags,
 static struct xtables_target mirror_tg_reg = {
 	.name		= "MIRROR",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV4,
+	.family		= PF_INET,
 	.size		= XT_ALIGN(0),
 	.userspacesize	= XT_ALIGN(0),
  	.help		= MIRROR_help,

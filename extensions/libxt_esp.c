@@ -32,18 +32,18 @@ parse_esp_spi(const char *spistr)
 	spi =  strtoul(spistr,&ep,0) ;
 
 	if ( spistr == ep ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "ESP no valid digits in spi `%s'", spistr);
 	}
 	if ( spi == ULONG_MAX  && errno == ERANGE ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "spi `%s' specified too big: would overflow", spistr);
 	}	
 	if ( *spistr != '\0'  && *ep != '\0' ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "ESP error parsing spi `%s'", spistr);
 	}
-	return spi;
+	return (u_int32_t) spi;
 }
 
 static void
@@ -62,7 +62,7 @@ parse_esp_spis(const char *spistring, u_int32_t *spis)
 		spis[0] = buffer[0] ? parse_esp_spi(buffer) : 0;
 		spis[1] = cp[0] ? parse_esp_spi(cp) : 0xFFFFFFFF;
 		if (spis[0] > spis[1])
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Invalid ESP spi range: %s", spistring);
 	}
 	free(buffer);
@@ -86,9 +86,9 @@ esp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & ESP_SPI)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--espspi' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_esp_spis(argv[optind-1], espinfo->spis);
 		if (invert)
 			espinfo->invflags |= XT_ESP_INV_SPI;
@@ -134,7 +134,7 @@ static void esp_save(const void *ip, const struct xt_entry_match *match)
 
 	if (!(espinfo->spis[0] == 0
 	    && espinfo->spis[1] == 0xFFFFFFFF)) {
-		printf("%s--espspi ",
+		printf("--espspi %s", 
 			(espinfo->invflags & XT_ESP_INV_SPI) ? "! " : "");
 		if (espinfo->spis[0]
 		    != espinfo->spis[1])
@@ -149,7 +149,7 @@ static void esp_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match esp_match = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name 		= "esp",
 	.version 	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_esp)),
@@ -163,7 +163,7 @@ static struct xtables_match esp_match = {
 };
 
 static struct xtables_match esp_match6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name 		= "esp",
 	.version 	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_esp)),

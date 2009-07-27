@@ -13,7 +13,8 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-#include <xtables.h>
+#include <iptables.h>
+#include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_ECN.h>
 
 static void ECN_help(void)
@@ -49,7 +50,7 @@ static int ECN_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case 'F':
 		if (*flags)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			        "ECN target: Only use --ecn-tcp-remove ONCE!");
 		einfo->operation = IPT_ECN_OP_SET_ECE | IPT_ECN_OP_SET_CWR;
 		einfo->proto.tcp.ece = 0;
@@ -58,10 +59,10 @@ static int ECN_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case 'G':
 		if (*flags & IPT_ECN_OP_SET_CWR)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				"ECN target: Only use --ecn-tcp-cwr ONCE!");
-		if (!xtables_strtoui(optarg, NULL, &result, 0, 1))
-			xtables_error(PARAMETER_PROBLEM,
+		if (string_to_number(optarg, 0, 1, &result))
+			exit_error(PARAMETER_PROBLEM,
 				   "ECN target: Value out of range");
 		einfo->operation |= IPT_ECN_OP_SET_CWR;
 		einfo->proto.tcp.cwr = result;
@@ -69,10 +70,10 @@ static int ECN_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case 'H':
 		if (*flags & IPT_ECN_OP_SET_ECE)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				"ECN target: Only use --ecn-tcp-ece ONCE!");
-		if (!xtables_strtoui(optarg, NULL, &result, 0, 1))
-			xtables_error(PARAMETER_PROBLEM,
+		if (string_to_number(optarg, 0, 1, &result))
+			exit_error(PARAMETER_PROBLEM,
 				   "ECN target: Value out of range");
 		einfo->operation |= IPT_ECN_OP_SET_ECE;
 		einfo->proto.tcp.ece = result;
@@ -80,10 +81,10 @@ static int ECN_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '9':
 		if (*flags & IPT_ECN_OP_SET_IP)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				"ECN target: Only use --ecn-ip-ect ONCE!");
-		if (!xtables_strtoui(optarg, NULL, &result, 0, 3))
-			xtables_error(PARAMETER_PROBLEM,
+		if (string_to_number(optarg, 0, 3, &result))
+			exit_error(PARAMETER_PROBLEM,
 				   "ECN target: Value out of range");
 		einfo->operation |= IPT_ECN_OP_SET_IP;
 		einfo->ip_ect = result;
@@ -99,7 +100,7 @@ static int ECN_parse(int c, char **argv, int invert, unsigned int *flags,
 static void ECN_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 		           "ECN target: Parameter --ecn-tcp-remove is required");
 }
 
@@ -152,7 +153,7 @@ static void ECN_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target ecn_tg_reg = {
 	.name		= "ECN",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV4,
+	.family		= PF_INET,
 	.size		= XT_ALIGN(sizeof(struct ipt_ECN_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_ECN_info)),
 	.help		= ECN_help,

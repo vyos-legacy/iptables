@@ -10,22 +10,22 @@ the next rule.  So if you want to LOG the packets you refuse, use two
 separate rules with the same matching criteria, first using target LOG
 then DROP (or REJECT).
 .TP
-\fB\-\-log\-level\fP \fIlevel\fP
+.BI "\-\-log-level " "level"
 Level of logging (numeric or see \fIsyslog.conf\fP(5)).
 .TP
-\fB\-\-log\-prefix\fP \fIprefix\fP
+.BI "\-\-log-prefix " "prefix"
 Prefix log messages with the specified prefix; up to 29 letters long,
 and useful for distinguishing messages in the logs.
 .TP
-\fB\-\-log\-tcp\-sequence\fP
+.B \-\-log-tcp-sequence
 Log TCP sequence numbers. This is a security risk if the log is
 readable by users.
 .TP
-\fB\-\-log\-tcp\-options\fP
+.B \-\-log-tcp-options
 Log options from the TCP packet header.
 .TP
-\fB\-\-log\-ip\-options\fP
+.B \-\-log-ip-options
 Log options from the IPv6 packet header.
 .TP
-\fB\-\-log\-uid\fP
+.B \-\-log-uid
 Log the userid of the process which generated the packet.

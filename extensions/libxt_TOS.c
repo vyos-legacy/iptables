@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <netinet/in.h>
 
 #include <xtables.h>
 #include <linux/netfilter/xt_DSCP.h>
@@ -82,12 +81,12 @@ static int tos_tg_parse_v0(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '=':
-		xtables_param_act(XTF_ONLY_ONCE, "TOS", "--set-tos", *flags & FLAG_TOS);
-		xtables_param_act(XTF_NO_INVERT, "TOS", "--set-tos", invert);
+		param_act(P_ONLY_ONCE, "TOS", "--set-tos", *flags & FLAG_TOS);
+		param_act(P_NO_INVERT, "TOS", "--set-tos", invert);
 		if (!tos_parse_symbolic(optarg, &tvm, 0xFF))
-			xtables_param_act(XTF_BAD_VALUE, "TOS", "--set-tos", optarg);
+			param_act(P_BAD_VALUE, "TOS", "--set-tos", optarg);
 		if (tvm.mask != 0xFF)
-			xtables_error(PARAMETER_PROBLEM, "tos match: Your kernel "
+			exit_error(PARAMETER_PROBLEM, "tos match: Your kernel "
 			           "is too old to support anything besides "
 				   "/0xFF as a mask.");
 		info->tos = tvm.value;
@@ -107,37 +106,37 @@ static int tos_tg_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '=': /* --set-tos */
-		xtables_param_act(XTF_ONLY_ONCE, "TOS", "--set-tos", *flags & FLAG_TOS);
-		xtables_param_act(XTF_NO_INVERT, "TOS", "--set-tos", invert);
+		param_act(P_ONLY_ONCE, "TOS", "--set-tos", *flags & FLAG_TOS);
+		param_act(P_NO_INVERT, "TOS", "--set-tos", invert);
 		if (!tos_parse_symbolic(optarg, &tvm, 0x3F))
-			xtables_param_act(XTF_BAD_VALUE, "TOS", "--set-tos", optarg);
+			param_act(P_BAD_VALUE, "TOS", "--set-tos", optarg);
 		info->tos_value = tvm.value;
 		info->tos_mask  = tvm.mask;
 		break;
 
 	case '&': /* --and-tos */
-		xtables_param_act(XTF_ONLY_ONCE, "TOS", "--and-tos", *flags & FLAG_TOS);
-		xtables_param_act(XTF_NO_INVERT, "TOS", "--and-tos", invert);
-		if (!xtables_strtoui(optarg, NULL, &bits, 0, UINT8_MAX))
-			xtables_param_act(XTF_BAD_VALUE, "TOS", "--and-tos", optarg);
+		param_act(P_ONLY_ONCE, "TOS", "--and-tos", *flags & FLAG_TOS);
+		param_act(P_NO_INVERT, "TOS", "--and-tos", invert);
+		if (!strtonum(optarg, NULL, &bits, 0, 0xFF))
+			param_act(P_BAD_VALUE, "TOS", "--and-tos", optarg);
 		info->tos_value = 0;
 		info->tos_mask  = ~bits;
 		break;
 
 	case '|': /* --or-tos */
-		xtables_param_act(XTF_ONLY_ONCE, "TOS", "--or-tos", *flags & FLAG_TOS);
-		xtables_param_act(XTF_NO_INVERT, "TOS", "--or-tos", invert);
-		if (!xtables_strtoui(optarg, NULL, &bits, 0, UINT8_MAX))
-			xtables_param_act(XTF_BAD_VALUE, "TOS", "--or-tos", optarg);
+		param_act(P_ONLY_ONCE, "TOS", "--or-tos", *flags & FLAG_TOS);
+		param_act(P_NO_INVERT, "TOS", "--or-tos", invert);
+		if (!strtonum(optarg, NULL, &bits, 0, 0xFF))
+			param_act(P_BAD_VALUE, "TOS", "--or-tos", optarg);
 		info->tos_value = bits;
 		info->tos_mask  = bits;
 		break;
 
 	case '^': /* --xor-tos */
-		xtables_param_act(XTF_ONLY_ONCE, "TOS", "--xor-tos", *flags & FLAG_TOS);
-		xtables_param_act(XTF_NO_INVERT, "TOS", "--xor-tos", invert);
-		if (!xtables_strtoui(optarg, NULL, &bits, 0, UINT8_MAX))
-			xtables_param_act(XTF_BAD_VALUE, "TOS", "--xor-tos", optarg);
+		param_act(P_ONLY_ONCE, "TOS", "--xor-tos", *flags & FLAG_TOS);
+		param_act(P_NO_INVERT, "TOS", "--xor-tos", invert);
+		if (!strtonum(optarg, NULL, &bits, 0, 0xFF))
+			param_act(P_BAD_VALUE, "TOS", "--xor-tos", optarg);
 		info->tos_value = bits;
 		info->tos_mask  = 0;
 		break;
@@ -153,7 +152,7 @@ static int tos_tg_parse(int c, char **argv, int invert, unsigned int *flags,
 static void tos_tg_check(unsigned int flags)
 {
 	if (flags == 0)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 		           "TOS: The --set-tos parameter is required");
 }
 
@@ -209,7 +208,7 @@ static struct xtables_target tos_tg_reg_v0 = {
 	.version       = XTABLES_VERSION,
 	.name          = "TOS",
 	.revision      = 0,
-	.family        = NFPROTO_IPV4,
+	.family        = AF_INET,
 	.size          = XT_ALIGN(sizeof(struct xt_tos_target_info)),
 	.userspacesize = XT_ALIGN(sizeof(struct xt_tos_target_info)),
 	.help          = tos_tg_help_v0,
@@ -224,7 +223,7 @@ static struct xtables_target tos_tg_reg = {
 	.version       = XTABLES_VERSION,
 	.name          = "TOS",
 	.revision      = 1,
-	.family        = NFPROTO_IPV4,
+	.family        = AF_INET,
 	.size          = XT_ALIGN(sizeof(struct xt_tos_target_info)),
 	.userspacesize = XT_ALIGN(sizeof(struct xt_tos_target_info)),
 	.help          = tos_tg_help,
@@ -238,7 +237,7 @@ static struct xtables_target tos_tg_reg = {
 static struct xtables_target tos_tg6_reg = {
 	.version       = XTABLES_VERSION,
 	.name          = "TOS",
-	.family        = NFPROTO_IPV6,
+	.family        = AF_INET6,
 	.revision      = 1,
 	.size          = XT_ALIGN(sizeof(struct xt_tos_target_info)),
 	.userspacesize = XT_ALIGN(sizeof(struct xt_tos_target_info)),

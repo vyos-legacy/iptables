@@ -22,6 +22,7 @@
 
 #include <linux/netfilter/xt_time.h>
 #include <xtables.h>
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x))
 
 enum { /* getopt "seen" bits */
 	F_DATE_START = 1 << 0,
@@ -142,10 +143,10 @@ static time_t time_parse_date(const char *s, bool end)
 	if (ret >= 0)
 		return ret;
 	perror("mktime");
-	xtables_error(OTHER_PROBLEM, "mktime returned an error");
+	exit_error(OTHER_PROBLEM, "mktime returned an error");
 
  out:
-	xtables_error(PARAMETER_PROBLEM, "Invalid date \"%s\" specified. Should "
+	exit_error(PARAMETER_PROBLEM, "Invalid date \"%s\" specified. Should "
 	           "be YYYY[-MM[-DD[Thh[:mm[:ss]]]]]", os);
 	return -1;
 }
@@ -175,7 +176,7 @@ static unsigned int time_parse_minutes(const char *s)
 	return 60 * 60 * hour + 60 * minute + second;
 
  out:
-	xtables_error(PARAMETER_PROBLEM, "invalid time \"%s\" specified, "
+	exit_error(PARAMETER_PROBLEM, "invalid time \"%s\" specified, "
 	           "should be hh:mm[:ss] format and within the boundaries", s);
 	return -1;
 }
@@ -207,7 +208,7 @@ static uint32_t time_parse_monthdays(const char *arg)
 	while (my_strseg(day, sizeof(day), &arg, ',') != NULL) {
 		i = strtoul(day, &err, 0);
 		if ((*err != ',' && *err != '\0') || i > 31)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "%s is not a valid day for --monthdays", day);
 		ret |= 1 << i;
 	}
@@ -225,7 +226,7 @@ static unsigned int time_parse_weekdays(const char *arg)
 		i = strtoul(day, &err, 0);
 		if (*err == '\0') {
 			if (i == 0)
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 				           "No, the week does NOT begin with Sunday.");
 			ret |= 1 << i;
 			continue;
@@ -239,7 +240,7 @@ static unsigned int time_parse_weekdays(const char *arg)
 			}
 
 		if (!valid)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "%s is not a valid day specifier", day);
 	}
 
@@ -254,54 +255,54 @@ static int time_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case 'D': /* --datestart */
 		if (*flags & F_DATE_START)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Cannot specify --datestart twice");
 		if (invert)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Unexpected \"!\" with --datestart");
 		info->date_start = time_parse_date(optarg, false);
 		*flags |= F_DATE_START;
 		return 1;
 	case 'E': /* --datestop */
 		if (*flags & F_DATE_STOP)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Cannot specify --datestop more than once");
 		if (invert)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "unexpected \"!\" with --datestop");
 		info->date_stop = time_parse_date(optarg, true);
 		*flags |= F_DATE_STOP;
 		return 1;
 	case 'X': /* --timestart */
 		if (*flags & F_TIME_START)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Cannot specify --timestart more than once");
 		if (invert)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Unexpected \"!\" with --timestart");
 		info->daytime_start = time_parse_minutes(optarg);
 		*flags |= F_TIME_START;
 		return 1;
 	case 'Y': /* --timestop */
 		if (*flags & F_TIME_STOP)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Cannot specify --timestop more than once");
 		if (invert)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Unexpected \"!\" with --timestop");
 		info->daytime_stop = time_parse_minutes(optarg);
 		*flags |= F_TIME_STOP;
 		return 1;
 	case 'l': /* --localtz */
 		if (*flags & F_TIMEZONE)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Can only specify exactly one of --localtz or --utc");
 		info->flags |= XT_TIME_LOCAL_TZ;
 		*flags |= F_TIMEZONE;
 		return 1;
 	case 'm': /* --monthdays */
 		if (*flags & F_MONTHDAYS)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Cannot specify --monthdays more than once");
 		info->monthdays_match = time_parse_monthdays(optarg);
 		if (invert)
@@ -310,7 +311,7 @@ static int time_parse(int c, char **argv, int invert, unsigned int *flags,
 		return 1;
 	case 'w': /* --weekdays */
 		if (*flags & F_WEEKDAYS)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Cannot specify --weekdays more than once");
 		info->weekdays_match = time_parse_weekdays(optarg);
 		if (invert)
@@ -319,7 +320,7 @@ static int time_parse(int c, char **argv, int invert, unsigned int *flags,
 		return 1;
 	case 'u': /* --utc */
 		if (*flags & F_TIMEZONE)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Can only specify exactly one of --localtz or --utc");
 		info->flags &= ~XT_TIME_LOCAL_TZ;
 		*flags |= F_TIMEZONE;
@@ -406,7 +407,7 @@ static inline void divide_time(unsigned int fulltime, unsigned int *hours,
 static void time_print(const void *ip, const struct xt_entry_match *match,
                        int numeric)
 {
-	const struct xt_time_info *info = (const void *)match->data;
+	struct xt_time_info *info = (void *)match->data;
 	unsigned int h, m, s;
 
 	printf("TIME ");
@@ -467,7 +468,7 @@ static void time_save(const void *ip, const struct xt_entry_match *match)
 
 static struct xtables_match time_match = {
 	.name          = "time",
-	.family        = NFPROTO_UNSPEC,
+	.family        = AF_UNSPEC,
 	.version       = XTABLES_VERSION,
 	.size          = XT_ALIGN(sizeof(struct xt_time_info)),
 	.userspacesize = XT_ALIGN(sizeof(struct xt_time_info)),

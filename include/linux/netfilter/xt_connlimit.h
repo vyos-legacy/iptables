@@ -5,15 +5,12 @@ struct xt_connlimit_data;
 
 struct xt_connlimit_info {
 	union {
-		union nf_inet_addr mask;
-		union {
-			__be32 v4_mask;
-			__be32 v6_mask[4];
-		};
+		u_int32_t v4_mask;
+		u_int32_t v6_mask[4];
 	};
 	unsigned int limit, inverse;
 
-	/* Used internally by the kernel */
+	/* this needs to be at the end */
 	struct xt_connlimit_data *data __attribute__((aligned(8)));
 };
 

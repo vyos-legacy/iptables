@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 
-configure :=  --with-xtlibdir=/lib/xtables --enable-libipq \
-	 --libdir=/lib
+configure :=  --with-xtlibdir=/lib/xtables --libdir=/lib --enable-libipq
 install :=  --exclude=-multi
 
 %:
@@ -25,10 +24,10 @@ else
 
 include /usr/share/quilt/quilt.make
 
-build: patch debian/stamp-build
+build: debian/stamp-build
 debian/stamp-build:
 	dh build --before dh_auto_configure
-	autoreconf -i
+	autoreconf -fi
 	dh_auto_configure -- $(configure)
 	dh build --after dh_auto_configure
 	touch $@

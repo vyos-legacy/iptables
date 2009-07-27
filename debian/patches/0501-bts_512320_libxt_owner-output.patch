@@ -1,0 +1,29 @@
+author	Daniel Drake <dsd@gentoo.org>
+
+	 Mon, 19 Jan 2009 14:36:41 +0000 (15:36 +0100)
+
+git.netfilter.org iptables.git cfb9cf0509ad8100cd8d6ab52d60a8ffbb318578
+
+
+Index: b/extensions/libxt_owner.c
+===================================================================
+--- a/extensions/libxt_owner.c	2009-01-19 13:21:38.754543632 -0500
++++ b/extensions/libxt_owner.c	2009-01-19 13:22:47.340543658 -0500
+@@ -324,7 +324,7 @@
+ 		return;
+ 	if (info->invert & flag)
+ 		printf("! ");
+-	printf(label);
++	printf("%s ", label);
+ 
+ 	switch (info->match & flag) {
+ 	case IPT_OWNER_UID:
+@@ -375,7 +375,7 @@
+ 		return;
+ 	if (info->invert & flag)
+ 		printf("! ");
+-	printf(label);
++	printf("%s ", label);
+ 
+ 	switch (info->match & flag) {
+ 	case IP6T_OWNER_UID:

@@ -33,11 +33,12 @@ parse_num(const char *s, struct xt_NFQ_info *tinfo)
 {
 	unsigned int num;
        
-	if (!xtables_strtoui(s, NULL, &num, 0, UINT16_MAX))
-		xtables_error(PARAMETER_PROBLEM,
+	if (string_to_number(s, 0, 65535, &num) == -1)
+		exit_error(PARAMETER_PROBLEM,
 			   "Invalid queue number `%s'\n", s);
 
     	tinfo->queuenum = num & 0xffff;
+    	return;
 }
 
 static int
@@ -50,7 +51,7 @@ NFQUEUE_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case 'F':
 		if (*flags)
-			xtables_error(PARAMETER_PROBLEM, "NFQUEUE target: "
+			exit_error(PARAMETER_PROBLEM, "NFQUEUE target: "
 				   "Only use --queue-num ONCE!");
 		parse_num(optarg, tinfo);
 		break;
@@ -78,7 +79,7 @@ static void NFQUEUE_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target nfqueue_target = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "NFQUEUE",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_NFQ_info)),
@@ -91,7 +92,7 @@ static struct xtables_target nfqueue_target = {
 };
 
 static struct xtables_target nfqueue_target6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name		= "NFQUEUE",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_NFQ_info)),

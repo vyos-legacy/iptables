@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <netinet/in.h>
 #include <xtables.h>
 #include <linux/netfilter/xt_tcpudp.h>
 
@@ -36,16 +35,16 @@ parse_udp_ports(const char *portstring, u_int16_t *ports)
 
 	buffer = strdup(portstring);
 	if ((cp = strchr(buffer, ':')) == NULL)
-		ports[0] = ports[1] = xtables_parse_port(buffer, "udp");
+		ports[0] = ports[1] = parse_port(buffer, "udp");
 	else {
 		*cp = '\0';
 		cp++;
 
-		ports[0] = buffer[0] ? xtables_parse_port(buffer, "udp") : 0;
-		ports[1] = cp[0] ? xtables_parse_port(cp, "udp") : 0xFFFF;
+		ports[0] = buffer[0] ? parse_port(buffer, "udp") : 0;
+		ports[1] = cp[0] ? parse_port(cp, "udp") : 0xFFFF;
 
 		if (ports[0] > ports[1])
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "invalid portrange (min > max)");
 	}
 	free(buffer);
@@ -70,9 +69,9 @@ udp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & UDP_SRC_PORTS)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--source-port' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_udp_ports(argv[optind-1], udpinfo->spts);
 		if (invert)
 			udpinfo->invflags |= XT_UDP_INV_SRCPT;
@@ -81,9 +80,9 @@ udp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & UDP_DST_PORTS)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--destination-port' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_udp_ports(argv[optind-1], udpinfo->dpts);
 		if (invert)
 			udpinfo->invflags |= XT_UDP_INV_DSTPT;
@@ -191,7 +190,7 @@ static void udp_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match udp_match = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "udp",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_udp)),
@@ -205,7 +204,7 @@ static struct xtables_match udp_match = {
 };
 
 static struct xtables_match udp_match6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name		= "udp",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_udp)),

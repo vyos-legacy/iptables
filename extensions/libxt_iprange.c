@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-#include <netinet/in.h>
 #include <xtables.h>
 #include <linux/netfilter.h>
 #include <linux/netfilter/xt_iprange.h>
@@ -40,16 +39,16 @@ parse_iprange(char *arg, struct ipt_iprange *range)
 	if (dash != NULL)
 		*dash = '\0';
 
-	ip = xtables_numeric_to_ipaddr(arg);
+	ip = numeric_to_ipaddr(arg);
 	if (!ip)
-		xtables_error(PARAMETER_PROBLEM, "iprange match: Bad IP address \"%s\"\n",
+		exit_error(PARAMETER_PROBLEM, "iprange match: Bad IP address `%s'\n",
 			   arg);
 	range->min_ip = ip->s_addr;
 
 	if (dash != NULL) {
-		ip = xtables_numeric_to_ipaddr(dash+1);
+		ip = numeric_to_ipaddr(dash+1);
 		if (!ip)
-			xtables_error(PARAMETER_PROBLEM, "iprange match: Bad IP address \"%s\"\n",
+			exit_error(PARAMETER_PROBLEM, "iprange match: Bad IP address `%s'\n",
 				   dash+1);
 		range->max_ip = ip->s_addr;
 	} else {
@@ -65,12 +64,12 @@ static int iprange_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & IPRANGE_SRC)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "iprange match: Only use --src-range ONCE!");
 		*flags |= IPRANGE_SRC;
 
 		info->flags |= IPRANGE_SRC;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		if (invert)
 			info->flags |= IPRANGE_SRC_INV;
 		parse_iprange(optarg, &info->src);
@@ -79,12 +78,12 @@ static int iprange_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & IPRANGE_DST)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "iprange match: Only use --dst-range ONCE!");
 		*flags |= IPRANGE_DST;
 
 		info->flags |= IPRANGE_DST;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		if (invert)
 			info->flags |= IPRANGE_DST_INV;
 
@@ -110,15 +109,15 @@ iprange_mt4_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '1': /* --src-range */
 		end = strchr(optarg, '-');
 		if (end == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--src-range", optarg);
+			param_act(P_BAD_VALUE, "iprange", "--src-range", optarg);
 		*end = '\0';
-		ia = xtables_numeric_to_ipaddr(optarg);
+		ia = numeric_to_ipaddr(optarg);
 		if (ia == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--src-range", optarg);
+			param_act(P_BAD_VALUE, "iprange", "--src-range", optarg);
 		memcpy(&info->src_min.in, ia, sizeof(*ia));
-		ia = xtables_numeric_to_ipaddr(end+1);
+		ia = numeric_to_ipaddr(end+1);
 		if (ia == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--src-range", end + 1);
+			param_act(P_BAD_VALUE, "iprange", "--src-range", end + 1);
 		memcpy(&info->src_max.in, ia, sizeof(*ia));
 		info->flags |= IPRANGE_SRC;
 		if (invert)
@@ -129,15 +128,15 @@ iprange_mt4_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '2': /* --dst-range */
 		end = strchr(optarg, '-');
 		if (end == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--dst-range", optarg);
+			param_act(P_BAD_VALUE, "iprange", "--dst-range", optarg);
 		*end = '\0';
-		ia = xtables_numeric_to_ipaddr(optarg);
+		ia = numeric_to_ipaddr(optarg);
 		if (ia == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--dst-range", optarg);
+			param_act(P_BAD_VALUE, "iprange", "--dst-range", optarg);
 		memcpy(&info->dst_min.in, ia, sizeof(*ia));
-		ia = xtables_numeric_to_ipaddr(end + 1);
+		ia = numeric_to_ipaddr(end + 1);
 		if (ia == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--dst-range", end + 1);
+			param_act(P_BAD_VALUE, "iprange", "--dst-range", end + 1);
 		memcpy(&info->dst_max.in, ia, sizeof(*ia));
 		info->flags |= IPRANGE_DST;
 		if (invert)
@@ -160,15 +159,15 @@ iprange_mt6_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '1': /* --src-range */
 		end = strchr(optarg, '-');
 		if (end == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--src-range", optarg);
+			param_act(P_BAD_VALUE, "iprange", "--src-range", optarg);
 		*end = '\0';
-		ia = xtables_numeric_to_ip6addr(optarg);
+		ia = numeric_to_ip6addr(optarg);
 		if (ia == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--src-range", optarg);
+			param_act(P_BAD_VALUE, "iprange", "--src-range", optarg);
 		memcpy(&info->src_min.in, ia, sizeof(*ia));
-		ia = xtables_numeric_to_ip6addr(end+1);
+		ia = numeric_to_ip6addr(end+1);
 		if (ia == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--src-range", end + 1);
+			param_act(P_BAD_VALUE, "iprange", "--src-range", end + 1);
 		memcpy(&info->src_max.in, ia, sizeof(*ia));
 		info->flags |= IPRANGE_SRC;
 		if (invert)
@@ -179,15 +178,15 @@ iprange_mt6_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '2': /* --dst-range */
 		end = strchr(optarg, '-');
 		if (end == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--dst-range", optarg);
+			param_act(P_BAD_VALUE, "iprange", "--dst-range", optarg);
 		*end = '\0';
-		ia = xtables_numeric_to_ip6addr(optarg);
+		ia = numeric_to_ip6addr(optarg);
 		if (ia == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--dst-range", optarg);
+			param_act(P_BAD_VALUE, "iprange", "--dst-range", optarg);
 		memcpy(&info->dst_min.in, ia, sizeof(*ia));
-		ia = xtables_numeric_to_ip6addr(end + 1);
+		ia = numeric_to_ip6addr(end + 1);
 		if (ia == NULL)
-			xtables_param_act(XTF_BAD_VALUE, "iprange", "--dst-range", end + 1);
+			param_act(P_BAD_VALUE, "iprange", "--dst-range", end + 1);
 		memcpy(&info->dst_max.in, ia, sizeof(*ia));
 		info->flags |= IPRANGE_DST;
 		if (invert)
@@ -201,7 +200,7 @@ iprange_mt6_parse(int c, char **argv, int invert, unsigned int *flags,
 static void iprange_mt_check(unsigned int flags)
 {
 	if (flags == 0)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "iprange match: You must specify `--src-range' or `--dst-range'");
 }
 
@@ -250,15 +249,15 @@ iprange_mt4_print(const void *ip, const struct xt_entry_match *match,
 		 * ipaddr_to_numeric() uses a static buffer, so cannot
 		 * combine the printf() calls.
 		 */
-		printf("%s", xtables_ipaddr_to_numeric(&info->src_min.in));
-		printf("-%s ", xtables_ipaddr_to_numeric(&info->src_max.in));
+		printf("%s", ipaddr_to_numeric(&info->src_min.in));
+		printf("-%s ", ipaddr_to_numeric(&info->src_max.in));
 	}
 	if (info->flags & IPRANGE_DST) {
 		printf("destination IP range ");
 		if (info->flags & IPRANGE_DST_INV)
 			printf("! ");
-		printf("%s", xtables_ipaddr_to_numeric(&info->dst_min.in));
-		printf("-%s ", xtables_ipaddr_to_numeric(&info->dst_max.in));
+		printf("%s", ipaddr_to_numeric(&info->dst_min.in));
+		printf("-%s ", ipaddr_to_numeric(&info->dst_max.in));
 	}
 }
 
@@ -276,15 +275,15 @@ iprange_mt6_print(const void *ip, const struct xt_entry_match *match,
 		 * ipaddr_to_numeric() uses a static buffer, so cannot
 		 * combine the printf() calls.
 		 */
-		printf("%s", xtables_ip6addr_to_numeric(&info->src_min.in6));
-		printf("-%s ", xtables_ip6addr_to_numeric(&info->src_max.in6));
+		printf("%s", ip6addr_to_numeric(&info->src_min.in6));
+		printf("-%s ", ip6addr_to_numeric(&info->src_max.in6));
 	}
 	if (info->flags & IPRANGE_DST) {
 		printf("destination IP range ");
 		if (info->flags & IPRANGE_DST_INV)
 			printf("! ");
-		printf("%s", xtables_ip6addr_to_numeric(&info->dst_min.in6));
-		printf("-%s ", xtables_ip6addr_to_numeric(&info->dst_max.in6));
+		printf("%s", ip6addr_to_numeric(&info->dst_min.in6));
+		printf("-%s ", ip6addr_to_numeric(&info->dst_max.in6));
 	}
 }
 
@@ -315,14 +314,14 @@ static void iprange_mt4_save(const void *ip, const struct xt_entry_match *match)
 	if (info->flags & IPRANGE_SRC) {
 		if (info->flags & IPRANGE_SRC_INV)
 			printf("! ");
-		printf("--src-range %s", xtables_ipaddr_to_numeric(&info->src_min.in));
-		printf("-%s ", xtables_ipaddr_to_numeric(&info->src_max.in));
+		printf("--src-range %s", ipaddr_to_numeric(&info->src_min.in));
+		printf("-%s ", ipaddr_to_numeric(&info->src_max.in));
 	}
 	if (info->flags & IPRANGE_DST) {
 		if (info->flags & IPRANGE_DST_INV)
 			printf("! ");
-		printf("--dst-range %s", xtables_ipaddr_to_numeric(&info->dst_min.in));
-		printf("-%s ", xtables_ipaddr_to_numeric(&info->dst_max.in));
+		printf("--dst-range %s", ipaddr_to_numeric(&info->dst_min.in));
+		printf("-%s ", ipaddr_to_numeric(&info->dst_max.in));
 	}
 }
 
@@ -333,14 +332,14 @@ static void iprange_mt6_save(const void *ip, const struct xt_entry_match *match)
 	if (info->flags & IPRANGE_SRC) {
 		if (info->flags & IPRANGE_SRC_INV)
 			printf("! ");
-		printf("--src-range %s", xtables_ip6addr_to_numeric(&info->src_min.in6));
-		printf("-%s ", xtables_ip6addr_to_numeric(&info->src_max.in6));
+		printf("--src-range %s", ip6addr_to_numeric(&info->src_min.in6));
+		printf("-%s ", ip6addr_to_numeric(&info->src_max.in6));
 	}
 	if (info->flags & IPRANGE_DST) {
 		if (info->flags & IPRANGE_DST_INV)
 			printf("! ");
-		printf("--dst-range %s", xtables_ip6addr_to_numeric(&info->dst_min.in6));
-		printf("-%s ", xtables_ip6addr_to_numeric(&info->dst_max.in6));
+		printf("--dst-range %s", ip6addr_to_numeric(&info->dst_min.in6));
+		printf("-%s ", ip6addr_to_numeric(&info->dst_max.in6));
 	}
 }
 
@@ -348,7 +347,7 @@ static struct xtables_match iprange_match = {
 	.version       = XTABLES_VERSION,
 	.name          = "iprange",
 	.revision      = 0,
-	.family        = NFPROTO_IPV4,
+	.family        = AF_INET,
 	.size          = XT_ALIGN(sizeof(struct ipt_iprange_info)),
 	.userspacesize = XT_ALIGN(sizeof(struct ipt_iprange_info)),
 	.help          = iprange_mt_help,
@@ -363,7 +362,7 @@ static struct xtables_match iprange_mt_reg = {
 	.version        = XTABLES_VERSION,
 	.name           = "iprange",
 	.revision       = 1,
-	.family         = NFPROTO_IPV4,
+	.family         = AF_INET,
 	.size           = XT_ALIGN(sizeof(struct xt_iprange_mtinfo)),
 	.userspacesize  = XT_ALIGN(sizeof(struct xt_iprange_mtinfo)),
 	.help           = iprange_mt_help,
@@ -378,7 +377,7 @@ static struct xtables_match iprange_mt6_reg = {
 	.version        = XTABLES_VERSION,
 	.name           = "iprange",
 	.revision       = 1,
-	.family         = NFPROTO_IPV6,
+	.family         = AF_INET6,
 	.size           = XT_ALIGN(sizeof(struct xt_iprange_mtinfo)),
 	.userspacesize  = XT_ALIGN(sizeof(struct xt_iprange_mtinfo)),
 	.help           = iprange_mt_help,

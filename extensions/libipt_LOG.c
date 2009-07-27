@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <syslog.h>
 #include <getopt.h>
-#include <xtables.h>
+#include <iptables.h>
+#include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_LOG.h>
 
 #define LOG_DEFAULT_LEVEL LOG_WARNING
@@ -69,25 +70,28 @@ parse_level(const char *level)
 	unsigned int lev = -1;
 	unsigned int set = 0;
 
-	if (!xtables_strtoui(level, NULL, &lev, 0, 7)) {
+	if (string_to_number(level, 0, 7, &lev) == -1) {
 		unsigned int i = 0;
 
-		for (i = 0; i < ARRAY_SIZE(ipt_log_names); ++i)
+		for (i = 0;
+		     i < sizeof(ipt_log_names) / sizeof(struct ipt_log_names);
+		     i++) {
 			if (strncasecmp(level, ipt_log_names[i].name,
 					strlen(level)) == 0) {
 				if (set++)
-					xtables_error(PARAMETER_PROBLEM,
+					exit_error(PARAMETER_PROBLEM,
 						   "log-level `%s' ambiguous",
 						   level);
 				lev = ipt_log_names[i].level;
 			}
+		}
 
 		if (!set)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "log-level `%s' unknown", level);
 	}
 
-	return lev;
+	return (u_int8_t)lev;
 }
 
 #define IPT_LOG_OPT_LEVEL 0x01
@@ -105,11 +109,11 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '!':
 		if (*flags & IPT_LOG_OPT_LEVEL)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-level twice");
 
-		if (xtables_check_inverse(optarg, &invert, NULL, 0))
-			xtables_error(PARAMETER_PROBLEM,
+		if (check_inverse(optarg, &invert, NULL, 0))
+			exit_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --log-level");
 
 		loginfo->level = parse_level(optarg);
@@ -118,24 +122,24 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '#':
 		if (*flags & IPT_LOG_OPT_PREFIX)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-prefix twice");
 
-		if (xtables_check_inverse(optarg, &invert, NULL, 0))
-			xtables_error(PARAMETER_PROBLEM,
+		if (check_inverse(optarg, &invert, NULL, 0))
+			exit_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --log-prefix");
 
 		if (strlen(optarg) > sizeof(loginfo->prefix) - 1)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Maximum prefix length %u for --log-prefix",
 				   (unsigned int)sizeof(loginfo->prefix) - 1);
 
 		if (strlen(optarg) == 0)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "No prefix specified for --log-prefix");
 
 		if (strlen(optarg) != strlen(strtok(optarg, "\n")))
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Newlines not allowed in --log-prefix");
 
 		strcpy(loginfo->prefix, optarg);
@@ -144,7 +148,7 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '1':
 		if (*flags & IPT_LOG_OPT_TCPSEQ)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-tcp-sequence "
 				   "twice");
 
@@ -154,7 +158,7 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & IPT_LOG_OPT_TCPOPT)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-tcp-options twice");
 
 		loginfo->logflags |= IPT_LOG_TCPOPT;
@@ -163,7 +167,7 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '3':
 		if (*flags & IPT_LOG_OPT_IPOPT)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-ip-options twice");
 
 		loginfo->logflags |= IPT_LOG_IPOPT;
@@ -172,7 +176,7 @@ static int LOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '4':
 		if (*flags & IPT_LOG_OPT_UID)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Can't specify --log-uid twice");
 
 		loginfo->logflags |= IPT_LOG_UID;
@@ -198,12 +202,15 @@ static void LOG_print(const void *ip, const struct xt_entry_target *target,
 		printf("flags %u level %u ",
 		       loginfo->logflags, loginfo->level);
 	else {
-		for (i = 0; i < ARRAY_SIZE(ipt_log_names); ++i)
+		for (i = 0;
+		     i < sizeof(ipt_log_names) / sizeof(struct ipt_log_names);
+		     i++) {
 			if (loginfo->level == ipt_log_names[i].level) {
 				printf("level %s ", ipt_log_names[i].name);
 				break;
 			}
-		if (i == ARRAY_SIZE(ipt_log_names))
+		}
+		if (i == sizeof(ipt_log_names) / sizeof(struct ipt_log_names))
 			printf("UNKNOWN level %u ", loginfo->level);
 		if (loginfo->logflags & IPT_LOG_TCPSEQ)
 			printf("tcp-sequence ");
@@ -228,7 +235,7 @@ static void LOG_save(const void *ip, const struct xt_entry_target *target)
 
 	if (strcmp(loginfo->prefix, "") != 0) {
 		printf("--log-prefix ");
-		xtables_save_string(loginfo->prefix);
+		save_string(loginfo->prefix);
 	}
 
 	if (loginfo->level != LOG_DEFAULT_LEVEL)
@@ -247,7 +254,7 @@ static void LOG_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target log_tg_reg = {
     .name          = "LOG",
     .version       = XTABLES_VERSION,
-    .family        = NFPROTO_IPV4,
+    .family        = PF_INET,
     .size          = XT_ALIGN(sizeof(struct ipt_log_info)),
     .userspacesize = XT_ALIGN(sizeof(struct ipt_log_info)),
     .help          = LOG_help,

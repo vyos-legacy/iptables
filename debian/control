@@ -3,7 +3,7 @@ Section: net
 Priority: important
 Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
 Build-Depends: debhelper (>>7.0), quilt, autoconf, automake, libtool
-Standards-Version: 3.8.1
+Standards-Version: 3.8.0
 Homepage: http://www.netfilter.org/
 
 
@@ -26,11 +26,9 @@ Description: administration tools for packet filtering and NAT
 Package: iptables-dev
 Architecture: any
 Priority: optional
-Depends: ${shlibs:Depends}, ${misc:Depends}, iptables (=${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: iptables (<<1.4.2-2)
 Section: devel
-Description: iptables development files
- iptables is used to setup, maintain, and inspect the tables of
- packet filter rules in the Linux kernel. This packages contains
- the available library (libipq, libiptc, libxtables), header,
- documentation and related files for iptables development.
+Description: development files for iptable's libipq
+ Header files, static libs and documentation for libipq, iptables'
+ user-space packet queuing library.

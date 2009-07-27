@@ -51,7 +51,7 @@ typedef unsigned int socklen_t;
 #define STRUCT_REPLACE		struct ipt_replace
 
 #define STRUCT_TC_HANDLE	struct iptc_handle
-#define xtc_handle		iptc_handle
+#define TC_HANDLE_T		iptc_handle_t
 
 #define ENTRY_ITERATE		IPT_ENTRY_ITERATE
 #define TABLE_MAXNAMELEN	IPT_TABLE_MAXNAMELEN
@@ -78,6 +78,7 @@ typedef unsigned int socklen_t;
 #define TC_APPEND_ENTRY		iptc_append_entry
 #define TC_DELETE_ENTRY		iptc_delete_entry
 #define TC_DELETE_NUM_ENTRY	iptc_delete_num_entry
+#define TC_CHECK_PACKET		iptc_check_packet
 #define TC_FLUSH_ENTRIES	iptc_flush_entries
 #define TC_ZERO_ENTRIES		iptc_zero_entries
 #define TC_READ_COUNTER		iptc_read_counter
@@ -125,7 +126,7 @@ typedef unsigned int socklen_t;
 #define IP_PARTS(n) IP_PARTS_NATIVE(ntohl(n))
 
 int
-dump_entry(STRUCT_ENTRY *e, struct iptc_handle *const handle)
+dump_entry(STRUCT_ENTRY *e, const TC_HANDLE_T handle)
 {
 	size_t i;
 	STRUCT_ENTRY_TARGET *t;
@@ -239,7 +240,7 @@ check_match(const STRUCT_ENTRY_MATCH *m, unsigned int *off)
 static inline int
 check_entry(const STRUCT_ENTRY *e, unsigned int *i, unsigned int *off,
 	    unsigned int user_offset, int *was_return,
-	    struct iptc_handle *h)
+	    TC_HANDLE_T h)
 {
 	unsigned int toff;
 	STRUCT_STANDARD_TARGET *t;
@@ -315,7 +316,7 @@ check_entry(const STRUCT_ENTRY *e, unsigned int *i, unsigned int *off,
 #ifdef IPTC_DEBUG
 /* Do every conceivable sanity check on the handle */
 static void
-do_check(struct iptc_handle *h, unsigned int line)
+do_check(TC_HANDLE_T h, unsigned int line)
 {
 	unsigned int i, n;
 	unsigned int user_offset; /* Offset of first user chain */

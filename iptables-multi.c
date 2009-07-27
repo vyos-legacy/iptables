@@ -17,8 +17,7 @@ int main(int argc, char **argv) {
   } else {
     progname = basename(argv[0]);
 
-    if (!strcmp(progname, "iptables") ||
-        strcmp(progname, "iptables-static") == 0)
+    if (!strcmp(progname, "iptables"))
       return iptables_main(argc, argv);
     
     if (!strcmp(progname, "iptables-save"))

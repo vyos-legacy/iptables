@@ -7,10 +7,10 @@ Matches the given Identification or range of it.
 This option cannot be used with kernel version 2.6.10 or later. The length of
 Fragment header is static and this option doesn't make sense.
 .TP
-\fB\-\-fragres\fP
+.BR "\-\-fragres "
 Matches if the reserved fields are filled with zero.
 .TP
-\fB\-\-fragfirst\fP
+.BR "\-\-fragfirst "
 Matches on the first fragment.
 .TP
 \fB\-\-fragmore\fP

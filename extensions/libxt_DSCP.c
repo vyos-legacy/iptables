@@ -48,15 +48,16 @@ parse_dscp(const char *s, struct xt_DSCP_info *dinfo)
 {
 	unsigned int dscp;
        
-	if (!xtables_strtoui(s, NULL, &dscp, 0, UINT8_MAX))
-		xtables_error(PARAMETER_PROBLEM,
+	if (string_to_number(s, 0, 255, &dscp) == -1)
+		exit_error(PARAMETER_PROBLEM,
 			   "Invalid dscp `%s'\n", s);
 
 	if (dscp > XT_DSCP_MAX)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "DSCP `%d` out of range\n", dscp);
 
-	dinfo->dscp = dscp;
+    	dinfo->dscp = (u_int8_t )dscp;
+    	return;
 }
 
 
@@ -66,7 +67,7 @@ parse_class(const char *s, struct xt_DSCP_info *dinfo)
 	unsigned int dscp = class_to_dscp(s);
 
 	/* Assign the value */
-	dinfo->dscp = dscp;
+	dinfo->dscp = (u_int8_t)dscp;
 }
 
 
@@ -79,14 +80,14 @@ static int DSCP_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case 'F':
 		if (*flags)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "DSCP target: Only use --set-dscp ONCE!");
 		parse_dscp(optarg, dinfo);
 		*flags = 1;
 		break;
 	case 'G':
 		if (*flags)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "DSCP target: Only use --set-dscp-class ONCE!");
 		parse_class(optarg, dinfo);
 		*flags = 1;
@@ -102,7 +103,7 @@ static int DSCP_parse(int c, char **argv, int invert, unsigned int *flags,
 static void DSCP_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 		           "DSCP target: Parameter --set-dscp is required");
 }
 
@@ -130,7 +131,7 @@ static void DSCP_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target dscp_target = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "DSCP",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_DSCP_info)),
@@ -144,7 +145,7 @@ static struct xtables_target dscp_target = {
 };
 
 static struct xtables_target dscp_target6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name		= "DSCP",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_DSCP_info)),

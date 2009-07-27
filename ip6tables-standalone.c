@@ -47,37 +47,31 @@ main(int argc, char *argv[])
 {
 	int ret;
 	char *table = "filter";
-	struct ip6tc_handle *handle = NULL;
+	ip6tc_handle_t handle = NULL;
 
-	ip6tables_globals.program_name = "ip6tables";
-	ret = xtables_init_all(&ip6tables_globals, NFPROTO_IPV6);
-	if (ret < 0) {
-		fprintf(stderr, "%s/%s Failed to initialize xtables\n",
-				ip6tables_globals.program_name,
-				ip6tables_globals.program_version);
-		exit(1);
+	program_name = "ip6tables";
+	program_version = XTABLES_VERSION;
+
+	lib_dir = getenv("XTABLES_LIBDIR");
+	if (lib_dir == NULL) {
+		lib_dir = getenv("IP6TABLES_LIB_DIR");
+		if (lib_dir != NULL)
+			fprintf(stderr, "IP6TABLES_LIB_DIR is deprecated\n");
 	}
+	if (lib_dir == NULL)
+		lib_dir = XTABLES_LIBDIR;
 
 #ifdef NO_SHARED_LIBS
 	init_extensions();
 #endif
 
 	ret = do_command6(argc, argv, &table, &handle);
-	if (ret) {
-		ret = ip6tc_commit(handle);
-		ip6tc_free(handle);
-	}
+	if (ret)
+		ret = ip6tc_commit(&handle);
 
-	if (!ret) {
-		if (errno == EINVAL) {
-			fprintf(stderr, "ip6tables: %s. "
-					"Run `dmesg' for more information.\n",
-				ip6tc_strerror(errno));
-		} else {
-			fprintf(stderr, "ip6tables: %s.\n",
-				ip6tc_strerror(errno));
-		}
-	}
+	if (!ret)
+		fprintf(stderr, "ip6tables: %s\n",
+			ip6tc_strerror(errno));
 
 	exit(!ret);
 }

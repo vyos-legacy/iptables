@@ -19,7 +19,7 @@ static int TRACE_parse(int c, char **argv, int invert, unsigned int *flags,
 }
 
 static struct xtables_target trace_target = {
-	.family		= NFPROTO_UNSPEC,
+	.family		= AF_UNSPEC,
 	.name		= "TRACE",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(0),

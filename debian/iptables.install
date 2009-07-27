@@ -2,7 +2,6 @@ usr/sbin/* sbin
 usr/bin/* usr/sbin
 lib/xtables
 lib/libxtables.so.*
-lib/libiptc.so.*
 usr/share/man/man8 usr/share/man
 iptables-apply usr/sbin
 iptables-apply.8 usr/share/man/man8

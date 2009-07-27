@@ -12,7 +12,6 @@
 
 #include <getopt.h>
 #include <sys/errno.h>
-#include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,22 +56,22 @@ static void print_usage(const char *name, const char *version)
 	exit(1);
 }
 
-static struct ip6tc_handle *create_handle(const char *tablename)
+static ip6tc_handle_t create_handle(const char *tablename,
+                                    const char *modprobe)
 {
-	struct ip6tc_handle *handle;
+	ip6tc_handle_t handle;
 
 	handle = ip6tc_init(tablename);
 
 	if (!handle) {
 		/* try to insmod the module if iptc_init failed */
-		xtables_load_ko(xtables_modprobe_program, false);
+		load_xtables_ko(modprobe, 0);
 		handle = ip6tc_init(tablename);
 	}
 
 	if (!handle) {
-		xtables_error(PARAMETER_PROBLEM, "%s: unable to initialize "
-			"table '%s'\n", ip6tables_globals.program_name,
-			tablename);
+		exit_error(PARAMETER_PROBLEM, "%s: unable to initialize "
+			"table '%s'\n", program_name, tablename);
 		exit(1);
 	}
 	return handle;
@@ -99,7 +98,7 @@ static int newargc;
  * returns true if argument added, false otherwise */
 static int add_argv(char *what) {
 	DEBUGP("add_argv: %s\n", what);
-	if (what && newargc + 1 < ARRAY_SIZE(newargv)) {
+	if (what && ((newargc + 1) < sizeof(newargv)/sizeof(char *))) {
 		newargv[newargc] = strdup(what);
 		newargc++;
 		return 1;
@@ -120,23 +119,27 @@ int ip6tables_restore_main(int argc, char *argv[])
 int main(int argc, char *argv[])
 #endif
 {
-	struct ip6tc_handle *handle = NULL;
+	ip6tc_handle_t handle = NULL;
 	char buffer[10240];
 	int c;
 	char curtable[IP6T_TABLE_MAXNAMELEN + 1];
 	FILE *in;
+	const char *modprobe = NULL;
 	int in_table = 0, testing = 0;
 
+	program_name = "ip6tables-restore";
+	program_version = XTABLES_VERSION;
 	line = 0;
 
-	ip6tables_globals.program_name = "ip6tables-restore";
-	c = xtables_init_all(&ip6tables_globals, NFPROTO_IPV6);
-	if (c < 0) {
-		fprintf(stderr, "%s/%s Failed to initialize xtables\n",
-				ip6tables_globals.program_name,
-				ip6tables_globals.program_version);
-		exit(1);
+	lib_dir = getenv("XTABLES_LIBDIR");
+	if (lib_dir == NULL) {
+		lib_dir = getenv("IP6TABLES_LIB_DIR");
+		if (lib_dir != NULL)
+			fprintf(stderr, "IP6TABLES_LIB_DIR is deprecated\n");
 	}
+	if (lib_dir == NULL)
+		lib_dir = XTABLES_LIBDIR;
+
 #ifdef NO_SHARED_LIBS
 	init_extensions();
 #endif
@@ -157,13 +160,13 @@ int main(int argc, char *argv[])
 				break;
 			case 'h':
 				print_usage("ip6tables-restore",
-					    IPTABLES_VERSION);
+					    XTABLES_VERSION);
 				break;
 			case 'n':
 				noflush = 1;
 				break;
 			case 'M':
-				xtables_modprobe_program = optarg;
+				modprobe = optarg;
 				break;
 		}
 	}
@@ -196,9 +199,7 @@ int main(int argc, char *argv[])
 		} else if ((strcmp(buffer, "COMMIT\n") == 0) && (in_table)) {
 			if (!testing) {
 				DEBUGP("Calling commit\n");
-				ret = ip6tc_commit(handle);
-				ip6tc_free(handle);
-				handle = NULL;
+				ret = ip6tc_commit(&handle);
 			} else {
 				DEBUGP("Not calling commit, testing\n");
 				ret = 1;
@@ -211,29 +212,28 @@ int main(int argc, char *argv[])
 			table = strtok(buffer+1, " \t\n");
 			DEBUGP("line %u, table '%s'\n", line, table);
 			if (!table) {
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 					"%s: line %u table name invalid\n",
-					ip6tables_globals.program_name,
-					line);
+					program_name, line);
 				exit(1);
 			}
 			strncpy(curtable, table, IP6T_TABLE_MAXNAMELEN);
 			curtable[IP6T_TABLE_MAXNAMELEN] = '\0';
 
 			if (handle)
-				ip6tc_free(handle);
+				ip6tc_free(&handle);
 
-			handle = create_handle(table);
+			handle = create_handle(table, modprobe);
 			if (noflush == 0) {
 				DEBUGP("Cleaning all chains of table '%s'\n",
 					table);
 				for_each_chain(flush_entries, verbose, 1,
-						handle);
+						&handle);
 
 				DEBUGP("Deleting all user-defined chains "
 				       "of table '%s'\n", table);
 				for_each_chain(delete_chain, verbose, 0,
-						handle);
+						&handle) ;
 			}
 
 			ret = 1;
@@ -246,25 +246,24 @@ int main(int argc, char *argv[])
 			chain = strtok(buffer+1, " \t\n");
 			DEBUGP("line %u, chain '%s'\n", line, chain);
 			if (!chain) {
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 					   "%s: line %u chain name invalid\n",
-					   ip6tables_globals.program_name,
-					   line);
+					   program_name, line);
 				exit(1);
 			}
 
 			if (ip6tc_builtin(chain, handle) <= 0) {
 				if (noflush && ip6tc_is_chain(chain, handle)) {
 					DEBUGP("Flushing existing user defined chain '%s'\n", chain);
-					if (!ip6tc_flush_entries(chain, handle))
-						xtables_error(PARAMETER_PROBLEM,
+					if (!ip6tc_flush_entries(chain, &handle))
+						exit_error(PARAMETER_PROBLEM,
 							   "error flushing chain "
 							   "'%s':%s\n", chain,
 							   strerror(errno));
 				} else {
 					DEBUGP("Creating new chain '%s'\n", chain);
-					if (!ip6tc_create_chain(chain, handle))
-						xtables_error(PARAMETER_PROBLEM,
+					if (!ip6tc_create_chain(chain, &handle))
+						exit_error(PARAMETER_PROBLEM,
 							   "error creating chain "
 							   "'%s':%s\n", chain,
 							   strerror(errno));
@@ -274,10 +273,9 @@ int main(int argc, char *argv[])
 			policy = strtok(NULL, " \t\n");
 			DEBUGP("line %u, policy '%s'\n", line, policy);
 			if (!policy) {
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 					   "%s: line %u policy invalid\n",
-					   ip6tables_globals.program_name,
-					   line);
+					   program_name, line);
 				exit(1);
 			}
 
@@ -289,7 +287,7 @@ int main(int argc, char *argv[])
 					ctrs = strtok(NULL, " \t\n");
 
 					if (!ctrs || !parse_counters(ctrs, &count))
-						xtables_error(PARAMETER_PROBLEM,
+						exit_error(PARAMETER_PROBLEM,
 							  "invalid policy counters "
 							  "for chain '%s'\n", chain);
 
@@ -302,8 +300,8 @@ int main(int argc, char *argv[])
 					chain, policy);
 
 				if (!ip6tc_set_policy(chain, policy, &count,
-						     handle))
-					xtables_error(OTHER_PROBLEM,
+						     &handle))
+					exit_error(OTHER_PROBLEM,
 						"Can't set policy `%s'"
 						" on `%s' line %u: %s\n",
 						chain, policy, line,
@@ -331,19 +329,19 @@ int main(int argc, char *argv[])
 				/* we have counters in our input */
 				ptr = strchr(buffer, ']');
 				if (!ptr)
-					xtables_error(PARAMETER_PROBLEM,
+					exit_error(PARAMETER_PROBLEM,
 						   "Bad line %u: need ]\n",
 						   line);
 
 				pcnt = strtok(buffer+1, ":");
 				if (!pcnt)
-					xtables_error(PARAMETER_PROBLEM,
+					exit_error(PARAMETER_PROBLEM,
 						   "Bad line %u: need :\n",
 						   line);
 
 				bcnt = strtok(NULL, "]");
 				if (!bcnt)
-					xtables_error(PARAMETER_PROBLEM,
+					exit_error(PARAMETER_PROBLEM,
 						   "Bad line %u: need ]\n",
 						   line);
 
@@ -410,7 +408,7 @@ int main(int argc, char *argv[])
 					/* check if table name specified */
 					if (!strncmp(param_buffer, "-t", 2)
                                             || !strncmp(param_buffer, "--table", 8)) {
-						xtables_error(PARAMETER_PROBLEM,
+						exit_error(PARAMETER_PROBLEM,
 						   "Line %u seems to have a "
 						   "-t table option.\n", line);
 						exit(1);
@@ -423,7 +421,7 @@ int main(int argc, char *argv[])
 					param_buffer[param_len++] = *curchar;
 
 					if (param_len >= sizeof(param_buffer))
-						xtables_error(PARAMETER_PROBLEM,
+						exit_error(PARAMETER_PROBLEM, 
 						   "Parameter too long!");
 				}
 			}
@@ -442,19 +440,15 @@ int main(int argc, char *argv[])
 		}
 		if (!ret) {
 			fprintf(stderr, "%s: line %u failed\n",
-					ip6tables_globals.program_name,
-					line);
+					program_name, line);
 			exit(1);
 		}
 	}
 	if (in_table) {
 		fprintf(stderr, "%s: COMMIT expected at line %u\n",
-				ip6tables_globals.program_name,
-				line + 1);
+				program_name, line + 1);
 		exit(1);
 	}
 
-	if (in != NULL)
-		fclose(in);
 	return 0;
 }

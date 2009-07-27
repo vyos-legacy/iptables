@@ -9,11 +9,11 @@ so it should be avoided at any cost.
 .B mangle
 table.
 .TP
-\fB\-\-ttl\-set\fP \fIvalue\fP
+.BI "\-\-ttl-set " "value"
 Set the TTL value to `value'.
 .TP
-\fB\-\-ttl\-dec\fP \fIvalue\fP
+.BI "\-\-ttl-dec " "value"
 Decrement the TTL value `value' times.
 .TP
-\fB\-\-ttl\-inc\fP \fIvalue\fP
+.BI "\-\-ttl-inc " "value"
 Increment the TTL value `value' times.

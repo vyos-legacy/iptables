@@ -31,7 +31,7 @@ parse_mac(const char *mac, struct xt_mac_info *info)
 	unsigned int i = 0;
 
 	if (strlen(mac) != ETH_ALEN*3-1)
-		xtables_error(PARAMETER_PROBLEM, "Bad mac address \"%s\"", mac);
+		exit_error(PARAMETER_PROBLEM, "Bad mac address `%s'", mac);
 
 	for (i = 0; i < ETH_ALEN; i++) {
 		long number;
@@ -44,7 +44,7 @@ parse_mac(const char *mac, struct xt_mac_info *info)
 		    && number <= 255)
 			info->srcaddr[i] = number;
 		else
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Bad mac address `%s'", mac);
 	}
 }
@@ -57,7 +57,7 @@ mac_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_mac(argv[optind-1], macinfo);
 		if (invert)
 			macinfo->invert = 1;
@@ -84,7 +84,7 @@ static void print_mac(const unsigned char macaddress[ETH_ALEN])
 static void mac_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "You must specify `--mac-source'");
 }
 
@@ -112,7 +112,7 @@ static void mac_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match mac_match = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
  	.name		= "mac",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_mac_info)),
@@ -126,7 +126,7 @@ static struct xtables_match mac_match = {
 };
 
 static struct xtables_match mac_match6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
  	.name		= "mac",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_mac_info)),

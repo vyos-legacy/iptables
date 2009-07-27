@@ -58,23 +58,22 @@ MARK_parse_v0(int c, char **argv, int invert, unsigned int *flags,
 {
 	struct xt_mark_target_info *markinfo
 		= (struct xt_mark_target_info *)(*target)->data;
-	unsigned int mark = 0;
 
 	switch (c) {
 	case '1':
-		if (!xtables_strtoui(optarg, NULL, &mark, 0, UINT32_MAX))
-			xtables_error(PARAMETER_PROBLEM, "Bad MARK value \"%s\"", optarg);
-		markinfo->mark = mark;
+		if (string_to_number_l(optarg, 0, 0, 
+				     &markinfo->mark))
+			exit_error(PARAMETER_PROBLEM, "Bad MARK value `%s'", optarg);
 		if (*flags)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "MARK target: Can't specify --set-mark twice");
 		*flags = 1;
 		break;
 	case '2':
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "MARK target: kernel too old for --and-mark");
 	case '3':
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "MARK target: kernel too old for --or-mark");
 	default:
 		return 0;
@@ -86,7 +85,7 @@ MARK_parse_v0(int c, char **argv, int invert, unsigned int *flags,
 static void MARK_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 		           "MARK target: Parameter --set/and/or-mark"
 			   " is required");
 }
@@ -97,7 +96,6 @@ MARK_parse_v1(int c, char **argv, int invert, unsigned int *flags,
 {
 	struct xt_mark_target_info_v1 *markinfo
 		= (struct xt_mark_target_info_v1 *)(*target)->data;
-	unsigned int mark = 0;
 
 	switch (c) {
 	case '1':
@@ -113,11 +111,11 @@ MARK_parse_v1(int c, char **argv, int invert, unsigned int *flags,
 		return 0;
 	}
 
-	if (!xtables_strtoui(optarg, NULL, &mark, 0, UINT32_MAX))
-		xtables_error(PARAMETER_PROBLEM, "Bad MARK value \"%s\"", optarg);
-	markinfo->mark = mark;
+	if (string_to_number_l(optarg, 0, 0, &markinfo->mark))
+		exit_error(PARAMETER_PROBLEM, "Bad MARK value `%s'", optarg);
+
 	if (*flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "MARK target: Can't specify --set-mark twice");
 
 	*flags = 1;
@@ -128,21 +126,21 @@ static int mark_tg_parse(int c, char **argv, int invert, unsigned int *flags,
                          const void *entry, struct xt_entry_target **target)
 {
 	struct xt_mark_tginfo2 *info = (void *)(*target)->data;
-	unsigned int value, mask = UINT32_MAX;
+	unsigned int value, mask = ~0U;
 	char *end;
 
 	switch (c) {
 	case 'X': /* --set-xmark */
 	case '=': /* --set-mark */
-		xtables_param_act(XTF_ONE_ACTION, "MARK", *flags & F_MARK);
-		xtables_param_act(XTF_NO_INVERT, "MARK", "--set-xmark/--set-mark", invert);
-		if (!xtables_strtoui(optarg, &end, &value, 0, UINT32_MAX))
-			xtables_param_act(XTF_BAD_VALUE, "MARK", "--set-xmark/--set-mark", optarg);
+		param_act(P_ONE_ACTION, "MARK", *flags & F_MARK);
+		param_act(P_NO_INVERT, "MARK", "--set-xmark/--set-mark", invert);
+		if (!strtonum(optarg, &end, &value, 0, ~0U))
+			param_act(P_BAD_VALUE, "MARK", "--set-xmark/--set-mark", optarg);
 		if (*end == '/')
-			if (!xtables_strtoui(end + 1, &end, &mask, 0, UINT32_MAX))
-				xtables_param_act(XTF_BAD_VALUE, "MARK", "--set-xmark/--set-mark", optarg);
+			if (!strtonum(end + 1, &end, &mask, 0, ~0U))
+				param_act(P_BAD_VALUE, "MARK", "--set-xmark/--set-mark", optarg);
 		if (*end != '\0')
-			xtables_param_act(XTF_BAD_VALUE, "MARK", "--set-xmark/--set-mark", optarg);
+			param_act(P_BAD_VALUE, "MARK", "--set-xmark/--set-mark", optarg);
 		info->mark = value;
 		info->mask = mask;
 
@@ -151,28 +149,28 @@ static int mark_tg_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '&': /* --and-mark */
-		xtables_param_act(XTF_ONE_ACTION, "MARK", *flags & F_MARK);
-		xtables_param_act(XTF_NO_INVERT, "MARK", "--and-mark", invert);
-		if (!xtables_strtoui(optarg, NULL, &mask, 0, UINT32_MAX))
-			xtables_param_act(XTF_BAD_VALUE, "MARK", "--and-mark", optarg);
+		param_act(P_ONE_ACTION, "MARK", *flags & F_MARK);
+		param_act(P_NO_INVERT, "MARK", "--and-mark", invert);
+		if (!strtonum(optarg, NULL, &mask, 0, ~0U))
+			param_act(P_BAD_VALUE, "MARK", "--and-mark", optarg);
 		info->mark = 0;
 		info->mask = ~mask;
 		break;
 
 	case '|': /* --or-mark */
-		xtables_param_act(XTF_ONE_ACTION, "MARK", *flags & F_MARK);
-		xtables_param_act(XTF_NO_INVERT, "MARK", "--or-mark", invert);
-		if (!xtables_strtoui(optarg, NULL, &value, 0, UINT32_MAX))
-			xtables_param_act(XTF_BAD_VALUE, "MARK", "--or-mark", optarg);
+		param_act(P_ONE_ACTION, "MARK", *flags & F_MARK);
+		param_act(P_NO_INVERT, "MARK", "--or-mark", invert);
+		if (!strtonum(optarg, NULL, &value, 0, ~0U))
+			param_act(P_BAD_VALUE, "MARK", "--or-mark", optarg);
 		info->mark = value;
 		info->mask = value;
 		break;
 
 	case '^': /* --xor-mark */
-		xtables_param_act(XTF_ONE_ACTION, "MARK", *flags & F_MARK);
-		xtables_param_act(XTF_NO_INVERT, "MARK", "--xor-mark", invert);
-		if (!xtables_strtoui(optarg, NULL, &value, 0, UINT32_MAX))
-			xtables_param_act(XTF_BAD_VALUE, "MARK", "--xor-mark", optarg);
+		param_act(P_ONE_ACTION, "MARK", *flags & F_MARK);
+		param_act(P_NO_INVERT, "MARK", "--xor-mark", invert);
+		if (!strtonum(optarg, NULL, &value, 0, ~0U))
+			param_act(P_BAD_VALUE, "MARK", "--xor-mark", optarg);
 		info->mark = value;
 		info->mask = 0;
 		break;
@@ -188,7 +186,7 @@ static int mark_tg_parse(int c, char **argv, int invert, unsigned int *flags,
 static void mark_tg_check(unsigned int flags)
 {
 	if (flags == 0)
-		xtables_error(PARAMETER_PROBLEM, "MARK: One of the --set-xmark, "
+		exit_error(PARAMETER_PROBLEM, "MARK: One of the --set-xmark, "
 		           "--{and,or,xor,set}-mark options is required");
 }
 
@@ -278,7 +276,7 @@ static void mark_tg_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target mark_target_v0 = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "MARK",
 	.version	= XTABLES_VERSION,
 	.revision	= 0,
@@ -293,7 +291,7 @@ static struct xtables_target mark_target_v0 = {
 };
 
 static struct xtables_target mark_target_v1 = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "MARK",
 	.version	= XTABLES_VERSION,
 	.revision	= 1,
@@ -308,7 +306,7 @@ static struct xtables_target mark_target_v1 = {
 };
 
 static struct xtables_target mark_target6_v0 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name		= "MARK",
 	.version	= XTABLES_VERSION,
 	.revision	= 0,
@@ -326,7 +324,7 @@ static struct xtables_target mark_tg_reg_v2 = {
 	.version       = XTABLES_VERSION,
 	.name          = "MARK",
 	.revision      = 2,
-	.family        = NFPROTO_UNSPEC,
+	.family        = AF_UNSPEC,
 	.size          = XT_ALIGN(sizeof(struct xt_mark_tginfo2)),
 	.userspacesize = XT_ALIGN(sizeof(struct xt_mark_tginfo2)),
 	.help          = mark_tg_help,

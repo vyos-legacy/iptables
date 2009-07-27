@@ -11,22 +11,24 @@ chains, and user-defined chains which are only called from those
 chains.  The following option controls the nature of the error packet
 returned:
 .TP
-\fB\-\-reject\-with\fP \fItype\fP
+.BI "\-\-reject-with " "type"
 The type given can be
-\fBicmp\-net\-unreachable\fP,
-\fBicmp\-host\-unreachable\fP,
-\fBicmp\-port\-unreachable\fP,
-\fBicmp\-proto\-unreachable\fP,
-\fBicmp\-net\-prohibited\fP,
-\fBicmp\-host\-prohibited\fP or
-\fBicmp\-admin\-prohibited\fP (*)
-which return the appropriate ICMP error message (\fBport\-unreachable\fP is
+.nf
+.B " icmp-net-unreachable"
+.B " icmp-host-unreachable"
+.B " icmp-port-unreachable"
+.B " icmp-proto-unreachable"
+.B " icmp-net-prohibited"
+.B " icmp-host-prohibited or"
+.B " icmp-admin-prohibited (*)"
+.fi
+which return the appropriate ICMP error message (\fBport-unreachable\fP is
 the default).  The option
-\fBtcp\-reset\fP
+.B tcp-reset
 can be used on rules which only match the TCP protocol: this causes a
 TCP RST packet to be sent back.  This is mainly useful for blocking 
 .I ident
 (113/tcp) probes which frequently occur when sending mail to broken mail
 hosts (which won't accept your mail otherwise).
 .PP
-(*) Using icmp\-admin\-prohibited with kernels that do not support it will result in a plain DROP instead of REJECT
+(*) Using icmp-admin-prohibited with kernels that do not support it will result in a plain DROP instead of REJECT

@@ -9,8 +9,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <xtables.h>
+#include <iptables.h>
 
+#include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_TTL.h>
 
 #define IPT_TTL_USED	1
@@ -31,20 +32,20 @@ static int TTL_parse(int c, char **argv, int invert, unsigned int *flags,
 	unsigned int value;
 
 	if (*flags & IPT_TTL_USED) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM, 
 				"Can't specify TTL option twice");
 	}
 
 	if (!optarg) 
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM, 
 				"TTL: You must specify a value");
 
-	if (xtables_check_inverse(optarg, &invert, NULL, 0))
-		xtables_error(PARAMETER_PROBLEM,
+	if (check_inverse(optarg, &invert, NULL, 0))
+		exit_error(PARAMETER_PROBLEM,
 				"TTL: unexpected `!'");
 	
-	if (!xtables_strtoui(optarg, NULL, &value, 0, UINT8_MAX))
-		xtables_error(PARAMETER_PROBLEM,
+	if (string_to_number(optarg, 0, 255, &value) == -1)
+		exit_error(PARAMETER_PROBLEM,
 		           "TTL: Expected value between 0 and 255");
 
 	switch (c) {
@@ -55,7 +56,7 @@ static int TTL_parse(int c, char **argv, int invert, unsigned int *flags,
 
 		case '2':
 			if (value == 0) {
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 					"TTL: decreasing by 0?");
 			}
 
@@ -64,7 +65,7 @@ static int TTL_parse(int c, char **argv, int invert, unsigned int *flags,
 
 		case '3':
 			if (value == 0) {
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 					"TTL: increasing by 0?");
 			}
 
@@ -85,7 +86,7 @@ static int TTL_parse(int c, char **argv, int invert, unsigned int *flags,
 static void TTL_check(unsigned int flags)
 {
 	if (!(flags & IPT_TTL_USED))
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 				"TTL: You must specify an action");
 }
 
@@ -140,7 +141,7 @@ static const struct option TTL_opts[] = {
 static struct xtables_target ttl_tg_reg = {
 	.name		= "TTL",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV4,
+	.family		= PF_INET,
 	.size		= XT_ALIGN(sizeof(struct ipt_TTL_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_TTL_info)),
 	.help		= TTL_help,

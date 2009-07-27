@@ -43,8 +43,8 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '1':
 		if (*flags & XT_PHYSDEV_OP_IN)
 			goto multiple_use;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
-		xtables_parse_interface(argv[optind-1], info->physindev,
+		check_inverse(optarg, &invert, &optind, 0);
+		parse_interface(argv[optind-1], info->physindev,
 				(unsigned char *)info->in_mask);
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_IN;
@@ -55,8 +55,8 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '2':
 		if (*flags & XT_PHYSDEV_OP_OUT)
 			goto multiple_use;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
-		xtables_parse_interface(argv[optind-1], info->physoutdev,
+		check_inverse(optarg, &invert, &optind, 0);
+		parse_interface(argv[optind-1], info->physoutdev,
 				(unsigned char *)info->out_mask);
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_OUT;
@@ -67,7 +67,7 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '3':
 		if (*flags & XT_PHYSDEV_OP_ISIN)
 			goto multiple_use;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		info->bitmask |= XT_PHYSDEV_OP_ISIN;
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_ISIN;
@@ -77,7 +77,7 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '4':
 		if (*flags & XT_PHYSDEV_OP_ISOUT)
 			goto multiple_use;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		info->bitmask |= XT_PHYSDEV_OP_ISOUT;
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_ISOUT;
@@ -87,7 +87,7 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '5':
 		if (*flags & XT_PHYSDEV_OP_BRIDGED)
 			goto multiple_use;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_BRIDGED;
 		*flags |= XT_PHYSDEV_OP_BRIDGED;
@@ -100,7 +100,7 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	return 1;
 multiple_use:
-	xtables_error(PARAMETER_PROBLEM,
+	exit_error(PARAMETER_PROBLEM,
 	   "multiple use of the same physdev option is not allowed");
 
 }
@@ -108,13 +108,14 @@ multiple_use:
 static void physdev_check(unsigned int flags)
 {
 	if (flags == 0)
-		xtables_error(PARAMETER_PROBLEM, "PHYSDEV: no physdev option specified");
+		exit_error(PARAMETER_PROBLEM, "PHYSDEV: no physdev option specified");
 }
 
 static void
 physdev_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	const struct xt_physdev_info *info = (const void *)match->data;
+	struct xt_physdev_info *info =
+		(struct xt_physdev_info*)match->data;
 
 	printf("PHYSDEV match");
 	if (info->bitmask & XT_PHYSDEV_OP_ISIN)
@@ -138,7 +139,8 @@ physdev_print(const void *ip, const struct xt_entry_match *match, int numeric)
 
 static void physdev_save(const void *ip, const struct xt_entry_match *match)
 {
-	const struct xt_physdev_info *info = (const void *)match->data;
+	struct xt_physdev_info *info =
+		(struct xt_physdev_info*)match->data;
 
 	if (info->bitmask & XT_PHYSDEV_OP_ISIN)
 		printf("%s--physdev-is-in ",
@@ -161,7 +163,7 @@ static void physdev_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match physdev_match = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "physdev",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_physdev_info)),
@@ -175,7 +177,7 @@ static struct xtables_match physdev_match = {
 };
 
 static struct xtables_match physdev_match6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name		= "physdev",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_physdev_info)),

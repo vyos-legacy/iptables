@@ -6,5 +6,5 @@ Matches SPI.
 [\fB!\fP] \fB\-\-ahlen\fP \fIlength\fP
 Total length of this header in octets.
 .TP
-\fB\-\-ahres\fP
+.BI "\-\-ahres"
 Matches if the reserved field is filled with zero.

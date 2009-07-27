@@ -29,9 +29,9 @@ helper_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 					"helper match: Only use --helper ONCE!");
-		xtables_check_inverse(optarg, &invert, &invert, 0);
+		check_inverse(optarg, &invert, &invert, 0);
 		strncpy(info->name, optarg, 29);
 		info->name[29] = '\0';
 		if (invert)
@@ -48,28 +48,28 @@ helper_parse(int c, char **argv, int invert, unsigned int *flags,
 static void helper_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "helper match: You must specify `--helper'");
 }
 
 static void
 helper_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	const struct xt_helper_info *info = (const void *)match->data;
+	struct xt_helper_info *info = (struct xt_helper_info *)match->data;
 
 	printf("helper match %s\"%s\" ", info->invert ? "! " : "", info->name);
 }
 
 static void helper_save(const void *ip, const struct xt_entry_match *match)
 {
-	const struct xt_helper_info *info = (const void *)match->data;
+	struct xt_helper_info *info = (struct xt_helper_info *)match->data;
 
 	printf("%s--helper ",info->invert ? "! " : "");
-	xtables_save_string(info->name);
+	save_string(info->name);
 }
 
 static struct xtables_match helper_match = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "helper",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_helper_info)),
@@ -82,7 +82,7 @@ static struct xtables_match helper_match = {
 };
 
 static struct xtables_match helper_match6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name		= "helper",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_helper_info)),

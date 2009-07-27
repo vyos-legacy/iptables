@@ -3,7 +3,7 @@ the maximum size for that connection (usually limiting it to your
 outgoing interface's MTU minus 40 for IPv4 or 60 for IPv6, respectively).
 Of course, it can only be used
 in conjunction with
-\fB\-p tcp\fP.
+.BR "\-p tcp" .
 It is only valid in the
 .BR mangle
 table.
@@ -29,14 +29,15 @@ ssh works fine, but scp hangs after initial handshaking.
 .PD
 Workaround: activate this option and add a rule to your firewall
 configuration like:
-.IP
- iptables \-t mangle \-A FORWARD \-p tcp \-\-tcp\-flags SYN,RST SYN
-             \-j TCPMSS \-\-clamp\-mss\-to\-pmtu
+.nf
+ iptables -t mangle -A FORWARD -p tcp \-\-tcp-flags SYN,RST SYN \\
+             -j TCPMSS \-\-clamp-mss-to-pmtu
+.fi
 .TP
-\fB\-\-set\-mss\fP \fIvalue\fP
+.BI "\-\-set-mss " "value"
 Explicitly set MSS option to specified value.
 .TP
-\fB\-\-clamp\-mss\-to\-pmtu\fP
-Automatically clamp MSS value to (path_MTU \- 40 for IPv4; \-60 for IPv6).
+.B "\-\-clamp-mss-to-pmtu"
+Automatically clamp MSS value to (path_MTU - 40 for IPv4; -60 for IPv6).
 .PP
 These options are mutually exclusive.

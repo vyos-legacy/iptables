@@ -7,11 +7,11 @@ table.
 .PP
 .B Don't ever set or increment the value on packets that leave your local network!
 .TP
-\fB\-\-hl\-set\fP \fIvalue\fP
+.BI "\-\-hl-set " "value"
 Set the Hop Limit to `value'.
 .TP
-\fB\-\-hl\-dec\fP \fIvalue\fP
+.BI "\-\-hl-dec " "value"
 Decrement the Hop Limit `value' times.
 .TP
-\fB\-\-hl\-inc\fP \fIvalue\fP
+.BI "\-\-hl-inc " "value"
 Increment the Hop Limit `value' times.

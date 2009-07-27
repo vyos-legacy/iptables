@@ -12,7 +12,6 @@
 #include <netdb.h>
 #include <ctype.h>
 
-#include <netinet/in.h>
 #include <xtables.h>
 #include <linux/dccp.h>
 #include <linux/netfilter/x_tables.h>
@@ -62,17 +61,17 @@ parse_dccp_ports(const char *portstring,
 	buffer = strdup(portstring);
 	DEBUGP("%s\n", portstring);
 	if ((cp = strchr(buffer, ':')) == NULL) {
-		ports[0] = ports[1] = xtables_parse_port(buffer, "dccp");
+		ports[0] = ports[1] = parse_port(buffer, "dccp");
 	}
 	else {
 		*cp = '\0';
 		cp++;
 
-		ports[0] = buffer[0] ? xtables_parse_port(buffer, "dccp") : 0;
-		ports[1] = cp[0] ? xtables_parse_port(cp, "dccp") : 0xFFFF;
+		ports[0] = buffer[0] ? parse_port(buffer, "dccp") : 0;
+		ports[1] = cp[0] ? parse_port(cp, "dccp") : 0xFFFF;
 
 		if (ports[0] > ports[1])
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "invalid portrange (min > max)");
 	}
 	free(buffer);
@@ -102,13 +101,14 @@ parse_dccp_types(const char *typestring)
 
 	for (ptr = strtok(buffer, ","); ptr; ptr = strtok(NULL, ",")) {
 		unsigned int i;
-		for (i = 0; i < ARRAY_SIZE(dccp_pkt_types); ++i)
+		for (i = 0; i < sizeof(dccp_pkt_types)/sizeof(char *); i++) {
 			if (!strcasecmp(dccp_pkt_types[i], ptr)) {
 				typemask |= (1 << i);
 				break;
 			}
-		if (i == ARRAY_SIZE(dccp_pkt_types))
-			xtables_error(PARAMETER_PROBLEM,
+		}
+		if (i == sizeof(dccp_pkt_types)/sizeof(char *))
+			exit_error(PARAMETER_PROBLEM,
 				   "Unknown DCCP type `%s'", ptr);
 	}
 
@@ -120,11 +120,11 @@ static u_int8_t parse_dccp_option(char *optstring)
 {
 	unsigned int ret;
 
-	if (!xtables_strtoui(optstring, NULL, &ret, 1, UINT8_MAX))
-		xtables_error(PARAMETER_PROBLEM, "Bad DCCP option \"%s\"",
+	if (string_to_number(optstring, 1, 255, &ret) == -1)
+		exit_error(PARAMETER_PROBLEM, "Bad DCCP option `%s'",
 			   optstring);
 
-	return ret;
+	return (u_int8_t)ret;
 }
 
 static int
@@ -137,10 +137,10 @@ dccp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & XT_DCCP_SRC_PORTS)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "Only one `--source-port' allowed");
 		einfo->flags |= XT_DCCP_SRC_PORTS;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_dccp_ports(argv[optind-1], einfo->spts);
 		if (invert)
 			einfo->invflags |= XT_DCCP_SRC_PORTS;
@@ -149,10 +149,10 @@ dccp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & XT_DCCP_DEST_PORTS)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--destination-port' allowed");
 		einfo->flags |= XT_DCCP_DEST_PORTS;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_dccp_ports(argv[optind-1], einfo->dpts);
 		if (invert)
 			einfo->invflags |= XT_DCCP_DEST_PORTS;
@@ -161,10 +161,10 @@ dccp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '3':
 		if (*flags & XT_DCCP_TYPE)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--dccp-types' allowed");
 		einfo->flags |= XT_DCCP_TYPE;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		einfo->typemask = parse_dccp_types(argv[optind-1]);
 		if (invert)
 			einfo->invflags |= XT_DCCP_TYPE;
@@ -173,10 +173,10 @@ dccp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '4':
 		if (*flags & XT_DCCP_OPTION)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--dccp-option' allowed");
 		einfo->flags |= XT_DCCP_OPTION;
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		einfo->option = parse_dccp_option(argv[optind-1]);
 		if (invert)
 			einfo->invflags |= XT_DCCP_OPTION;
@@ -336,7 +336,7 @@ static void dccp_save(const void *ip, const struct xt_entry_match *match)
 
 static struct xtables_match dccp_match = {
 	.name		= "dccp",
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_dccp_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct xt_dccp_info)),
@@ -350,7 +350,7 @@ static struct xtables_match dccp_match = {
 
 static struct xtables_match dccp_match6 = {
 	.name		= "dccp",
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_dccp_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct xt_dccp_info)),

@@ -9,7 +9,7 @@ Matches the packet which EXACTLY includes all specified headers. The headers
 encapsulated with ESP header are out of scope.
 Possible \fIheader\fP types can be:
 .TP
-\fBhop\fP|\fBhop\-by\-hop\fP
+\fBhop\fP|\fBhop-by-hop\fP
 Hop-by-Hop Options header
 .TP
 \fBdst\fP

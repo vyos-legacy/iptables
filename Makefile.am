@@ -1,34 +1,25 @@
 # -*- Makefile -*-
 
-ACLOCAL_AMFLAGS  = -I m4
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
 AM_CFLAGS        = ${regular_CFLAGS} -I${top_builddir}/include -I${top_srcdir}/include ${kinclude_CFLAGS}
-SUBDIRS          = extensions
-if ENABLE_DEVEL
-SUBDIRS         += include
-endif
+SUBDIRS         := extensions
 if ENABLE_LIBIPQ
 SUBDIRS         += libipq
 endif
-lib_LTLIBRARIES =
 
 # libiptc
-lib_LTLIBRARIES           += libiptc/libiptc.la
-libiptc_libiptc_la_SOURCES = libiptc/libip4tc.c libiptc/libip6tc.c
-libiptc_libiptc_la_LDFLAGS = -version-info 0:0:0
+libiptc_libiptc_a_SOURCES = libiptc/libip4tc.c libiptc/libip6tc.c
 
-lib_LTLIBRARIES      += libxtables.la
+lib_LTLIBRARIES       = libxtables.la
 libxtables_la_SOURCES = xtables.c
-libxtables_la_LDFLAGS = -version-info ${libxtables_vcurrent}:0:${libxtables_vage}
-libxtables_la_LIBADD  = -ldl
+libxtables_la_LDFLAGS = -version 0:0:0
 
 # iptables, dynamic
 iptables_SOURCES          = iptables-standalone.c iptables.c
 iptables_LDFLAGS          = -rdynamic
-iptables_LDADD            = libiptc/libiptc.la extensions/libext4.a libxtables.la -lm
+iptables_LDADD            = -ldl -lm libiptc/libiptc.a extensions/libext4.a libxtables.la
 
-iptables_xml_LDADD        = libxtables.la
 iptables_multi_SOURCES    = iptables-multi.c iptables-save.c \
                             iptables-restore.c iptables-xml.c \
                             iptables-standalone.c iptables.c
@@ -47,14 +38,14 @@ iptables_save_LDADD       = ${iptables_LDADD}
 # iptables-multi, semi-static
 iptables_static_SOURCES   = ${iptables_multi_SOURCES} xtables.c
 iptables_static_CFLAGS    = ${iptables_multi_CFLAGS} -DNO_SHARED_LIBS=1
-iptables_static_LDADD     = libiptc/libiptc.la extensions/libext4.a -lm
+iptables_static_LDADD     = -lm libiptc/libiptc.a extensions/libext4.a
 
 iptables_xml_SOURCES      = iptables-xml.c
 
 # ip6tables, dynamic
 ip6tables_SOURCES         = ip6tables-standalone.c ip6tables.c
 ip6tables_LDFLAGS         = -rdynamic
-ip6tables_LDADD           = libiptc/libiptc.la extensions/libext6.a libxtables.la -lm
+ip6tables_LDADD           = -ldl -lm libiptc/libiptc.a extensions/libext6.a libxtables.la
 
 ip6tables_multi_SOURCES   = ip6tables-multi.c ip6tables-save.c \
                             ip6tables-restore.c ip6tables-standalone.c \
@@ -74,40 +65,38 @@ ip6tables_save_LDADD      = ${ip6tables_LDADD}
 # iptables-multi, semi-static
 ip6tables_static_SOURCES    = ${ip6tables_multi_SOURCES} xtables.c
 ip6tables_static_CFLAGS     = ${ip6tables_multi_CFLAGS} -DNO_SHARED_LIBS=1
-ip6tables_static_LDADD      = libiptc/libiptc.la extensions/libext6.a -lm
+ip6tables_static_LDADD      = -lm libiptc/libiptc.a extensions/libext6.a
 
-bin_PROGRAMS     = iptables-xml
-sbin_PROGRAMS    =
-noinst_PROGRAMS  =
-man_MANS         = iptables.8 iptables-restore.8 iptables-save.8 \
-                   iptables-xml.8 ip6tables.8 ip6tables-restore.8 \
-                   ip6tables-save.8
-CLEANFILES       = iptables.8 ip6tables.8
+noinst_LIBRARIES := libiptc/libiptc.a
+bin_PROGRAMS     := iptables-xml
+sbin_PROGRAMS    :=
+noinst_PROGRAMS  :=
+man_MANS         := iptables.8 iptables-restore.8 iptables-save.8 \
+                    iptables-xml.8 ip6tables.8 ip6tables-restore.8 \
+                    ip6tables-save.8
+CLEANFILES       := iptables.8 ip6tables.8
+if ENABLE_DEVEL
+include_HEADERS  := include/xtables.h
+endif
 
 if ENABLE_STATIC
-if ENABLE_IPV4
-sbin_PROGRAMS += iptables-static
-endif
-if ENABLE_IPV6
-sbin_PROGRAMS += ip6tables-static
-endif
+sbin_PROGRAMS += iptables-static ip6tables-static
 endif
 if ENABLE_SHARED
-if ENABLE_IPV4
-sbin_PROGRAMS += iptables iptables-multi iptables-restore iptables-save
-endif
-if ENABLE_IPV6
-sbin_PROGRAMS += ip6tables ip6tables-multi ip6tables-restore ip6tables-save
-endif
+sbin_PROGRAMS += iptables iptables-multi iptables-restore iptables-save \
+                 ip6tables ip6tables-multi ip6tables-restore ip6tables-save
 endif
 
 iptables.8: ${srcdir}/iptables.8.in extensions/matches4.man extensions/targets4.man
-	${AM_VERBOSE_GEN} sed -e 's/@PACKAGE_AND_VERSION@/${PACKAGE} ${PACKAGE_VERSION}/g' -e '/@MATCH@/ r extensions/matches4.man' -e '/@TARGET@/ r extensions/targets4.man' $< >$@;
+	${AM_VERBOSE_GEN} sed -e '/@MATCH@/ r extensions/matches4.man' -e '/@TARGET@/ r extensions/targets4.man' $< >$@;
 
 ip6tables.8: ${srcdir}/ip6tables.8.in extensions/matches6.man extensions/targets6.man
-	${AM_VERBOSE_GEN} sed -e 's/@PACKAGE_AND_VERSION@/${PACKAGE} ${PACKAGE_VERSION}/g' -e '/@MATCH@/ r extensions/matches6.man' -e '/@TARGET@/ r extensions/targets6.man' $< >$@;
+	${AM_VERBOSE_GEN} sed -e '/@MATCH@/ r extensions/matches6.man' -e '/@TARGET@/ r extensions/targets6.man' $< >$@;
 
-pkgconfig_DATA = libiptc.pc xtables.pc
+extensions/%:
+	${MAKE} ${AM_MAKEFLAGS} -C $(@D) $(@F)
+
+pkgconfig_DATA = xtables.pc
 
 .PHONY: tarball
 tarball:
@@ -117,9 +106,12 @@ tarball:
 	tar -C /tmp -cjf ${PACKAGE_TARNAME}-${PACKAGE_VERSION}.tar.bz2 --owner=root --group=root ${PACKAGE_TARNAME}-${PACKAGE_VERSION}/;
 	rm -Rf /tmp/${PACKAGE_TARNAME}-${PACKAGE_VERSION};
 
-config.status: extensions/GNUmakefile.in \
-	include/xtables.h.in include/iptables/internal.h.in
+config.status: include/xtables.h.in
 
-# Using if..fi avoids an ugly "error (ignored)" message :)
+# ldconfig may fail when we are not root (as is the case in build systems)
+# so add appropriate protection that it does not let `make` fail.
 install-exec-hook:
-	-if test -z "${DESTDIR}"; then /sbin/ldconfig; fi;
+	-/sbin/ldconfig || :;
+
+test check:
+	echo "Are we on the air? Hello, Mom!"

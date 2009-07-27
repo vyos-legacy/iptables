@@ -3,22 +3,22 @@ a certain IP and MAC address without an explicit load balancer in front of
 them.  Connections are statically distributed between the nodes in this
 cluster.
 .TP
-\fB\-\-new\fP
+.BI "\-\-new "
 Create a new ClusterIP.  You always have to set this on the first rule
 for a given ClusterIP.
 .TP
-\fB\-\-hashmode\fP \fImode\fP
+.BI "\-\-hashmode " "mode"
 Specify the hashing mode.  Has to be one of
-\fBsourceip\fP, \fBsourceip\-sourceport\fP, \fBsourceip\-sourceport\-destport\fP.
+.B sourceip, sourceip-sourceport, sourceip-sourceport-destport
 .TP
-\fB\-\-clustermac\fP \fImac\fP
-Specify the ClusterIP MAC address. Has to be a link\-layer multicast address
+.BI "\-\-clustermac " "mac"
+Specify the ClusterIP MAC address.  Has to be a link-layer multicast address
 .TP
-\fB\-\-total\-nodes\fP \fInum\fP
+.BI "\-\-total-nodes " "num"
 Number of total nodes within this cluster.
 .TP
-\fB\-\-local\-node\fP \fInum\fP
+.BI "\-\-local-node " "num"
 Local node number within this cluster.
 .TP
-\fB\-\-hash\-init\fP \fIrnd\fP
+.BI "\-\-hash-init " "rnd"
 Specify the random seed used for hash initialization.

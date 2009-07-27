@@ -46,9 +46,11 @@ static void print_types(void)
 	unsigned int	i;
 	
 	printf("Valid packet types:\n");
-	for (i = 0; i < ARRAY_SIZE(supported_types); ++i)
+	for (i = 0; i < sizeof(supported_types)/sizeof(struct pkttypes); i++)
+	{
 		if(supported_types[i].printhelp == 1)
 			printf("\t%-14s\t\t%s\n", supported_types[i].name, supported_types[i].help);
+	}
 	printf("\n");
 }
 
@@ -69,14 +71,16 @@ static void parse_pkttype(const char *pkttype, struct xt_pkttype_info *info)
 {
 	unsigned int	i;
 	
-	for (i = 0; i < ARRAY_SIZE(supported_types); ++i)
+	for (i = 0; i < sizeof(supported_types)/sizeof(struct pkttypes); i++)
+	{
 		if(strcasecmp(pkttype, supported_types[i].name)==0)
 		{
 			info->pkttype=supported_types[i].pkttype;
 			return;
 		}
+	}
 	
-	xtables_error(PARAMETER_PROBLEM, "Bad packet type '%s'", pkttype);
+	exit_error(PARAMETER_PROBLEM, "Bad packet type '%s'", pkttype);
 }
 
 static int pkttype_parse(int c, char **argv, int invert, unsigned int *flags,
@@ -87,7 +91,7 @@ static int pkttype_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch(c)
 	{
 		case '1':
-			xtables_check_inverse(optarg, &invert, &optind, 0);
+			check_inverse(optarg, &invert, &optind, 0);
 			parse_pkttype(argv[optind-1], info);
 			if(invert)
 				info->invert=1;
@@ -104,19 +108,21 @@ static int pkttype_parse(int c, char **argv, int invert, unsigned int *flags,
 static void pkttype_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM, "You must specify \"--pkt-type\"");
+		exit_error(PARAMETER_PROBLEM, "You must specify `--pkt-type'");
 }
 
-static void print_pkttype(const struct xt_pkttype_info *info)
+static void print_pkttype(struct xt_pkttype_info *info)
 {
 	unsigned int	i;
 	
-	for (i = 0; i < ARRAY_SIZE(supported_types); ++i)
+	for (i = 0; i < sizeof(supported_types)/sizeof(struct pkttypes); i++)
+	{
 		if(supported_types[i].pkttype==info->pkttype)
 		{
 			printf("%s ", supported_types[i].name);
 			return;
 		}
+	}
 
 	printf("%d ", info->pkttype);	/* in case we didn't find an entry in named-packtes */
 }
@@ -124,7 +130,7 @@ static void print_pkttype(const struct xt_pkttype_info *info)
 static void pkttype_print(const void *ip, const struct xt_entry_match *match,
                           int numeric)
 {
-	const struct xt_pkttype_info *info = (const void *)match->data;
+	struct xt_pkttype_info *info = (struct xt_pkttype_info *)match->data;
 	
 	printf("PKTTYPE %s= ", info->invert?"!":"");
 	print_pkttype(info);
@@ -132,14 +138,14 @@ static void pkttype_print(const void *ip, const struct xt_entry_match *match,
 
 static void pkttype_save(const void *ip, const struct xt_entry_match *match)
 {
-	const struct xt_pkttype_info *info = (const void *)match->data;
+	struct xt_pkttype_info *info = (struct xt_pkttype_info *)match->data;
 	
-	printf("%s--pkt-type ", info->invert ? "! " : "");
+	printf("--pkt-type %s", info->invert?"! ":"");
 	print_pkttype(info);
 }
 
 static struct xtables_match pkttype_match = {
-	.family		= NFPROTO_UNSPEC,
+	.family		= AF_UNSPEC,
 	.name		= "pkttype",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_pkttype_info)),

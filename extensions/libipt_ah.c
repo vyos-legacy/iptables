@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
-#include <xtables.h>
+#include <iptables.h>
 #include <linux/netfilter_ipv4/ipt_ah.h>
 
 static void ah_help(void)
@@ -30,18 +30,18 @@ parse_ah_spi(const char *spistr)
 	spi =  strtoul(spistr,&ep,0) ;
 
 	if ( spistr == ep ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "AH no valid digits in spi `%s'", spistr);
 	}
 	if ( spi == ULONG_MAX  && errno == ERANGE ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "spi `%s' specified too big: would overflow", spistr);
 	}	
 	if ( *spistr != '\0'  && *ep != '\0' ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "AH error parsing spi `%s'", spistr);
 	}
-	return spi;
+	return (u_int32_t) spi;
 }
 
 static void
@@ -80,9 +80,9 @@ static int ah_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & AH_SPI)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--ahspi' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_ah_spis(argv[optind-1], ahinfo->spis);
 		if (invert)
 			ahinfo->invflags |= IPT_AH_INV_SPI;
@@ -135,7 +135,7 @@ static void ah_save(const void *ip, const struct xt_entry_match *match)
 
 	if (!(ahinfo->spis[0] == 0
 	    && ahinfo->spis[1] == 0xFFFFFFFF)) {
-		printf("%s--ahspi ",
+		printf("--ahspi %s", 
 			(ahinfo->invflags & IPT_AH_INV_SPI) ? "! " : "");
 		if (ahinfo->spis[0]
 		    != ahinfo->spis[1])
@@ -152,7 +152,7 @@ static void ah_save(const void *ip, const struct xt_entry_match *match)
 static struct xtables_match ah_mt_reg = {
 	.name 		= "ah",
 	.version 	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV4,
+	.family		= PF_INET,
 	.size		= XT_ALIGN(sizeof(struct ipt_ah)),
 	.userspacesize 	= XT_ALIGN(sizeof(struct ipt_ah)),
 	.help 		= ah_help,

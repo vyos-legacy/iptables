@@ -12,19 +12,19 @@ when the interface goes down.  This is the correct behavior when the
 next dialup is unlikely to have the same interface address (and hence
 any established connections are lost anyway).  It takes one option:
 .TP
-\fB\-\-to\-ports\fP \fIport\fP[\fB\-\fP\fIport\fP]
+\fB\-\-to-ports\fP \fIport\fP[\fB-\fP\fIport\fP]
 This specifies a range of source ports to use, overriding the default
 .B SNAT
 source port-selection heuristics (see above).  This is only valid
 if the rule also specifies
-\fB\-p tcp\fP
+.B "\-p tcp"
 or
-\fB\-p udp\fP.
+.BR "\-p udp" .
 .TP
-\fB\-\-random\fP
+.BR "\-\-random"
 Randomize source port mapping
 If option
-\fB\-\-random\fP
+.B "\-\-random"
 is used then port mapping will be randomized (kernel >= 2.6.21).
 .RS
 .PP

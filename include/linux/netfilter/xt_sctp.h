@@ -7,6 +7,10 @@
 
 #define XT_SCTP_VALID_FLAGS		0x07
 
+/* temporary */
+#define SCTP_ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
+
+
 struct xt_sctp_flag_info {
 	u_int8_t chunktype;
 	u_int8_t flag;
@@ -63,8 +67,8 @@ struct xt_sctp_info {
 	memcpy((destmap), (srcmap), sizeof(srcmap))
 
 #define SCTP_CHUNKMAP_IS_CLEAR(chunkmap) \
-	__sctp_chunkmap_is_clear((chunkmap), ARRAY_SIZE(chunkmap))
-static __inline__ bool
+	__sctp_chunkmap_is_clear((chunkmap), SCTP_ARRAY_SIZE(chunkmap))
+static inline bool
 __sctp_chunkmap_is_clear(const u_int32_t *chunkmap, unsigned int n)
 {
 	unsigned int i;
@@ -76,7 +80,7 @@ __sctp_chunkmap_is_clear(const u_int32_t *chunkmap, unsigned int n)
 
 #define SCTP_CHUNKMAP_IS_ALL_SET(chunkmap) \
 	__sctp_chunkmap_is_all_set((chunkmap), ARRAY_SIZE(chunkmap))
-static __inline__ bool
+static inline bool
 __sctp_chunkmap_is_all_set(const u_int32_t *chunkmap, unsigned int n)
 {
 	unsigned int i;

@@ -12,7 +12,8 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-#include <xtables.h>
+#include <iptables.h>
+#include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_ecn.h>
 
 static void ecn_help(void)
@@ -41,9 +42,9 @@ static int ecn_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case 'F':
 		if (*flags & IPT_ECN_OP_MATCH_CWR)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "ECN match: can only use parameter ONCE!");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		einfo->operation |= IPT_ECN_OP_MATCH_CWR;
 		if (invert)
 			einfo->invert |= IPT_ECN_OP_MATCH_CWR;
@@ -52,9 +53,9 @@ static int ecn_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case 'G':
 		if (*flags & IPT_ECN_OP_MATCH_ECE)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "ECN match: can only use parameter ONCE!");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		einfo->operation |= IPT_ECN_OP_MATCH_ECE;
 		if (invert)
 			einfo->invert |= IPT_ECN_OP_MATCH_ECE;
@@ -63,15 +64,15 @@ static int ecn_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case 'H':
 		if (*flags & IPT_ECN_OP_MATCH_IP)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "ECN match: can only use parameter ONCE!");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		if (invert)
 			einfo->invert |= IPT_ECN_OP_MATCH_IP;
 		*flags |= IPT_ECN_OP_MATCH_IP;
 		einfo->operation |= IPT_ECN_OP_MATCH_IP;
-		if (!xtables_strtoui(optarg, NULL, &result, 0, 3))
-			xtables_error(PARAMETER_PROBLEM,
+		if (string_to_number(optarg, 0, 3, &result))
+			exit_error(PARAMETER_PROBLEM,
 				   "ECN match: Value out of range");
 		einfo->ip_ect = result;
 		break;
@@ -85,7 +86,7 @@ static int ecn_parse(int c, char **argv, int invert, unsigned int *flags,
 static void ecn_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 		           "ECN match: some option required");
 }
 
@@ -143,7 +144,7 @@ static void ecn_save(const void *ip, const struct xt_entry_match *match)
 static struct xtables_match ecn_mt_reg = {
     .name          = "ecn",
     .version       = XTABLES_VERSION,
-    .family        = NFPROTO_IPV4,
+    .family        = PF_INET,
     .size          = XT_ALIGN(sizeof(struct ipt_ecn_info)),
     .userspacesize = XT_ALIGN(sizeof(struct ipt_ecn_info)),
     .help          = ecn_help,

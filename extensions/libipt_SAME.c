@@ -4,8 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <xtables.h>
-#include <net/netfilter/nf_nat.h>
+#include <iptables.h>
+#include <linux/netfilter_ipv4/ip_tables.h>
+#include <linux/netfilter/nf_nat.h>
 /* For 64bit kernel / 32bit userspace */
 #include <linux/netfilter_ipv4/ipt_SAME.h>
 
@@ -44,7 +45,7 @@ static void SAME_init(struct xt_entry_target *t)
 
 /* Parses range of IPs */
 static void
-parse_to(char *arg, struct nf_nat_range *range)
+parse_to(char *arg, struct ip_nat_range *range)
 {
 	char *dash;
 	const struct in_addr *ip;
@@ -55,22 +56,22 @@ parse_to(char *arg, struct nf_nat_range *range)
 	if (dash)
 		*dash = '\0';
 
-	ip = xtables_numeric_to_ipaddr(arg);
+	ip = numeric_to_ipaddr(arg);
 	if (!ip)
-		xtables_error(PARAMETER_PROBLEM, "Bad IP address \"%s\"\n",
+		exit_error(PARAMETER_PROBLEM, "Bad IP address `%s'\n",
 			   arg);
 	range->min_ip = ip->s_addr;
 
 	if (dash) {
-		ip = xtables_numeric_to_ipaddr(dash+1);
+		ip = numeric_to_ipaddr(dash+1);
 		if (!ip)
-			xtables_error(PARAMETER_PROBLEM, "Bad IP address \"%s\"\n",
+			exit_error(PARAMETER_PROBLEM, "Bad IP address `%s'\n",
 				   dash+1);
 	}
 	range->max_ip = ip->s_addr;
 	if (dash)
 		if (range->min_ip > range->max_ip)
-			xtables_error(PARAMETER_PROBLEM, "Bad IP range \"%s-%s\"\n",
+			exit_error(PARAMETER_PROBLEM, "Bad IP range `%s-%s'\n", 
 				   arg, dash+1);
 }
 
@@ -88,12 +89,12 @@ static int SAME_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (mr->rangesize == IPT_SAME_MAX_RANGE)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Too many ranges specified, maximum "
 				   "is %i ranges.\n",
 				   IPT_SAME_MAX_RANGE);
-		if (xtables_check_inverse(optarg, &invert, NULL, 0))
-			xtables_error(PARAMETER_PROBLEM,
+		if (check_inverse(optarg, &invert, NULL, 0))
+			exit_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --to");
 
 		parse_to(optarg, &mr->range[mr->rangesize]);
@@ -107,7 +108,7 @@ static int SAME_parse(int c, char **argv, int invert, unsigned int *flags,
 		
 	case '2':
 		if (*flags & IPT_SAME_OPT_NODST)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Can't specify --nodst twice");
 		
 		mr->info |= IPT_SAME_NODST;
@@ -130,7 +131,7 @@ static int SAME_parse(int c, char **argv, int invert, unsigned int *flags,
 static void SAME_check(unsigned int flags)
 {
 	if (!(flags & IPT_SAME_OPT_TO))
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "SAME needs --to");
 }
 
@@ -138,24 +139,25 @@ static void SAME_print(const void *ip, const struct xt_entry_target *target,
                        int numeric)
 {
 	unsigned int count;
-	const struct ipt_same_info *mr = (const void *)target->data;
+	struct ipt_same_info *mr
+		= (struct ipt_same_info *)target->data;
 	int random_selection = 0;
 	
 	printf("same:");
 	
 	for (count = 0; count < mr->rangesize; count++) {
-		const struct nf_nat_range *r = &mr->range[count];
+		struct ip_nat_range *r = &mr->range[count];
 		struct in_addr a;
 
 		a.s_addr = r->min_ip;
 
-		printf("%s", xtables_ipaddr_to_numeric(&a));
+		printf("%s", ipaddr_to_numeric(&a));
 		a.s_addr = r->max_ip;
 		
 		if (r->min_ip == r->max_ip)
 			printf(" ");
 		else
-			printf("-%s ", xtables_ipaddr_to_numeric(&a));
+			printf("-%s ", ipaddr_to_numeric(&a));
 		if (r->flags & IP_NAT_RANGE_PROTO_RANDOM) 
 			random_selection = 1;
 	}
@@ -170,21 +172,22 @@ static void SAME_print(const void *ip, const struct xt_entry_target *target,
 static void SAME_save(const void *ip, const struct xt_entry_target *target)
 {
 	unsigned int count;
-	const struct ipt_same_info *mr = (const void *)target->data;
+	struct ipt_same_info *mr
+		= (struct ipt_same_info *)target->data;
 	int random_selection = 0;
 
 	for (count = 0; count < mr->rangesize; count++) {
-		const struct nf_nat_range *r = &mr->range[count];
+		struct ip_nat_range *r = &mr->range[count];
 		struct in_addr a;
 
 		a.s_addr = r->min_ip;
-		printf("--to %s", xtables_ipaddr_to_numeric(&a));
+		printf("--to %s", ipaddr_to_numeric(&a));
 		a.s_addr = r->max_ip;
 
 		if (r->min_ip == r->max_ip)
 			printf(" ");
 		else
-			printf("-%s ", xtables_ipaddr_to_numeric(&a));
+			printf("-%s ", ipaddr_to_numeric(&a));
 		if (r->flags & IP_NAT_RANGE_PROTO_RANDOM) 
 			random_selection = 1;
 	}
@@ -199,7 +202,7 @@ static void SAME_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target same_tg_reg = {
 	.name		= "SAME",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV4,
+	.family		= PF_INET,
 	.size		= XT_ALIGN(sizeof(struct ipt_same_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_same_info)),
 	.help		= SAME_help,

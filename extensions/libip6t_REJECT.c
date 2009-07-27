@@ -9,7 +9,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <xtables.h>
+#include <ip6tables.h>
+#include <linux/netfilter_ipv6/ip6_tables.h>
 #include <linux/netfilter_ipv6/ip6t_REJECT.h>
 
 struct reject_names {
@@ -43,7 +44,7 @@ print_reject_types(void)
 
 	printf("Valid reject types:\n");
 
-	for (i = 0; i < ARRAY_SIZE(reject_table); ++i) {
+	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++) {
 		printf("    %-25s\t%s\n", reject_table[i].name, reject_table[i].desc);
 		printf("    %-25s\talias\n", reject_table[i].alias);
 	}
@@ -79,20 +80,22 @@ static int REJECT_parse(int c, char **argv, int invert, unsigned int *flags,
 {
 	struct ip6t_reject_info *reject = 
 		(struct ip6t_reject_info *)(*target)->data;
+	unsigned int limit = sizeof(reject_table)/sizeof(struct reject_names);
 	unsigned int i;
 
 	switch(c) {
 	case '1':
-		if (xtables_check_inverse(optarg, &invert, NULL, 0))
-			xtables_error(PARAMETER_PROBLEM,
+		if (check_inverse(optarg, &invert, NULL, 0))
+			exit_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --reject-with");
-		for (i = 0; i < ARRAY_SIZE(reject_table); ++i)
+		for (i = 0; i < limit; i++) {
 			if ((strncasecmp(reject_table[i].name, optarg, strlen(optarg)) == 0)
 			    || (strncasecmp(reject_table[i].alias, optarg, strlen(optarg)) == 0)) {
 				reject->with = reject_table[i].with;
 				return 1;
 			}
-		xtables_error(PARAMETER_PROBLEM, "unknown reject type \"%s\"", optarg);
+		}
+		exit_error(PARAMETER_PROBLEM, "unknown reject type `%s'",optarg);
 	default:
 		/* Fall through */
 		break;
@@ -107,9 +110,10 @@ static void REJECT_print(const void *ip, const struct xt_entry_target *target,
 		= (const struct ip6t_reject_info *)target->data;
 	unsigned int i;
 
-	for (i = 0; i < ARRAY_SIZE(reject_table); ++i)
+	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++) {
 		if (reject_table[i].with == reject->with)
 			break;
+	}
 	printf("reject-with %s ", reject_table[i].name);
 }
 
@@ -119,7 +123,7 @@ static void REJECT_save(const void *ip, const struct xt_entry_target *target)
 		= (const struct ip6t_reject_info *)target->data;
 	unsigned int i;
 
-	for (i = 0; i < ARRAY_SIZE(reject_table); ++i)
+	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++)
 		if (reject_table[i].with == reject->with)
 			break;
 
@@ -129,7 +133,7 @@ static void REJECT_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target reject_tg6_reg = {
 	.name = "REJECT",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV6,
+	.family		= PF_INET6,
 	.size 		= XT_ALIGN(sizeof(struct ip6t_reject_info)),
 	.userspacesize 	= XT_ALIGN(sizeof(struct ip6t_reject_info)),
 	.help		= REJECT_help,

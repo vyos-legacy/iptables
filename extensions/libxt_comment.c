@@ -32,7 +32,7 @@ parse_comment(const char *s, struct xt_comment_info *info)
 	int slen = strlen(s);
 
 	if (slen >= XT_MAX_COMMENT_LEN) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			"COMMENT must be shorter than %i characters", XT_MAX_COMMENT_LEN);
 	}
 	strcpy((char *)info->comment, s);
@@ -46,9 +46,9 @@ comment_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		xtables_check_inverse(argv[optind-1], &invert, &optind, 0);
+		check_inverse(argv[optind-1], &invert, &optind, 0);
 		if (invert) {
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 					"Sorry, you can't have an inverted comment");
 		}
 		parse_comment(argv[optind-1], commentinfo);
@@ -64,14 +64,14 @@ comment_parse(int c, char **argv, int invert, unsigned int *flags,
 static void comment_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "COMMENT match: You must specify `--comment'");
 }
 
 static void
 comment_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct xt_comment_info *commentinfo = (void *)match->data;
+	struct xt_comment_info *commentinfo = (struct xt_comment_info *)match->data;
 
 	commentinfo->comment[XT_MAX_COMMENT_LEN-1] = '\0';
 	printf("/* %s */ ", commentinfo->comment);
@@ -81,15 +81,14 @@ comment_print(const void *ip, const struct xt_entry_match *match, int numeric)
 static void
 comment_save(const void *ip, const struct xt_entry_match *match)
 {
-	struct xt_comment_info *commentinfo = (void *)match->data;
+	struct xt_comment_info *commentinfo = (struct xt_comment_info *)match->data;
 
 	commentinfo->comment[XT_MAX_COMMENT_LEN-1] = '\0';
-	printf("--comment ");
-	xtables_save_string((const char *)commentinfo->comment);
+	printf("--comment \"%s\" ", commentinfo->comment);
 }
 
 static struct xtables_match comment_match = {
-	.family		= NFPROTO_IPV4,
+	.family		= AF_INET,
 	.name		= "comment",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_comment_info)),
@@ -103,7 +102,7 @@ static struct xtables_match comment_match = {
 };
 
 static struct xtables_match comment_match6 = {
-	.family		= NFPROTO_IPV6,
+	.family		= AF_INET6,
 	.name		= "comment",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_comment_info)),

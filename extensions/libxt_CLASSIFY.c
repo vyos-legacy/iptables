@@ -15,7 +15,7 @@ CLASSIFY_help(void)
 {
 	printf(
 "CLASSIFY target options:\n"
-"--set-class MAJOR:MINOR    Set skb->priority value (always hexadecimal!)\n");
+"  --set-class [MAJOR:MINOR]    Set skb->priority value\n");
 }
 
 static const struct option CLASSIFY_opts[] = {
@@ -45,10 +45,10 @@ CLASSIFY_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (CLASSIFY_string_to_priority(optarg, &clinfo->priority))
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Bad class value `%s'", optarg);
 		if (*flags)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 			           "CLASSIFY: Can't specify --set-class twice");
 		*flags = 1;
 		break;
@@ -64,7 +64,7 @@ static void
 CLASSIFY_final_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 		           "CLASSIFY: Parameter --set-class is required");
 }
 
@@ -96,7 +96,7 @@ CLASSIFY_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target classify_target = { 
-	.family		= NFPROTO_UNSPEC,
+	.family		= AF_UNSPEC,
 	.name		= "CLASSIFY",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_classify_target_info)),

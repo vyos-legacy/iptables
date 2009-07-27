@@ -35,12 +35,12 @@ static int SECMARK_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & SECMARK_MODE_SEL)
-			xtables_error(PARAMETER_PROBLEM, PFX
+			exit_error(PARAMETER_PROBLEM, PFX
 				   "Can't specify --selctx twice");
 		info->mode = SECMARK_MODE_SEL;
 
 		if (strlen(optarg) > SECMARK_SELCTX_MAX-1)
-			xtables_error(PARAMETER_PROBLEM, PFX
+			exit_error(PARAMETER_PROBLEM, PFX
 				   "Maximum length %u exceeded by --selctx"
 				   " parameter (%zu)",
 				   SECMARK_SELCTX_MAX-1, strlen(optarg));
@@ -58,10 +58,10 @@ static int SECMARK_parse(int c, char **argv, int invert, unsigned int *flags,
 static void SECMARK_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM, PFX "parameter required");
+		exit_error(PARAMETER_PROBLEM, PFX "parameter required");
 }
 
-static void print_secmark(const struct xt_secmark_target_info *info)
+static void print_secmark(struct xt_secmark_target_info *info)
 {
 	switch (info->mode) {
 	case SECMARK_MODE_SEL:
@@ -69,14 +69,14 @@ static void print_secmark(const struct xt_secmark_target_info *info)
 		break;
 	
 	default:
-		xtables_error(OTHER_PROBLEM, PFX "invalid mode %hhu\n", info->mode);
+		exit_error(OTHER_PROBLEM, PFX "invalid mode %hhu\n", info->mode);
 	}
 }
 
 static void SECMARK_print(const void *ip, const struct xt_entry_target *target,
                           int numeric)
 {
-	const struct xt_secmark_target_info *info =
+	struct xt_secmark_target_info *info =
 		(struct xt_secmark_target_info*)(target)->data;
 
 	printf("SECMARK ");
@@ -85,7 +85,7 @@ static void SECMARK_print(const void *ip, const struct xt_entry_target *target,
 
 static void SECMARK_save(const void *ip, const struct xt_entry_target *target)
 {
-	const struct xt_secmark_target_info *info =
+	struct xt_secmark_target_info *info =
 		(struct xt_secmark_target_info*)target->data;
 
 	printf("--");
@@ -93,7 +93,7 @@ static void SECMARK_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target secmark_target = {
-	.family		= NFPROTO_UNSPEC,
+	.family		= AF_UNSPEC,
 	.name		= "SECMARK",
 	.version	= XTABLES_VERSION,
 	.revision	= 0,

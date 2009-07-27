@@ -17,23 +17,22 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include <xtables.h>
+#include <iptables.h>
 #include <linux/netfilter_ipv4/ipt_set.h>
 #include "libipt_set.h"
 
 static void set_help(void)
 {
 	printf("set match options:\n"
-	       " [!] --match-set name flags\n"
-	       "		 'name' is the set name from to match,\n" 
-	       "		 'flags' are the comma separated list of\n"
-	       "		 'src' and 'dst' specifications.\n");
+	       " [!] --set     name flags\n"
+	       "		'name' is the set name from to match,\n" 
+	       "		'flags' are the comma separated list of\n"
+	       "		'src' and 'dst'.\n");
 }
 
 static const struct option set_opts[] = {
-	{ .name = "match-set", .has_arg = true, .val = '1'},
-	{ .name = "set",       .has_arg = true, .val = '2'},
-	{ .name = NULL }
+	{"set", 1, NULL, '1'},
+	{ }
 };
 
 static void set_init(struct xt_entry_match *match)
@@ -54,28 +53,23 @@ static int set_parse(int c, char **argv, int invert, unsigned int *flags,
 	struct ipt_set_info *info = &myinfo->match_set;
 
 	switch (c) {
-	case '2':
-#if 0
-		fprintf(stderr,
-			"--set option deprecated, please use --match-set\n");
-#endif
-	case '1':		/* --match-set <set> <flag>[,<flag> */
+	case '1':		/* --set <set> <flag>[,<flag> */
 		if (info->flags[0])
-			xtables_error(PARAMETER_PROBLEM,
-				   "--match-set can be specified only once");
+			exit_error(PARAMETER_PROBLEM,
+				   "--set can be specified only once");
 
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		if (invert)
 			info->flags[0] |= IPSET_MATCH_INV;
 
 		if (!argv[optind]
 		    || argv[optind][0] == '-'
 		    || argv[optind][0] == '!')
-			xtables_error(PARAMETER_PROBLEM,
-				   "--match-set requires two args.");
+			exit_error(PARAMETER_PROBLEM,
+				   "--set requires two args.");
 
 		if (strlen(argv[optind-1]) > IP_SET_MAXNAMELEN - 1)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "setname `%s' too long, max %d characters.",
 				   argv[optind-1], IP_SET_MAXNAMELEN - 1);
 
@@ -97,8 +91,8 @@ static int set_parse(int c, char **argv, int invert, unsigned int *flags,
 static void set_check(unsigned int flags)
 {
 	if (!flags)
-		xtables_error(PARAMETER_PROBLEM,
-			   "You must specify `--match-set' with proper arguments");
+		exit_error(PARAMETER_PROBLEM,
+			   "You must specify `--set' with proper arguments");
 	DEBUGP("final check OK\n");
 }
 
@@ -127,22 +121,24 @@ print_match(const char *prefix, const struct ipt_set_info *info)
 static void set_print(const void *ip, const struct xt_entry_match *match,
                       int numeric)
 {
-	const struct ipt_set_info_match *info = (const void *)match->data;
+	struct ipt_set_info_match *info = 
+		(struct ipt_set_info_match *) match->data;
 
-	print_match("match-set", &info->match_set);
+	print_match("set", &info->match_set);
 }
 
 static void set_save(const void *ip, const struct xt_entry_match *match)
 {
-	const struct ipt_set_info_match *info = (const void *)match->data;
+	struct ipt_set_info_match *info = 
+		(struct ipt_set_info_match *) match->data;
 
-	print_match("--match-set", &info->match_set);
+	print_match("--set", &info->match_set);
 }
 
 static struct xtables_match set_mt_reg = {
 	.name		= "set",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV4,
+	.family		= PF_INET,
 	.size		= XT_ALIGN(sizeof(struct ipt_set_info_match)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_set_info_match)),
 	.help		= set_help,

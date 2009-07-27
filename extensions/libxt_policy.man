@@ -15,7 +15,7 @@ chains.
 \fB\-\-pol\fP {\fBnone\fP|\fBipsec\fP}
 Matches if the packet is subject to IPsec processing.
 .TP
-\fB\-\-strict\fP
+.BI "\-\-strict"
 Selects whether to match the exact policy or match if any rule of
 the policy matches the given policy.
 .TP
@@ -35,14 +35,14 @@ Matches the encapsulation protocol.
 [\fB!\fP] \fB\-\-mode\fP {\fBtunnel\fP|\fBtransport\fP}
 Matches the encapsulation mode.
 .TP
-[\fB!\fP] \fB\-\-tunnel\-src\fP \fIaddr\fP[\fB/\fP\fImask\fP]
+[\fB!\fP] \fB\-\-tunnel-src\fP \fIaddr\fP[\fB/\fP\fImask\fP]
 Matches the source end-point address of a tunnel mode SA.
 Only valid with \fB\-\-mode tunnel\fP.
 .TP
-[\fB!\fP] \fB\-\-tunnel\-dst\fP \fIaddr\fP[\fB/\fP\fImask\fP]
+[\fB!\fP] \fB\-\-tunnel-dst\fP \fIaddr\fP[\fB/\fP\fImask\fP]
 Matches the destination end-point address of a tunnel mode SA.
 Only valid with \fB\-\-mode tunnel\fP.
 .TP
-\fB\-\-next\fP
+.BI "\-\-next"
 Start the next element in the policy specification. Can only be used with
 \fB\-\-strict\fP.

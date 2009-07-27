@@ -10,8 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
-#include <xtables.h>
+#include <ip6tables.h>
 
+#include <linux/netfilter_ipv6/ip6_tables.h>
 #include <linux/netfilter_ipv6/ip6t_hl.h>
 
 static void hl_help(void)
@@ -29,15 +30,15 @@ static int hl_parse(int c, char **argv, int invert, unsigned int *flags,
 	struct ip6t_hl_info *info = (struct ip6t_hl_info *) (*match)->data;
 	u_int8_t value;
 
-	xtables_check_inverse(optarg, &invert, &optind, 0);
+	check_inverse(optarg, &invert, &optind, 0);
 	value = atoi(argv[optind-1]);
 
 	if (*flags) 
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM, 
 				"Can't specify HL option twice");
 
 	if (!optarg)
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 				"hl: You must specify a value");
 	switch (c) {
 		case '2':
@@ -53,7 +54,7 @@ static int hl_parse(int c, char **argv, int invert, unsigned int *flags,
 			break;
 		case '3':
 			if (invert) 
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 						"hl: unexpected `!'");
 
 			info->mode = IP6T_HL_LT;
@@ -63,7 +64,7 @@ static int hl_parse(int c, char **argv, int invert, unsigned int *flags,
 			break;
 		case '4':
 			if (invert)
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 						"hl: unexpected `!'");
 
 			info->mode = IP6T_HL_GT;
@@ -81,7 +82,7 @@ static int hl_parse(int c, char **argv, int invert, unsigned int *flags,
 static void hl_check(unsigned int flags)
 {
 	if (!flags) 
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			"HL match: You must specify one of "
 			"`--hl-eq', `--hl-lt', `--hl-gt'");
 }
@@ -89,7 +90,7 @@ static void hl_check(unsigned int flags)
 static void hl_print(const void *ip, const struct xt_entry_match *match,
                      int numeric)
 {
-	static const char *const op[] = {
+	static const char *op[] = {
 		[IP6T_HL_EQ] = "==",
 		[IP6T_HL_NE] = "!=",
 		[IP6T_HL_LT] = "<",
@@ -103,16 +104,16 @@ static void hl_print(const void *ip, const struct xt_entry_match *match,
 
 static void hl_save(const void *ip, const struct xt_entry_match *match)
 {
-	static const char *const op[] = {
-		[IP6T_HL_EQ] = "--hl-eq",
-		[IP6T_HL_NE] = "! --hl-eq",
-		[IP6T_HL_LT] = "--hl-lt",
-		[IP6T_HL_GT] = "--hl-gt" };
+	static const char *op[] = {
+		[IP6T_HL_EQ] = "eq",
+		[IP6T_HL_NE] = "eq !",
+		[IP6T_HL_LT] = "lt",
+		[IP6T_HL_GT] = "gt" };
 
 	const struct ip6t_hl_info *info =
 		(struct ip6t_hl_info *) match->data;
 
-	printf("%s %u ", op[info->mode], info->hop_limit);
+	printf("--hl-%s %u ", op[info->mode], info->hop_limit);
 }
 
 static const struct option hl_opts[] = {
@@ -126,7 +127,7 @@ static const struct option hl_opts[] = {
 static struct xtables_match hl_mt6_reg = {
 	.name          = "hl",
 	.version       = XTABLES_VERSION,
-	.family        = NFPROTO_IPV6,
+	.family        = PF_INET6,
 	.size          = XT_ALIGN(sizeof(struct ip6t_hl_info)),
 	.userspacesize = XT_ALIGN(sizeof(struct ip6t_hl_info)),
 	.help          = hl_help,

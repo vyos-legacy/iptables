@@ -4,8 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <xtables.h>
-#include <limits.h> /* INT_MAX in ip_tables.h */
+#include <iptables.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
 
 /* special hack for icmp-type 'any': 
@@ -83,7 +82,7 @@ print_icmptypes(void)
 	unsigned int i;
 	printf("Valid ICMP Types:");
 
-	for (i = 0; i < ARRAY_SIZE(icmp_codes); ++i) {
+	for (i = 0; i < sizeof(icmp_codes)/sizeof(struct icmp_names); i++) {
 		if (i && icmp_codes[i].type == icmp_codes[i-1].type) {
 			if (icmp_codes[i].code_min == icmp_codes[i-1].code_min
 			    && (icmp_codes[i].code_max
@@ -103,7 +102,7 @@ static void icmp_help(void)
 	printf(
 "icmp match options:\n"
 "[!] --icmp-type typename	match icmp type\n"
-"[!] --icmp-type type[/code]	(or numeric type or type/code)\n");
+"				(or numeric type or type/code)\n");
 	print_icmptypes();
 }
 
@@ -115,7 +114,7 @@ static const struct option icmp_opts[] = {
 static void 
 parse_icmp(const char *icmptype, u_int8_t *type, u_int8_t code[])
 {
-	static const unsigned int limit = ARRAY_SIZE(icmp_codes);
+	unsigned int limit = sizeof(icmp_codes)/sizeof(struct icmp_names);
 	unsigned int match = limit;
 	unsigned int i;
 
@@ -123,7 +122,7 @@ parse_icmp(const char *icmptype, u_int8_t *type, u_int8_t code[])
 		if (strncasecmp(icmp_codes[i].name, icmptype, strlen(icmptype))
 		    == 0) {
 			if (match != limit)
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 					   "Ambiguous ICMP type `%s':"
 					   " `%s' or `%s'?",
 					   icmptype,
@@ -148,13 +147,13 @@ parse_icmp(const char *icmptype, u_int8_t *type, u_int8_t code[])
 		if (slash)
 			*slash = '\0';
 
-		if (!xtables_strtoui(buffer, NULL, &number, 0, UINT8_MAX))
-			xtables_error(PARAMETER_PROBLEM,
+		if (string_to_number(buffer, 0, 255, &number) == -1)
+			exit_error(PARAMETER_PROBLEM,
 				   "Invalid ICMP type `%s'\n", buffer);
 		*type = number;
 		if (slash) {
-			if (!xtables_strtoui(slash+1, NULL, &number, 0, UINT8_MAX))
-				xtables_error(PARAMETER_PROBLEM,
+			if (string_to_number(slash+1, 0, 255, &number) == -1)
+				exit_error(PARAMETER_PROBLEM,
 					   "Invalid ICMP code `%s'\n",
 					   slash+1);
 			code[0] = code[1] = number;
@@ -181,9 +180,9 @@ static int icmp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags == 1)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "icmp match: only use --icmp-type once!");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_icmp(argv[optind-1], &icmpinfo->type, 
 			   icmpinfo->code);
 		if (invert)
@@ -206,13 +205,16 @@ static void print_icmptype(u_int8_t type,
 	if (!numeric) {
 		unsigned int i;
 
-		for (i = 0; i < ARRAY_SIZE(icmp_codes); ++i)
+		for (i = 0;
+		     i < sizeof(icmp_codes)/sizeof(struct icmp_names);
+		     i++) {
 			if (icmp_codes[i].type == type
 			    && icmp_codes[i].code_min == code_min
 			    && icmp_codes[i].code_max == code_max)
 				break;
+		}
 
-		if (i != ARRAY_SIZE(icmp_codes)) {
+		if (i != sizeof(icmp_codes)/sizeof(struct icmp_names)) {
 			printf("%s%s ",
 			       invert ? "!" : "",
 			       icmp_codes[i].name);
@@ -268,7 +270,7 @@ static void icmp_save(const void *ip, const struct xt_entry_match *match)
 static struct xtables_match icmp_mt_reg = {
 	.name		= "icmp",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV4,
+	.family		= PF_INET,
 	.size		= XT_ALIGN(sizeof(struct ipt_icmp)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_icmp)),
 	.help		= icmp_help,

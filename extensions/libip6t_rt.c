@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
-#include <xtables.h>
+#include <ip6tables.h>
 /*#include <linux/in6.h>*/
 #include <linux/netfilter_ipv6/ip6t_rt.h>
 #include <sys/types.h>
@@ -46,19 +46,19 @@ parse_rt_num(const char *idstr, const char *typestr)
 	id =  strtoul(idstr,&ep,0) ;
 
 	if ( idstr == ep ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "RT no valid digits in %s `%s'", typestr, idstr);
 	}
 	if ( id == ULONG_MAX  && errno == ERANGE ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "%s `%s' specified too big: would overflow",
 			   typestr, idstr);
 	}	
 	if ( *idstr != '\0'  && *ep != '\0' ) {
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			   "RT error parsing %s `%s'", typestr, idstr);
 	}
-	return id;
+	return (u_int32_t) id;
 }
 
 static void
@@ -98,7 +98,7 @@ numeric_to_addr(const char *num)
 #ifdef DEBUG
 	fprintf(stderr, "\nnumeric2addr: %d\n", err);
 #endif
-	xtables_error(PARAMETER_PROBLEM, "bad address: %s", num);
+        exit_error(PARAMETER_PROBLEM, "bad address: %s", num);
 
 	return (struct in6_addr *)NULL;
 }
@@ -111,7 +111,7 @@ parse_addresses(const char *addrstr, struct in6_addr *addrp)
         unsigned int i;
 	
 	buffer = strdup(addrstr);
-	if (!buffer) xtables_error(OTHER_PROBLEM, "strdup failed");
+        if (!buffer) exit_error(OTHER_PROBLEM, "strdup failed");
 			
         for (cp=buffer, i=0; cp && i<IP6T_RT_HOPS; cp=next,i++)
         {
@@ -124,7 +124,7 @@ parse_addresses(const char *addrstr, struct in6_addr *addrp)
 		printf("addr [%d]: %s\n", i, addr_to_numeric(&(addrp[i])));
 #endif
 	}
-	if (cp) xtables_error(PARAMETER_PROBLEM, "too many addresses specified");
+        if (cp) exit_error(PARAMETER_PROBLEM, "too many addresses specified");
 
 	free(buffer);
 
@@ -156,9 +156,9 @@ static int rt_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & IP6T_RT_TYP)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--rt-type' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		rtinfo->rt_type = parse_rt_num(argv[optind-1], "type");
 		if (invert)
 			rtinfo->invflags |= IP6T_RT_INV_TYP;
@@ -167,9 +167,9 @@ static int rt_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '2':
 		if (*flags & IP6T_RT_SGS)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--rt-segsleft' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		parse_rt_segsleft(argv[optind-1], rtinfo->segsleft);
 		if (invert)
 			rtinfo->invflags |= IP6T_RT_INV_SGS;
@@ -178,9 +178,9 @@ static int rt_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '3':
 		if (*flags & IP6T_RT_LEN)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--rt-len' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		rtinfo->hdrlen = parse_rt_num(argv[optind-1], "length");
 		if (invert)
 			rtinfo->invflags |= IP6T_RT_INV_LEN;
@@ -189,24 +189,24 @@ static int rt_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '4':
 		if (*flags & IP6T_RT_RES)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--rt-0-res' allowed");
 		if ( !(*flags & IP6T_RT_TYP) || (rtinfo->rt_type != 0) || (rtinfo->invflags & IP6T_RT_INV_TYP) )
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "`--rt-type 0' required before `--rt-0-res'");
 		rtinfo->flags |= IP6T_RT_RES;
 		*flags |= IP6T_RT_RES;
 		break;
 	case '5':
 		if (*flags & IP6T_RT_FST)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--rt-0-addrs' allowed");
 		if ( !(*flags & IP6T_RT_TYP) || (rtinfo->rt_type != 0) || (rtinfo->invflags & IP6T_RT_INV_TYP) )
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "`--rt-type 0' required before `--rt-0-addrs'");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		check_inverse(optarg, &invert, &optind, 0);
 		if (invert)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   " '!' not allowed with `--rt-0-addrs'");
 		rtinfo->addrnr = parse_addresses(argv[optind-1], rtinfo->addrs);
 		rtinfo->flags |= IP6T_RT_FST;
@@ -214,10 +214,10 @@ static int rt_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '6':
 		if (*flags & IP6T_RT_FST_NSTRICT)
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "Only one `--rt-0-not-strict' allowed");
 		if ( !(*flags & IP6T_RT_FST) )
-			xtables_error(PARAMETER_PROBLEM,
+			exit_error(PARAMETER_PROBLEM,
 				   "`--rt-0-addr ...' required before `--rt-0-not-strict'");
 		rtinfo->flags |= IP6T_RT_FST_NSTRICT;
 		*flags |= IP6T_RT_FST_NSTRICT;
@@ -291,14 +291,14 @@ static void rt_save(const void *ip, const struct xt_entry_match *match)
 	const struct ip6t_rt *rtinfo = (struct ip6t_rt *)match->data;
 
 	if (rtinfo->flags & IP6T_RT_TYP) {
-		printf("%s--rt-type %u ", 
+		printf("--rt-type %s%u ", 
 			(rtinfo->invflags & IP6T_RT_INV_TYP) ? "! " : "", 
 			rtinfo->rt_type);
 	}
 
 	if (!(rtinfo->segsleft[0] == 0
 	    && rtinfo->segsleft[1] == 0xFFFFFFFF)) {
-		printf("%s--rt-segsleft ",
+		printf("--rt-segsleft %s", 
 			(rtinfo->invflags & IP6T_RT_INV_SGS) ? "! " : "");
 		if (rtinfo->segsleft[0]
 		    != rtinfo->segsleft[1])
@@ -311,7 +311,7 @@ static void rt_save(const void *ip, const struct xt_entry_match *match)
 	}
 
 	if (rtinfo->flags & IP6T_RT_LEN) {
-		printf("%s--rt-len %u ",
+		printf("--rt-len %s%u ", 
 			(rtinfo->invflags & IP6T_RT_INV_LEN) ? "! " : "", 
 			rtinfo->hdrlen);
 	}
@@ -326,7 +326,7 @@ static void rt_save(const void *ip, const struct xt_entry_match *match)
 static struct xtables_match rt_mt6_reg = {
 	.name		= "rt",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV6,
+	.family		= PF_INET6,
 	.size		= XT_ALIGN(sizeof(struct ip6t_rt)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ip6t_rt)),
 	.help		= rt_help,

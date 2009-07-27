@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
-#include <xtables.h>
+#include <iptables.h>
 
+#include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_ttl.h>
 
 static void ttl_help(void)
@@ -28,12 +29,12 @@ static int ttl_parse(int c, char **argv, int invert, unsigned int *flags,
 	struct ipt_ttl_info *info = (struct ipt_ttl_info *) (*match)->data;
 	unsigned int value;
 
-	xtables_check_inverse(optarg, &invert, &optind, 0);
+	check_inverse(optarg, &invert, &optind, 0);
 
 	switch (c) {
 		case '2':
-			if (!xtables_strtoui(optarg, NULL, &value, 0, UINT8_MAX))
-				xtables_error(PARAMETER_PROBLEM,
+			if (string_to_number(optarg, 0, 255, &value) == -1)
+				exit_error(PARAMETER_PROBLEM,
 				           "ttl: Expected value between 0 and 255");
 
 			if (invert)
@@ -45,24 +46,24 @@ static int ttl_parse(int c, char **argv, int invert, unsigned int *flags,
 			info->ttl = value;
 			break;
 		case '3':
-			if (!xtables_strtoui(optarg, NULL, &value, 0, UINT8_MAX))
-				xtables_error(PARAMETER_PROBLEM,
+			if (string_to_number(optarg, 0, 255, &value) == -1)
+				exit_error(PARAMETER_PROBLEM,
 				           "ttl: Expected value between 0 and 255");
 
 			if (invert) 
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 						"ttl: unexpected `!'");
 
 			info->mode = IPT_TTL_LT;
 			info->ttl = value;
 			break;
 		case '4':
-			if (!xtables_strtoui(optarg, NULL, &value, 0, UINT8_MAX))
-				xtables_error(PARAMETER_PROBLEM,
+			if (string_to_number(optarg, 0, 255, &value) == -1)
+				exit_error(PARAMETER_PROBLEM,
 				           "ttl: Expected value between 0 and 255");
 
 			if (invert)
-				xtables_error(PARAMETER_PROBLEM,
+				exit_error(PARAMETER_PROBLEM,
 						"ttl: unexpected `!'");
 
 			info->mode = IPT_TTL_GT;
@@ -74,7 +75,7 @@ static int ttl_parse(int c, char **argv, int invert, unsigned int *flags,
 	}
 
 	if (*flags) 
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM, 
 				"Can't specify TTL option twice");
 	*flags = 1;
 
@@ -84,7 +85,7 @@ static int ttl_parse(int c, char **argv, int invert, unsigned int *flags,
 static void ttl_check(unsigned int flags)
 {
 	if (!flags) 
-		xtables_error(PARAMETER_PROBLEM,
+		exit_error(PARAMETER_PROBLEM,
 			"TTL match: You must specify one of "
 			"`--ttl-eq', `--ttl-lt', `--ttl-gt");
 }
@@ -149,7 +150,7 @@ static const struct option ttl_opts[] = {
 static struct xtables_match ttl_mt_reg = {
 	.name		= "ttl",
 	.version	= XTABLES_VERSION,
-	.family		= NFPROTO_IPV4,
+	.family		= PF_INET,
 	.size		= XT_ALIGN(sizeof(struct ipt_ttl_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_ttl_info)),
 	.help		= ttl_help,

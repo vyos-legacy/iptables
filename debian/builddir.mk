@@ -1,3 +1,5 @@
+export QUILT_PATCH_DIR=debian/patch
+
 BUILD_DIR := debian/build
 BUILD_DIR_TARGETS := build install patch unpatch
 

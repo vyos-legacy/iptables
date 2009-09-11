@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 configure :=  --with-xtlibdir=/lib/xtables --enable-libipq \
-	 --libdir=/lib
+	 --enable-devel --libdir=/lib
 install :=  --exclude=-multi
 
 %:

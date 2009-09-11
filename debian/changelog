@@ -1,3 +1,11 @@
+iptables (1.4.4-2) unstable; urgency=low
+
+  * renamed debian/patches to debian/patch to avoid 3.0-quilt-by-default
+    bug reports. Closes: #538608
+  * Bumped Standards Version to 3.8.2
+
+ -- Laurence J. Lane <ljlane@debian.org>  Tue, 28 Jul 2009 09:16:06 -0400
+
 iptables (1.4.4-1) unstable; urgency=low
 
   * New upstream release

@@ -3,7 +3,7 @@ Section: net
 Priority: important
 Maintainer: Laurence J. Lane <ljlane@debian.org>
 Build-Depends: debhelper (>>7.0), quilt, autoconf, automake, libtool
-Standards-Version: 3.8.1
+Standards-Version: 3.8.2
 Homepage: http://www.netfilter.org/
 
 

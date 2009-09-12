@@ -1,7 +1,17 @@
+Author: ljlane
+Description: esacped apostrophes in man page for this lintian warning:
+  W: iptables: manpage-has-errors-from-man usr/share/man/man8/ip6tables.8.gz 1823: warning: `precedence'' not defined
+
+
 Index: b/extensions/libxt_TOS.man
 ===================================================================
+<<<<<<< HEAD:debian/patches/0404-apostrophe.man.patch
 --- a/extensions/libxt_TOS.man	2008-10-08 12:31:58.000000000 -0400
 +++ b/extensions/libxt_TOS.man	2009-01-12 13:19:07.634582985 -0500
+=======
+--- a/extensions/libxt_TOS.man	2009-03-25 16:50:32.801338397 -0400
++++ b/extensions/libxt_TOS.man	2009-03-25 16:50:45.886316101 -0400
+>>>>>>> origin/upstream:debian/patch/0200-prcedence_TOS.man.patch
 @@ -1,5 +1,5 @@
  This module sets the Type of Service field in the IPv4 header (including the
 -'precedence' bits) or the Priority field in the IPv6 header. Note that TOS

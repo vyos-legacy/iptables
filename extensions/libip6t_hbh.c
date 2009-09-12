@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
-#include <ip6tables.h>
+#include <xtables.h>
 /*#include <linux/in6.h>*/
 #include <linux/netfilter_ipv6/ip6t_opts.h>
 #include <sys/types.h>
@@ -40,19 +40,19 @@ parse_opts_num(const char *idstr, const char *typestr)
 	id =  strtoul(idstr,&ep,0) ;
 
 	if ( idstr == ep ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "hbh: no valid digits in %s `%s'", typestr, idstr);
 	}
 	if ( id == ULONG_MAX  && errno == ERANGE ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "%s `%s' specified too big: would overflow",
 			   typestr, idstr);
 	}	
 	if ( *idstr != '\0'  && *ep != '\0' ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "hbh: error parsing %s `%s'", typestr, idstr);
 	}
-	return (u_int32_t) id;
+	return id;
 }
 
 static int
@@ -62,7 +62,7 @@ parse_options(const char *optsstr, u_int16_t *opts)
         unsigned int i;
 	
 	buffer = strdup(optsstr);
-        if (!buffer) exit_error(OTHER_PROBLEM, "strdup failed");
+	if (!buffer) xtables_error(OTHER_PROBLEM, "strdup failed");
 			
         for (cp=buffer, i=0; cp && i<IP6T_OPTS_OPTSNR; cp=next,i++)
         {
@@ -71,16 +71,15 @@ parse_options(const char *optsstr, u_int16_t *opts)
                 range = strchr(cp, ':');
                 if (range) {
                         if (i == IP6T_OPTS_OPTSNR-1)
-                                exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
                                            "too many ports specified");
                         *range++ = '\0';
                 }
-                opts[i] = (u_int16_t)((parse_opts_num(cp,"opt") & 0x000000FF)<<8); 
+		opts[i] = (parse_opts_num(cp, "opt") & 0xFF) << 8;
                 if (range) {
 			if (opts[i] == 0)
-        			exit_error(PARAMETER_PROBLEM, "PAD0 hasn't got length");
-                        opts[i] |= (u_int16_t)(parse_opts_num(range,"length") &
-					0x000000FF);
+				xtables_error(PARAMETER_PROBLEM, "PAD0 has not got length");
+			opts[i] |= parse_opts_num(range, "length") & 0xFF;
                 } else {
                         opts[i] |= (0x00FF);
 		}
@@ -90,7 +89,7 @@ parse_options(const char *optsstr, u_int16_t *opts)
 		printf("opts opt: %04X\n", opts[i]);
 #endif
 	}
-        if (cp) exit_error(PARAMETER_PROBLEM, "too many addresses specified");
+	if (cp) xtables_error(PARAMETER_PROBLEM, "too many addresses specified");
 
 	free(buffer);
 
@@ -119,9 +118,9 @@ static int hbh_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & IP6T_OPTS_LEN)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--hbh-len' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		optinfo->hdrlen = parse_opts_num(argv[optind-1], "length");
 		if (invert)
 			optinfo->invflags |= IP6T_OPTS_INV_LEN;
@@ -130,11 +129,11 @@ static int hbh_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '2':
 		if (*flags & IP6T_OPTS_OPTS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--hbh-opts' allowed");
-                check_inverse(optarg, &invert, &optind, 0);
+                xtables_check_inverse(optarg, &invert, &optind, 0);
                 if (invert)
-                        exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				" '!' not allowed with `--hbh-opts'");
 		optinfo->optsnr = parse_options(argv[optind-1], optinfo->opts);
 		optinfo->flags |= IP6T_OPTS_OPTS;
@@ -142,10 +141,10 @@ static int hbh_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case '3':
 		if (*flags & IP6T_OPTS_NSTRICT)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--hbh-not-strict' allowed");
 		if ( !(*flags & IP6T_OPTS_OPTS) )
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "`--hbh-opts ...' required before `--hbh-not-strict'");
 		optinfo->flags |= IP6T_OPTS_NSTRICT;
 		*flags |= IP6T_OPTS_NSTRICT;
@@ -196,7 +195,7 @@ static void hbh_save(const void *ip, const struct xt_entry_match *match)
 	const struct ip6t_opts *optinfo = (struct ip6t_opts *)match->data;
 
 	if (optinfo->flags & IP6T_OPTS_LEN) {
-		printf("--hbh-len %s%u ",
+		printf("%s--hbh-len %u ",
 			(optinfo->invflags & IP6T_OPTS_INV_LEN) ? "! " : "", 
 			optinfo->hdrlen);
 	}
@@ -211,7 +210,7 @@ static void hbh_save(const void *ip, const struct xt_entry_match *match)
 static struct xtables_match hbh_mt6_reg = {
 	.name 		= "hbh",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET6,
+	.family		= NFPROTO_IPV6,
 	.size		= XT_ALIGN(sizeof(struct ip6t_opts)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ip6t_opts)),
 	.help		= hbh_help,

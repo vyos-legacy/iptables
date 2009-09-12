@@ -25,14 +25,14 @@ static void quota_help(void)
 static void
 quota_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct xt_quota_info *q = (struct xt_quota_info *) match->data;
+	const struct xt_quota_info *q = (const void *)match->data;
 	printf("quota: %llu bytes", (unsigned long long) q->quota);
 }
 
 static void
 quota_save(const void *ip, const struct xt_entry_match *match)
 {
-	struct xt_quota_info *q = (struct xt_quota_info *) match->data;
+	const struct xt_quota_info *q = (const void *)match->data;
 	printf("--quota %llu ", (unsigned long long) q->quota);
 }
 
@@ -46,8 +46,8 @@ parse_quota(const char *s, u_int64_t * quota)
 	printf("Quota: %llu\n", *quota);
 #endif
 
-	if (*quota == (u_int64_t)-1)
-		exit_error(PARAMETER_PROBLEM, "quota invalid: '%s'\n", s);
+	if (*quota == UINT64_MAX)
+		xtables_error(PARAMETER_PROBLEM, "quota invalid: '%s'\n", s);
 	else
 		return 1;
 }
@@ -60,10 +60,10 @@ quota_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM, "quota: unexpected '!'");
+		if (xtables_check_inverse(optarg, &invert, NULL, 0))
+			xtables_error(PARAMETER_PROBLEM, "quota: unexpected '!'");
 		if (!parse_quota(optarg, &info->quota))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "bad quota: '%s'", optarg);
 		break;
 
@@ -74,7 +74,7 @@ quota_parse(int c, char **argv, int invert, unsigned int *flags,
 }
 
 static struct xtables_match quota_match = {
-	.family		= AF_UNSPEC,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "quota",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof (struct xt_quota_info)),

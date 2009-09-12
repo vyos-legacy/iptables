@@ -1,18 +1,18 @@
-define([_XTABLES_VERSION_MAJOR], 1)
-define([_XTABLES_VERSION_MINOR], 4)
-define([_XTABLES_VERSION_PATCH], 2)
-define([_XTABLES_VERSION_EXTRA],)
 
-define([_XTABLES_VERSION],_XTABLES_VERSION_MAJOR._XTABLES_VERSION_MINOR._XTABLES_VERSION_PATCH[]_XTABLES_VERSION_EXTRA)
+AC_INIT([iptables], [1.4.4])
 
-AC_INIT([iptables], _XTABLES_VERSION)
+# See libtool.info "Libtool's versioning system"
+libxtables_vcurrent=2
+libxtables_vage=0
+
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_INSTALL
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([-Wall])
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 
 AC_ARG_WITH([kernel],
 	AS_HELP_STRING([--with-kernel=PATH],
@@ -31,6 +31,12 @@ AC_ARG_WITH([xtlibdir],
 	[Path where to install Xtables extensions [[LIBEXECDIR/xtables]]]),
 	[xtlibdir="$withval"],
 	[xtlibdir="${libexecdir}/xtables"])
+AC_ARG_ENABLE([ipv4],
+	AS_HELP_STRING([--disable-ipv4], [Do not build iptables]),
+	[enable_ipv4="$enableval"], [enable_ipv4="yes"])
+AC_ARG_ENABLE([ipv6],
+	AS_HELP_STRING([--disable-ipv6], [Do not build ip6tables]),
+	[enable_ipv6="$enableval"], [enable_ipv6="yes"])
 AC_ARG_ENABLE([devel],
 	AS_HELP_STRING([--enable-devel],
 	[Install Xtables development headers]),
@@ -51,6 +57,8 @@ AC_SUBST([blacklist_modules])
 
 AM_CONDITIONAL([ENABLE_STATIC], [test "$enable_static" = "yes"])
 AM_CONDITIONAL([ENABLE_SHARED], [test "$enable_shared" = "yes"])
+AM_CONDITIONAL([ENABLE_IPV4], [test "$enable_ipv4" = "yes"])
+AM_CONDITIONAL([ENABLE_IPV6], [test "$enable_ipv6" = "yes"])
 AM_CONDITIONAL([ENABLE_DEVEL], [test "$enable_devel" = "yes"])
 AM_CONDITIONAL([ENABLE_LIBIPQ], [test "$enable_libipq" = "yes"])
 
@@ -73,15 +81,12 @@ AC_SUBST([kbuilddir])
 AC_SUBST([ksourcedir])
 AC_SUBST([xtlibdir])
 AC_SUBST([pkgconfigdir])
+AC_SUBST([libxtables_vcurrent])
+AC_SUBST([libxtables_vage])
+libxtables_vmajor=$(($libxtables_vcurrent - $libxtables_vage));
+AC_SUBST([libxtables_vmajor])
 
-XTABLES_VERSION_MAJOR=_XTABLES_VERSION_MAJOR
-XTABLES_VERSION_MINOR=_XTABLES_VERSION_MINOR
-XTABLES_VERSION_PATCH=_XTABLES_VERSION_PATCH
-XTABLES_VERSION_EXTRA=_XTABLES_VERSION_EXTRA
-AC_SUBST([XTABLES_VERSION_MAJOR])
-AC_SUBST([XTABLES_VERSION_MINOR])
-AC_SUBST([XTABLES_VERSION_PATCH])
-AC_SUBST([XTABLES_VERSION_EXTRA])
-
-AC_OUTPUT([Makefile extensions/GNUmakefile libipq/Makefile include/xtables.h
-	xtables.pc])
+AC_CONFIG_FILES([Makefile extensions/GNUmakefile include/Makefile
+	libipq/Makefile
+	include/xtables.h include/iptables/internal.h libiptc.pc xtables.pc])
+AC_OUTPUT

@@ -15,8 +15,7 @@
 #include <stdlib.h>
 #include <syslog.h>
 #include <getopt.h>
-#include <iptables.h>
-#include <linux/netfilter_ipv4/ip_tables.h>
+#include <xtables.h>
 /* For 64bit kernel / 32bit userspace */
 #include <linux/netfilter_ipv4/ipt_ULOG.h>
 
@@ -74,15 +73,15 @@ static int ULOG_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '!':
 		if (*flags & IPT_LOG_OPT_NLGROUP)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --ulog-nlgroup twice");
 
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --ulog-nlgroup");
 		group_d = atoi(optarg);
 		if (group_d > 32 || group_d < 1)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "--ulog-nlgroup has to be between 1 and 32");
 
 		loginfo->nl_group = (1 << (group_d - 1));
@@ -92,24 +91,24 @@ static int ULOG_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '#':
 		if (*flags & IPT_LOG_OPT_PREFIX)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --ulog-prefix twice");
 
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --ulog-prefix");
 
 		if (strlen(optarg) > sizeof(loginfo->prefix) - 1)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Maximum prefix length %u for --ulog-prefix",
 				   (unsigned int)sizeof(loginfo->prefix) - 1);
 
 		if (strlen(optarg) == 0)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "No prefix specified for --ulog-prefix");
 
 		if (strlen(optarg) != strlen(strtok(optarg, "\n")))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Newlines not allowed in --ulog-prefix");
 
 		strcpy(loginfo->prefix, optarg);
@@ -117,23 +116,23 @@ static int ULOG_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 	case 'A':
 		if (*flags & IPT_LOG_OPT_CPRANGE)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --ulog-cprange twice");
 		if (atoi(optarg) < 0)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Negative copy range?");
 		loginfo->copy_range = atoi(optarg);
 		*flags |= IPT_LOG_OPT_CPRANGE;
 		break;
 	case 'B':
 		if (*flags & IPT_LOG_OPT_QTHRESHOLD)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Can't specify --ulog-qthreshold twice");
 		if (atoi(optarg) < 1)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Negative or zero queue threshold ?");
 		if (atoi(optarg) > ULOG_MAX_QLEN)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Maximum queue length exceeded");
 		loginfo->qthreshold = atoi(optarg);
 		*flags |= IPT_LOG_OPT_QTHRESHOLD;
@@ -151,7 +150,7 @@ static void ULOG_save(const void *ip, const struct xt_entry_target *target)
 
 	if (strcmp(loginfo->prefix, "") != 0) {
 		fputs("--ulog-prefix ", stdout);
-		save_string(loginfo->prefix);
+		xtables_save_string(loginfo->prefix);
 	}
 
 	if (loginfo->nl_group != ULOG_DEFAULT_NLGROUP) {
@@ -182,7 +181,7 @@ static void ULOG_print(const void *ip, const struct xt_entry_target *target,
 static struct xtables_target ulog_tg_reg = {
 	.name		= "ULOG",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET,
+	.family		= NFPROTO_IPV4,
 	.size		= XT_ALIGN(sizeof(struct ipt_ulog_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_ulog_info)),
 	.help		= ULOG_help,

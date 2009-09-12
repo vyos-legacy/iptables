@@ -1,3 +1,11 @@
+iptables (1.4.4-2) unstable; urgency=low
+
+  * renamed debian/patches to debian/patch to avoid 3.0-quilt-by-default
+    bug reports. Closes: #538608
+  * Bumped Standards Version to 3.8.2
+
+ -- Stig Thormodsrud <stig@vyatta.org>  Fri, 11 Sep 2009 17:16:06 -0700
+
 iptables (1.4.2-6+vyatta+3) unstable; urgency=low
 
   * UNRELEASED
@@ -224,7 +232,7 @@ iptables (1.3.6.0debian1-1) unstable; urgency=low
     + adds support port range match to libip6t_multiport
     + adds endian annotation types to fix compilation for
       kernels > 2.6.18
-  * ipv6 updates in SVN by Rémi Denis-Courmont fixes the ip6tables port
+  * ipv6 updates in SVN by RÃ©mi Denis-Courmont fixes the ip6tables port
     range bug reported by Alexander Dreweke. Thanks. closes: #329775
   * debian/control: added info about missing kernel extensions
   * bumped standards version to 3.7.2, no changes
@@ -269,7 +277,7 @@ iptables (1.3.5.0debian1-1) unstable; urgency=low
     mport, nth, osf, pool, psd, quota, random, time
   * replaced debian/copyright GPL paste with stubs
   * updated debian/copyright source URLs
-  * Thanks for the invaluable help Rémi Denis-Courmont.
+  * Thanks for the invaluable help RÃ©mi Denis-Courmont.
 
  -- Laurence J. Lane <ljlane@debian.org>  Sun, 20 Aug 2006 21:29:33 -0400
 

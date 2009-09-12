@@ -9,6 +9,7 @@
 
 #include <getopt.h>
 #include <sys/errno.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +41,8 @@ static const struct option options[] = {
 
 static void print_usage(const char *name, const char *version) __attribute__((noreturn));
 
+#define prog_name iptables_globals.program_name
+
 static void print_usage(const char *name, const char *version)
 {
 	fprintf(stderr, "Usage: %s [-b] [-c] [-v] [-t] [-h]\n"
@@ -55,21 +58,21 @@ static void print_usage(const char *name, const char *version)
 	exit(1);
 }
 
-static iptc_handle_t create_handle(const char *tablename, const char *modprobe)
+static struct iptc_handle *create_handle(const char *tablename)
 {
-	iptc_handle_t handle;
+	struct iptc_handle *handle;
 
 	handle = iptc_init(tablename);
 
 	if (!handle) {
 		/* try to insmod the module if iptc_init failed */
-		load_xtables_ko(modprobe, 0);
+		xtables_load_ko(xtables_modprobe_program, false);
 		handle = iptc_init(tablename);
 	}
 
 	if (!handle) {
-		exit_error(PARAMETER_PROBLEM, "%s: unable to initialize "
-			"table '%s'\n", program_name, tablename);
+		xtables_error(PARAMETER_PROBLEM, "%s: unable to initialize "
+			"table '%s'\n", prog_name, tablename);
 		exit(1);
 	}
 	return handle;
@@ -96,7 +99,7 @@ static int newargc;
  * returns true if argument added, false otherwise */
 static int add_argv(char *what) {
 	DEBUGP("add_argv: %s\n", what);
-	if (what && ((newargc + 1) < sizeof(newargv)/sizeof(char *))) {
+	if (what && newargc + 1 < ARRAY_SIZE(newargv)) {
 		newargv[newargc] = strdup(what);
 		newargc++;
 		return 1;
@@ -119,28 +122,24 @@ int
 main(int argc, char *argv[])
 #endif
 {
-	iptc_handle_t handle = NULL;
+	struct iptc_handle *handle = NULL;
 	char buffer[10240];
 	int c;
 	char curtable[IPT_TABLE_MAXNAMELEN + 1];
 	FILE *in;
-	const char *modprobe = NULL;
 	int in_table = 0, testing = 0;
 	const char *tablename = NULL;
 
-	program_name = "iptables-restore";
-	program_version = XTABLES_VERSION;
 	line = 0;
 
-	lib_dir = getenv("XTABLES_LIBDIR");
-	if (lib_dir == NULL) {
-		lib_dir = getenv("IPTABLES_LIB_DIR");
-		if (lib_dir != NULL)
-			fprintf(stderr, "IPTABLES_LIB_DIR is deprecated\n");
+	iptables_globals.program_name = "iptables-restore";
+	c = xtables_init_all(&iptables_globals, NFPROTO_IPV4);
+	if (c < 0) {
+		fprintf(stderr, "%s/%s Failed to initialize xtables\n",
+				iptables_globals.program_name,
+				iptables_globals.program_version);
+		exit(1);
 	}
-	if (lib_dir == NULL)
-		lib_dir = XTABLES_LIBDIR;
-
 #ifdef NO_SHARED_LIBS
 	init_extensions();
 #endif
@@ -161,13 +160,13 @@ main(int argc, char *argv[])
 				break;
 			case 'h':
 				print_usage("iptables-restore",
-					    XTABLES_VERSION);
+					    IPTABLES_VERSION);
 				break;
 			case 'n':
 				noflush = 1;
 				break;
 			case 'M':
-				modprobe = optarg;
+				xtables_modprobe_program = optarg;
 				break;
 			case 'T':
 				tablename = optarg;
@@ -203,7 +202,9 @@ main(int argc, char *argv[])
 		} else if ((strcmp(buffer, "COMMIT\n") == 0) && (in_table)) {
 			if (!testing) {
 				DEBUGP("Calling commit\n");
-				ret = iptc_commit(&handle);
+				ret = iptc_commit(handle);
+				iptc_free(handle);
+				handle = NULL;
 			} else {
 				DEBUGP("Not calling commit, testing\n");
 				ret = 1;
@@ -216,9 +217,9 @@ main(int argc, char *argv[])
 			table = strtok(buffer+1, " \t\n");
 			DEBUGP("line %u, table '%s'\n", line, table);
 			if (!table) {
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					"%s: line %u table name invalid\n",
-					program_name, line);
+					prog_name, line);
 				exit(1);
 			}
 			strncpy(curtable, table, IPT_TABLE_MAXNAMELEN);
@@ -227,19 +228,19 @@ main(int argc, char *argv[])
 			if (tablename && (strcmp(tablename, table) != 0))
 				continue;
 			if (handle)
-				iptc_free(&handle);
+				iptc_free(handle);
 
-			handle = create_handle(table, modprobe);
+			handle = create_handle(table);
 			if (noflush == 0) {
 				DEBUGP("Cleaning all chains of table '%s'\n",
 					table);
 				for_each_chain(flush_entries, verbose, 1,
-						&handle);
+						handle);
 
 				DEBUGP("Deleting all user-defined chains "
 				       "of table '%s'\n", table);
 				for_each_chain(delete_chain, verbose, 0,
-						&handle) ;
+						handle);
 			}
 
 			ret = 1;
@@ -252,24 +253,24 @@ main(int argc, char *argv[])
 			chain = strtok(buffer+1, " \t\n");
 			DEBUGP("line %u, chain '%s'\n", line, chain);
 			if (!chain) {
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "%s: line %u chain name invalid\n",
-					   program_name, line);
+					   prog_name, line);
 				exit(1);
 			}
 
 			if (iptc_builtin(chain, handle) <= 0) {
 				if (noflush && iptc_is_chain(chain, handle)) {
 					DEBUGP("Flushing existing user defined chain '%s'\n", chain);
-					if (!iptc_flush_entries(chain, &handle))
-						exit_error(PARAMETER_PROBLEM,
+					if (!iptc_flush_entries(chain, handle))
+						xtables_error(PARAMETER_PROBLEM,
 							   "error flushing chain "
 							   "'%s':%s\n", chain,
 							   strerror(errno));
 				} else {
 					DEBUGP("Creating new chain '%s'\n", chain);
-					if (!iptc_create_chain(chain, &handle))
-						exit_error(PARAMETER_PROBLEM,
+					if (!iptc_create_chain(chain, handle))
+						xtables_error(PARAMETER_PROBLEM,
 							   "error creating chain "
 							   "'%s':%s\n", chain,
 							   strerror(errno));
@@ -279,9 +280,9 @@ main(int argc, char *argv[])
 			policy = strtok(NULL, " \t\n");
 			DEBUGP("line %u, policy '%s'\n", line, policy);
 			if (!policy) {
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "%s: line %u policy invalid\n",
-					   program_name, line);
+					   prog_name, line);
 				exit(1);
 			}
 
@@ -293,7 +294,7 @@ main(int argc, char *argv[])
 					ctrs = strtok(NULL, " \t\n");
 
 					if (!ctrs || !parse_counters(ctrs, &count))
-						exit_error(PARAMETER_PROBLEM,
+						xtables_error(PARAMETER_PROBLEM,
 							   "invalid policy counters "
 							   "for chain '%s'\n", chain);
 
@@ -306,8 +307,8 @@ main(int argc, char *argv[])
 					chain, policy);
 
 				if (!iptc_set_policy(chain, policy, &count,
-						     &handle))
-					exit_error(OTHER_PROBLEM,
+						     handle))
+					xtables_error(OTHER_PROBLEM,
 						"Can't set policy `%s'"
 						" on `%s' line %u: %s\n",
 						chain, policy, line,
@@ -335,19 +336,19 @@ main(int argc, char *argv[])
 				/* we have counters in our input */
 				ptr = strchr(buffer, ']');
 				if (!ptr)
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 						   "Bad line %u: need ]\n",
 						   line);
 
 				pcnt = strtok(buffer+1, ":");
 				if (!pcnt)
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 						   "Bad line %u: need :\n",
 						   line);
 
 				bcnt = strtok(NULL, "]");
 				if (!bcnt)
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 						   "Bad line %u: need ]\n",
 						   line);
 
@@ -414,7 +415,7 @@ main(int argc, char *argv[])
 					/* check if table name specified */
 					if (!strncmp(param_buffer, "-t", 2)
 					    || !strncmp(param_buffer, "--table", 8)) {
-						exit_error(PARAMETER_PROBLEM,
+						xtables_error(PARAMETER_PROBLEM,
 						   "Line %u seems to have a "
 						   "-t table option.\n", line);
 						exit(1);
@@ -427,7 +428,7 @@ main(int argc, char *argv[])
 					param_buffer[param_len++] = *curchar;
 
 					if (param_len >= sizeof(param_buffer))
-						exit_error(PARAMETER_PROBLEM,
+						xtables_error(PARAMETER_PROBLEM,
 						   "Parameter too long!");
 				}
 			}
@@ -448,15 +449,17 @@ main(int argc, char *argv[])
 			continue;
 		if (!ret) {
 			fprintf(stderr, "%s: line %u failed\n",
-					program_name, line);
+					prog_name, line);
 			exit(1);
 		}
 	}
 	if (in_table) {
 		fprintf(stderr, "%s: COMMIT expected at line %u\n",
-				program_name, line + 1);
+				prog_name, line + 1);
 		exit(1);
 	}
 
+	if (in != NULL)
+		fclose(in);
 	return 0;
 }

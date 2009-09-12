@@ -14,21 +14,10 @@
 #include <netdb.h>
 #include <ctype.h>
 
+#include <netinet/in.h>
 #include <xtables.h>
 
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
-
 #include <linux/netfilter/xt_sctp.h>
-
-/* Some ZS!#@:$%*#$! has replaced the ELEMCOUNT macro in ipt_sctp.h with
- * ARRAY_SIZE without noticing that this file is used from userspace,
- * and userspace doesn't have ARRAY_SIZE */
-
-#ifndef ELEMCOUNT
-#define ELEMCOUNT ARRAY_SIZE
-#endif
 
 #if 0
 #define DEBUGP(format, first...) printf(format, ##first)
@@ -84,17 +73,17 @@ parse_sctp_ports(const char *portstring,
 	buffer = strdup(portstring);
 	DEBUGP("%s\n", portstring);
 	if ((cp = strchr(buffer, ':')) == NULL) {
-		ports[0] = ports[1] = parse_port(buffer, "sctp");
+		ports[0] = ports[1] = xtables_parse_port(buffer, "sctp");
 	}
 	else {
 		*cp = '\0';
 		cp++;
 
-		ports[0] = buffer[0] ? parse_port(buffer, "sctp") : 0;
-		ports[1] = cp[0] ? parse_port(cp, "sctp") : 0xFFFF;
+		ports[0] = buffer[0] ? xtables_parse_port(buffer, "sctp") : 0;
+		ports[1] = cp[0] ? xtables_parse_port(cp, "sctp") : 0xFFFF;
 
 		if (ports[0] > ports[1])
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "invalid portrange (min > max)");
 	}
 	free(buffer);
@@ -150,7 +139,7 @@ save_chunk_flag_info(struct xt_sctp_flag_info *flag_info,
 	}
 	
 	if (*flag_count == XT_NUM_SCTP_FLAGS) {
-		exit_error (PARAMETER_PROBLEM,
+		xtables_error (PARAMETER_PROBLEM,
 			"Number of chunk types with flags exceeds currently allowed limit."
 			"Increasing this limit involves changing IPT_NUM_SCTP_FLAGS and"
 			"recompiling both the kernel space and user space modules\n");
@@ -197,7 +186,7 @@ parse_sctp_chunk(struct xt_sctp_info *einfo,
 			*chunk_flags++ = 0;
 		}
 		
-		for (i = 0; i < ELEMCOUNT(sctp_chunk_names); i++) {
+		for (i = 0; i < ARRAY_SIZE(sctp_chunk_names); ++i)
 			if (strcasecmp(sctp_chunk_names[i].name, ptr) == 0) {
 				DEBUGP("Chunk num %d\n", sctp_chunk_names[i].chunk_type);
 				SCTP_CHUNKMAP_SET(einfo->chunkmap, 
@@ -205,9 +194,8 @@ parse_sctp_chunk(struct xt_sctp_info *einfo,
 				found = 1;
 				break;
 			}
-		}
 		if (!found)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unknown sctp chunk `%s'", ptr);
 
 		if (chunk_flags) {
@@ -225,7 +213,7 @@ parse_sctp_chunk(struct xt_sctp_info *einfo,
 						&(einfo->flag_count), i, bit, 
 						isupper(chunk_flags[j]));
 				} else {
-					exit_error(PARAMETER_PROBLEM, 
+					xtables_error(PARAMETER_PROBLEM,
 						"Invalid flags for chunk type %d\n", i);
 				}
 			}
@@ -248,7 +236,7 @@ parse_sctp_chunks(struct xt_sctp_info *einfo,
 	} else 	if (!strcasecmp(match_type, "ONLY")) {
 		einfo->chunk_match_type = SCTP_CHUNK_MATCH_ONLY;
 	} else {
-		exit_error (PARAMETER_PROBLEM, 
+		xtables_error (PARAMETER_PROBLEM,
 			"Match type has to be one of \"ALL\", \"ANY\" or \"ONLY\"");
 	}
 
@@ -266,10 +254,10 @@ sctp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & XT_SCTP_SRC_PORTS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "Only one `--source-port' allowed");
 		einfo->flags |= XT_SCTP_SRC_PORTS;
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_sctp_ports(argv[optind-1], einfo->spts);
 		if (invert)
 			einfo->invflags |= XT_SCTP_SRC_PORTS;
@@ -278,10 +266,10 @@ sctp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & XT_SCTP_DEST_PORTS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--destination-port' allowed");
 		einfo->flags |= XT_SCTP_DEST_PORTS;
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 		parse_sctp_ports(argv[optind-1], einfo->dpts);
 		if (invert)
 			einfo->invflags |= XT_SCTP_DEST_PORTS;
@@ -290,13 +278,13 @@ sctp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '3':
 		if (*flags & XT_SCTP_CHUNK_TYPES)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--chunk-types' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0);
 
 		if (!argv[optind] 
 		    || argv[optind][0] == '-' || argv[optind][0] == '!')
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "--chunk-types requires two args");
 
 		einfo->flags |= XT_SCTP_CHUNK_TYPES;
@@ -388,10 +376,9 @@ print_chunk(u_int32_t chunknum, int numeric)
 	else {
 		int i;
 
-		for (i = 0; i < ELEMCOUNT(sctp_chunk_names); i++) {
+		for (i = 0; i < ARRAY_SIZE(sctp_chunk_names); ++i)
 			if (sctp_chunk_names[i].chunk_type == chunknum)
 				printf("%s", sctp_chunk_names[chunknum].name);
-		}
 	}
 }
 
@@ -509,7 +496,7 @@ static void sctp_save(const void *ip, const struct xt_entry_match *match)
 
 static struct xtables_match sctp_match = {
 	.name		= "sctp",
-	.family		= AF_INET,
+	.family		= NFPROTO_IPV4,
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_sctp_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct xt_sctp_info)),
@@ -523,7 +510,7 @@ static struct xtables_match sctp_match = {
 
 static struct xtables_match sctp_match6 = {
 	.name		= "sctp",
-	.family		= AF_INET6,
+	.family		= NFPROTO_IPV6,
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_sctp_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct xt_sctp_info)),

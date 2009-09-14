@@ -1,3 +1,9 @@
+iptables (1.4.4-2+vyatta+2) unstable; urgency=low
+
+  * UNRELEASED
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Mon, 14 Sep 2009 10:53:17 -0700
+
 iptables (1.4.4-2+vyatta+1) unstable; urgency=low
 
   * renamed debian/patches to debian/patch to avoid 3.0-quilt-by-default

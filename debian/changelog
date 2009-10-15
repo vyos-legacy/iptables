@@ -1,3 +1,9 @@
+iptables (1.4.4-2+vyatta+3) unstable; urgency=low
+
+  * add .merge-branch-exclude
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Thu, 15 Oct 2009 14:02:35 -0700
+
 iptables (1.4.4-2+vyatta+2) unstable; urgency=low
 
   * UNRELEASED

@@ -1,3 +1,9 @@
+iptables (1.4.4-2+vyatta+3+kenwood1) unstable; urgency=low
+
+  * UNRELEASED
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Wed, 17 Feb 2010 16:04:02 -0800
+
 iptables (1.4.4-2+vyatta+3) unstable; urgency=low
 
   * add .merge-branch-exclude

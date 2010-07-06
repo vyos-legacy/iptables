@@ -1,3 +1,9 @@
+iptables (1.4.4-2+vyatta+5) unstable; urgency=low
+
+  * build shared libipq
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Tue, 06 Jul 2010 15:21:01 -0700
+
 iptables (1.4.4-2+vyatta+4) unstable; urgency=low
 
   * UNRELEASED

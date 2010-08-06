@@ -1,16 +1,16 @@
-/* Shared library add-on to iptables to add customized REJECT support.
+/* Shared library add-on to ip6tables to add customized REJECT support.
  *
  * (C) 2000 Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>
  * 
  * ported to IPv6 by Harald Welte <laforge@gnumonks.org>
  *
  */
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <ip6tables.h>
-#include <linux/netfilter_ipv6/ip6_tables.h>
+#include <xtables.h>
 #include <linux/netfilter_ipv6/ip6t_REJECT.h>
 
 struct reject_names {
@@ -44,16 +44,13 @@ print_reject_types(void)
 
 	printf("Valid reject types:\n");
 
-	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++) {
+	for (i = 0; i < ARRAY_SIZE(reject_table); ++i) {
 		printf("    %-25s\t%s\n", reject_table[i].name, reject_table[i].desc);
 		printf("    %-25s\talias\n", reject_table[i].alias);
 	}
 	printf("\n");
 }
 
-/* Saves the union ipt_targinfo in parsable form to stdout. */
-
-/* Function which prints out usage message. */
 static void REJECT_help(void)
 {
 	printf(
@@ -65,11 +62,10 @@ static void REJECT_help(void)
 }
 
 static const struct option REJECT_opts[] = {
-	{ "reject-with", 1, NULL, '1' },
-	{ .name = NULL }
+	{.name = "reject-with", .has_arg = true, .val = '1'},
+	XT_GETOPT_TABLEEND,
 };
 
-/* Allocate and initialize the target. */
 static void REJECT_init(struct xt_entry_target *t)
 {
 	struct ip6t_reject_info *reject = (struct ip6t_reject_info *)t->data;
@@ -79,29 +75,25 @@ static void REJECT_init(struct xt_entry_target *t)
 
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int REJECT_parse(int c, char **argv, int invert, unsigned int *flags,
                         const void *entry, struct xt_entry_target **target)
 {
 	struct ip6t_reject_info *reject = 
 		(struct ip6t_reject_info *)(*target)->data;
-	unsigned int limit = sizeof(reject_table)/sizeof(struct reject_names);
 	unsigned int i;
 
 	switch(c) {
 	case '1':
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0, argv))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --reject-with");
-		for (i = 0; i < limit; i++) {
+		for (i = 0; i < ARRAY_SIZE(reject_table); ++i)
 			if ((strncasecmp(reject_table[i].name, optarg, strlen(optarg)) == 0)
 			    || (strncasecmp(reject_table[i].alias, optarg, strlen(optarg)) == 0)) {
 				reject->with = reject_table[i].with;
 				return 1;
 			}
-		}
-		exit_error(PARAMETER_PROBLEM, "unknown reject type `%s'",optarg);
+		xtables_error(PARAMETER_PROBLEM, "unknown reject type \"%s\"", optarg);
 	default:
 		/* Fall through */
 		break;
@@ -109,7 +101,6 @@ static int REJECT_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 0;
 }
 
-/* Prints out ipt_reject_info. */
 static void REJECT_print(const void *ip, const struct xt_entry_target *target,
                          int numeric)
 {
@@ -117,21 +108,19 @@ static void REJECT_print(const void *ip, const struct xt_entry_target *target,
 		= (const struct ip6t_reject_info *)target->data;
 	unsigned int i;
 
-	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++) {
+	for (i = 0; i < ARRAY_SIZE(reject_table); ++i)
 		if (reject_table[i].with == reject->with)
 			break;
-	}
 	printf("reject-with %s ", reject_table[i].name);
 }
 
-/* Saves ipt_reject in parsable form to stdout. */
 static void REJECT_save(const void *ip, const struct xt_entry_target *target)
 {
 	const struct ip6t_reject_info *reject
 		= (const struct ip6t_reject_info *)target->data;
 	unsigned int i;
 
-	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++)
+	for (i = 0; i < ARRAY_SIZE(reject_table); ++i)
 		if (reject_table[i].with == reject->with)
 			break;
 
@@ -141,7 +130,7 @@ static void REJECT_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target reject_tg6_reg = {
 	.name = "REJECT",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET6,
+	.family		= NFPROTO_IPV6,
 	.size 		= XT_ALIGN(sizeof(struct ip6t_reject_info)),
 	.userspacesize 	= XT_ALIGN(sizeof(struct ip6t_reject_info)),
 	.help		= REJECT_help,

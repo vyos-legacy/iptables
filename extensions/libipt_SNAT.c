@@ -1,12 +1,15 @@
 /* Shared library add-on to iptables to add source-NAT support. */
+#include <stdbool.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <xtables.h>
 #include <iptables.h>
+#include <limits.h> /* INT_MAX in ip_tables.h */
 #include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter/nf_nat.h>
+#include <net/netfilter/nf_nat.h>
 
 #define IPT_SNAT_OPT_SOURCE 0x01
 #define IPT_SNAT_OPT_RANDOM 0x02
@@ -16,27 +19,27 @@
 struct ipt_natinfo
 {
 	struct xt_entry_target t;
-	struct ip_nat_multi_range mr;
+	struct nf_nat_multi_range mr;
 };
 
-/* Function which prints out usage message. */
 static void SNAT_help(void)
 {
 	printf(
 "SNAT target options:\n"
 " --to-source <ipaddr>[-<ipaddr>][:port-port]\n"
 "				Address to map source to.\n"
-"[--random]\n");
+"[--random] [--persistent]\n");
 }
 
 static const struct option SNAT_opts[] = {
-	{ "to-source", 1, NULL, '1' },
-	{ "random", 0, NULL, '2' },
-	{ .name = NULL }
+	{.name = "to-source",  .has_arg = true,  .val = '1'},
+	{.name = "random",     .has_arg = false, .val = '2'},
+	{.name = "persistent", .has_arg = false, .val = '3'},
+	XT_GETOPT_TABLEEND,
 };
 
 static struct ipt_natinfo *
-append_range(struct ipt_natinfo *info, const struct ip_nat_range *range)
+append_range(struct ipt_natinfo *info, const struct nf_nat_range *range)
 {
 	unsigned int size;
 
@@ -45,7 +48,7 @@ append_range(struct ipt_natinfo *info, const struct ip_nat_range *range)
 
 	info = realloc(info, size);
 	if (!info)
-		exit_error(OTHER_PROBLEM, "Out of memory\n");
+		xtables_error(OTHER_PROBLEM, "Out of memory\n");
 
 	info->t.u.target_size = size;
 	info->mr.range[info->mr.rangesize] = *range;
@@ -58,7 +61,7 @@ append_range(struct ipt_natinfo *info, const struct ip_nat_range *range)
 static struct xt_entry_target *
 parse_to(char *arg, int portok, struct ipt_natinfo *info)
 {
-	struct ip_nat_range range;
+	struct nf_nat_range range;
 	char *colon, *dash, *error;
 	const struct in_addr *ip;
 
@@ -69,19 +72,19 @@ parse_to(char *arg, int portok, struct ipt_natinfo *info)
 		int port;
 
 		if (!portok)
-			exit_error(PARAMETER_PROBLEM,
-				   "Need TCP or UDP with port specification");
+			xtables_error(PARAMETER_PROBLEM,
+				   "Need TCP, UDP, SCTP or DCCP with port specification");
 
 		range.flags |= IP_NAT_RANGE_PROTO_SPECIFIED;
 
 		port = atoi(colon+1);
 		if (port <= 0 || port > 65535)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Port `%s' not valid\n", colon+1);
 
 		error = strchr(colon+1, ':');
 		if (error)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Invalid port:port syntax - use dash\n");
 
 		dash = strchr(colon, '-');
@@ -94,11 +97,11 @@ parse_to(char *arg, int portok, struct ipt_natinfo *info)
 
 			maxport = atoi(dash + 1);
 			if (maxport <= 0 || maxport > 65535)
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "Port `%s' not valid\n", dash+1);
 			if (maxport < port)
 				/* People are stupid. */
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "Port range `%s' funky\n", colon+1);
 			range.min.tcp.port = htons(port);
 			range.max.tcp.port = htons(maxport);
@@ -117,15 +120,15 @@ parse_to(char *arg, int portok, struct ipt_natinfo *info)
 	if (dash)
 		*dash = '\0';
 
-	ip = numeric_to_ipaddr(arg);
+	ip = xtables_numeric_to_ipaddr(arg);
 	if (!ip)
-		exit_error(PARAMETER_PROBLEM, "Bad IP address `%s'\n",
+		xtables_error(PARAMETER_PROBLEM, "Bad IP address \"%s\"\n",
 			   arg);
 	range.min_ip = ip->s_addr;
 	if (dash) {
-		ip = numeric_to_ipaddr(dash+1);
+		ip = xtables_numeric_to_ipaddr(dash+1);
 		if (!ip)
-			exit_error(PARAMETER_PROBLEM, "Bad IP address `%s'\n",
+			xtables_error(PARAMETER_PROBLEM, "Bad IP address \"%s\"\n",
 				   dash+1);
 		range.max_ip = ip->s_addr;
 	} else
@@ -134,8 +137,6 @@ parse_to(char *arg, int portok, struct ipt_natinfo *info)
 	return &(append_range(info, &range)->t);
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int SNAT_parse(int c, char **argv, int invert, unsigned int *flags,
                       const void *e, struct xt_entry_target **target)
 {
@@ -145,6 +146,8 @@ static int SNAT_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	if (entry->ip.proto == IPPROTO_TCP
 	    || entry->ip.proto == IPPROTO_UDP
+	    || entry->ip.proto == IPPROTO_SCTP
+	    || entry->ip.proto == IPPROTO_DCCP
 	    || entry->ip.proto == IPPROTO_ICMP)
 		portok = 1;
 	else
@@ -152,15 +155,15 @@ static int SNAT_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0, argv))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --to-source");
 
 		if (*flags & IPT_SNAT_OPT_SOURCE) {
 			if (!kernel_version)
 				get_kernel_version();
 			if (kernel_version > LINUX_VERSION(2, 6, 10))
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "Multiple --to-source not supported");
 		}
 		*target = parse_to(optarg, portok, info);
@@ -178,29 +181,32 @@ static int SNAT_parse(int c, char **argv, int invert, unsigned int *flags,
 			*flags |= IPT_SNAT_OPT_RANDOM;
 		return 1;
 
+	case '3':
+		info->mr.range[0].flags |= IP_NAT_RANGE_PERSISTENT;
+		return 1;
+
 	default:
 		return 0;
 	}
 }
 
-/* Final check; must have specfied --to-source. */
 static void SNAT_check(unsigned int flags)
 {
 	if (!(flags & IPT_SNAT_OPT_SOURCE))
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "You must specify --to-source");
 }
 
-static void print_range(const struct ip_nat_range *r)
+static void print_range(const struct nf_nat_range *r)
 {
 	if (r->flags & IP_NAT_RANGE_MAP_IPS) {
 		struct in_addr a;
 
 		a.s_addr = r->min_ip;
-		printf("%s", ipaddr_to_numeric(&a));
+		printf("%s", xtables_ipaddr_to_numeric(&a));
 		if (r->max_ip != r->min_ip) {
 			a.s_addr = r->max_ip;
-			printf("-%s", ipaddr_to_numeric(&a));
+			printf("-%s", xtables_ipaddr_to_numeric(&a));
 		}
 	}
 	if (r->flags & IP_NAT_RANGE_PROTO_SPECIFIED) {
@@ -211,11 +217,10 @@ static void print_range(const struct ip_nat_range *r)
 	}
 }
 
-/* Prints out the targinfo. */
 static void SNAT_print(const void *ip, const struct xt_entry_target *target,
                        int numeric)
 {
-	struct ipt_natinfo *info = (void *)target;
+	const struct ipt_natinfo *info = (const void *)target;
 	unsigned int i = 0;
 
 	printf("to:");
@@ -224,13 +229,14 @@ static void SNAT_print(const void *ip, const struct xt_entry_target *target,
 		printf(" ");
 		if (info->mr.range[i].flags & IP_NAT_RANGE_PROTO_RANDOM)
 			printf("random ");
+		if (info->mr.range[i].flags & IP_NAT_RANGE_PERSISTENT)
+			printf("persistent ");
 	}
 }
 
-/* Saves the union ipt_targinfo in parsable form to stdout. */
 static void SNAT_save(const void *ip, const struct xt_entry_target *target)
 {
-	struct ipt_natinfo *info = (void *)target;
+	const struct ipt_natinfo *info = (const void *)target;
 	unsigned int i = 0;
 
 	for (i = 0; i < info->mr.rangesize; i++) {
@@ -239,15 +245,17 @@ static void SNAT_save(const void *ip, const struct xt_entry_target *target)
 		printf(" ");
 		if (info->mr.range[i].flags & IP_NAT_RANGE_PROTO_RANDOM)
 			printf("--random ");
+		if (info->mr.range[i].flags & IP_NAT_RANGE_PERSISTENT)
+			printf("--persistent ");
 	}
 }
 
 static struct xtables_target snat_tg_reg = {
 	.name		= "SNAT",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET,
-	.size		= XT_ALIGN(sizeof(struct ip_nat_multi_range)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ip_nat_multi_range)),
+	.family		= NFPROTO_IPV4,
+	.size		= XT_ALIGN(sizeof(struct nf_nat_multi_range)),
+	.userspacesize	= XT_ALIGN(sizeof(struct nf_nat_multi_range)),
 	.help		= SNAT_help,
 	.parse		= SNAT_parse,
 	.final_check	= SNAT_check,

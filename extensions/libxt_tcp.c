@@ -1,39 +1,40 @@
 /* Shared library add-on to iptables to add TCP support. */
+#include <stdbool.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <netinet/in.h>
 #include <xtables.h>
 #include <linux/netfilter/xt_tcpudp.h>
 
-/* Function which prints out usage message. */
 static void tcp_help(void)
 {
 	printf(
 "tcp match options:\n"
-" --tcp-flags [!] mask comp	match when TCP flags & mask == comp\n"
+"[!] --tcp-flags mask comp	match when TCP flags & mask == comp\n"
 "				(Flags: SYN ACK FIN RST URG PSH ALL NONE)\n"
 "[!] --syn			match when only SYN flag set\n"
 "				(equivalent to --tcp-flags SYN,RST,ACK,FIN SYN)\n"
-" --source-port [!] port[:port]\n"
+"[!] --source-port port[:port]\n"
 " --sport ...\n"
 "				match source port(s)\n"
-" --destination-port [!] port[:port]\n"
+"[!] --destination-port port[:port]\n"
 " --dport ...\n"
 "				match destination port(s)\n"
-" --tcp-option [!] number       match if TCP option set\n");
+"[!] --tcp-option number        match if TCP option set\n");
 }
 
 static const struct option tcp_opts[] = {
-	{ "source-port", 1, NULL, '1' },
-	{ "sport", 1, NULL, '1' }, /* synonym */
-	{ "destination-port", 1, NULL, '2' },
-	{ "dport", 1, NULL, '2' }, /* synonym */
-	{ "syn", 0, NULL, '3' },
-	{ "tcp-flags", 1, NULL, '4' },
-	{ "tcp-option", 1, NULL, '5' },
-	{ .name = NULL }
+	{.name = "source-port",      .has_arg = true,  .val = '1'},
+	{.name = "sport",            .has_arg = true,  .val = '1'}, /* synonym */
+	{.name = "destination-port", .has_arg = true,  .val = '2'},
+	{.name = "dport",            .has_arg = true,  .val = '2'}, /* synonym */
+	{.name = "syn",              .has_arg = false, .val = '3'},
+	{.name = "tcp-flags",        .has_arg = true,  .val = '4'},
+	{.name = "tcp-option",       .has_arg = true,  .val = '5'},
+	XT_GETOPT_TABLEEND,
 };
 
 static void
@@ -44,16 +45,16 @@ parse_tcp_ports(const char *portstring, u_int16_t *ports)
 
 	buffer = strdup(portstring);
 	if ((cp = strchr(buffer, ':')) == NULL)
-		ports[0] = ports[1] = parse_port(buffer, "tcp");
+		ports[0] = ports[1] = xtables_parse_port(buffer, "tcp");
 	else {
 		*cp = '\0';
 		cp++;
 
-		ports[0] = buffer[0] ? parse_port(buffer, "tcp") : 0;
-		ports[1] = cp[0] ? parse_port(cp, "tcp") : 0xFFFF;
+		ports[0] = buffer[0] ? xtables_parse_port(buffer, "tcp") : 0;
+		ports[1] = cp[0] ? xtables_parse_port(cp, "tcp") : 0xFFFF;
 
 		if (ports[0] > ports[1])
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "invalid portrange (min > max)");
 	}
 	free(buffer);
@@ -86,18 +87,15 @@ parse_tcp_flag(const char *flags)
 
 	for (ptr = strtok(buffer, ","); ptr; ptr = strtok(NULL, ",")) {
 		unsigned int i;
-		for (i = 0;
-		     i < sizeof(tcp_flag_names)/sizeof(struct tcp_flag_names);
-		     i++) {
+		for (i = 0; i < ARRAY_SIZE(tcp_flag_names); ++i)
 			if (strcasecmp(tcp_flag_names[i].name, ptr) == 0) {
 				ret |= tcp_flag_names[i].flag;
 				break;
 			}
-		}
-		if (i == sizeof(tcp_flag_names)/sizeof(struct tcp_flag_names))
-			exit_error(PARAMETER_PROBLEM,
+		if (i == ARRAY_SIZE(tcp_flag_names))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unknown TCP flag `%s'", ptr);
-		}
+	}
 
 	free(buffer);
 	return ret;
@@ -121,13 +119,12 @@ parse_tcp_option(const char *option, u_int8_t *result)
 {
 	unsigned int ret;
 
-	if (string_to_number(option, 1, 255, &ret) == -1)
-		exit_error(PARAMETER_PROBLEM, "Bad TCP option `%s'", option);
+	if (!xtables_strtoui(option, NULL, &ret, 1, UINT8_MAX))
+		xtables_error(PARAMETER_PROBLEM, "Bad TCP option \"%s\"", option);
 
-	*result = (u_int8_t)ret;
+	*result = ret;
 }
 
-/* Initialize the match. */
 static void tcp_init(struct xt_entry_match *m)
 {
 	struct xt_tcp *tcpinfo = (struct xt_tcp *)m->data;
@@ -140,8 +137,6 @@ static void tcp_init(struct xt_entry_match *m)
 #define TCP_FLAGS 0x04
 #define TCP_OPTION	0x08
 
-/* Function which parses command options; returns true if it
-   ate an option. */
 static int
 tcp_parse(int c, char **argv, int invert, unsigned int *flags,
           const void *entry, struct xt_entry_match **match)
@@ -151,10 +146,10 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & TCP_SRC_PORTS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--source-port' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
-		parse_tcp_ports(argv[optind-1], tcpinfo->spts);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_tcp_ports(optarg, tcpinfo->spts);
 		if (invert)
 			tcpinfo->invflags |= XT_TCP_INV_SRCPT;
 		*flags |= TCP_SRC_PORTS;
@@ -162,10 +157,10 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '2':
 		if (*flags & TCP_DST_PORTS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--destination-port' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
-		parse_tcp_ports(argv[optind-1], tcpinfo->dpts);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_tcp_ports(optarg, tcpinfo->dpts);
 		if (invert)
 			tcpinfo->invflags |= XT_TCP_INV_DSTPT;
 		*flags |= TCP_DST_PORTS;
@@ -173,7 +168,7 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '3':
 		if (*flags & TCP_FLAGS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one of `--syn' or `--tcp-flags' "
 				   " allowed");
 		parse_tcp_flags(tcpinfo, "SYN,RST,ACK,FIN", "SYN", invert);
@@ -182,17 +177,17 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '4':
 		if (*flags & TCP_FLAGS)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one of `--syn' or `--tcp-flags' "
 				   " allowed");
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
 		if (!argv[optind]
 		    || argv[optind][0] == '-' || argv[optind][0] == '!')
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "--tcp-flags requires two args.");
 
-		parse_tcp_flags(tcpinfo, argv[optind-1], argv[optind],
+		parse_tcp_flags(tcpinfo, optarg, argv[optind],
 				invert);
 		optind++;
 		*flags |= TCP_FLAGS;
@@ -200,10 +195,10 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	case '5':
 		if (*flags & TCP_OPTION)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--tcp-option' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
-		parse_tcp_option(argv[optind-1], &tcpinfo->option);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_tcp_option(optarg, &tcpinfo->option);
 		if (invert)
 			tcpinfo->invflags |= XT_TCP_INV_OPTION;
 		*flags |= TCP_OPTION;
@@ -304,7 +299,6 @@ print_flags(u_int8_t mask, u_int8_t cmp, int invert, int numeric)
 	}
 }
 
-/* Prints out the union ipt_matchinfo. */
 static void
 tcp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
@@ -328,7 +322,6 @@ tcp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 		       tcp->invflags & ~XT_TCP_INV_MASK);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void tcp_save(const void *ip, const struct xt_entry_match *match)
 {
 	const struct xt_tcp *tcpinfo = (struct xt_tcp *)match->data;
@@ -383,21 +376,7 @@ static void tcp_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match tcp_match = {
-	.family		= AF_INET,
-	.name		= "tcp",
-	.version	= XTABLES_VERSION,
-	.size		= XT_ALIGN(sizeof(struct xt_tcp)),
-	.userspacesize	= XT_ALIGN(sizeof(struct xt_tcp)),
-	.help		= tcp_help,
-	.init		= tcp_init,
-	.parse		= tcp_parse,
-	.print		= tcp_print,
-	.save		= tcp_save,
-	.extra_opts	= tcp_opts,
-};
-
-static struct xtables_match tcp_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "tcp",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_tcp)),
@@ -414,5 +393,4 @@ void
 _init(void)
 {
 	xtables_register_match(&tcp_match);
-	xtables_register_match(&tcp_match6);
 }

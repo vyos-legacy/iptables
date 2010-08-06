@@ -20,7 +20,7 @@
 .\"
 .\"
 .SH NAME
-libipq \- iptables userspace packet queuing library.
+libipq \(em iptables userspace packet queuing library.
 .SH SYNOPSIS
 .B #include <linux/netfilter.h>
 .br
@@ -51,7 +51,7 @@ running the following commands:
 .br	
 	# modprobe ip_queue
 .br	
-	# iptables -A OUTPUT -p icmp -j QUEUE
+	# iptables \-A OUTPUT \-p icmp \-j QUEUE
 .PP
 will cause any locally generated ICMP packets (e.g. ping output) to
 be sent to the ip_queue module, which will then attempt to deliver the
@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 	unsigned char buf[BUFSIZE];
 	struct ipq_handle *h;
 	
-	h = ipq_create_handle(0, PF_INET);
+	h = ipq_create_handle(0, NFPROTO_IPV4);
 	if (!h)
 		die(h);
 		

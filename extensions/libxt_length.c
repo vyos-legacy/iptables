@@ -1,4 +1,5 @@
 /* Shared library add-on to iptables to add packet length matching support. */
+#include <stdbool.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
@@ -8,7 +9,6 @@
 #include <xtables.h>
 #include <linux/netfilter/xt_length.h>
 
-/* Function which prints out usage message. */
 static void length_help(void)
 {
 	printf(
@@ -18,8 +18,8 @@ static void length_help(void)
 }
   
 static const struct option length_opts[] = {
-	{ "length", 1, NULL, '1' },
-	{ .name = NULL }
+	{.name = "length", .has_arg = true, .val = '1'},
+	XT_GETOPT_TABLEEND,
 };
 
 static u_int16_t
@@ -27,10 +27,10 @@ parse_length(const char *s)
 {
 	unsigned int len;
 	
-	if (string_to_number(s, 0, 0xFFFF, &len) == -1)
-		exit_error(PARAMETER_PROBLEM, "length invalid: `%s'\n", s);
+	if (!xtables_strtoui(s, NULL, &len, 0, UINT32_MAX))
+		xtables_error(PARAMETER_PROBLEM, "length invalid: \"%s\"\n", s);
 	else
-		return (u_int16_t )len;
+		return len;
 }
 
 /* If a single value is provided, min and max are both set to the value */
@@ -53,14 +53,12 @@ parse_lengths(const char *s, struct xt_length_info *info)
 	free(buffer);
 	
 	if (info->min > info->max)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "length min. range value `%u' greater than max. "
 		           "range value `%u'", info->min, info->max);
 	
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 length_parse(int c, char **argv, int invert, unsigned int *flags,
              const void *entry, struct xt_entry_match **match)
@@ -70,11 +68,11 @@ length_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 		case '1':
 			if (*flags)
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 				           "length: `--length' may only be "
 				           "specified once");
-			check_inverse(optarg, &invert, &optind, 0);
-			parse_lengths(argv[optind-1], info);
+			xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+			parse_lengths(optarg, info);
 			if (invert)
 				info->invert = 1;
 			*flags = 1;
@@ -86,44 +84,38 @@ length_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 1;
 }
 
-/* Final check; must have specified --length. */
 static void length_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "length: You must specify `--length'");
 }
 
-/* Common match printing code. */
 static void
-print_length(struct xt_length_info *info)
+length_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	if (info->invert)
-		printf("! ");
-	
-	if (info->max == info->min)
+	const struct xt_length_info *info = (void *)match->data;
+
+	printf("length %s", info->invert ? "!" : "");
+	if (info->min == info->max)
 		printf("%u ", info->min);
 	else
 		printf("%u:%u ", info->min, info->max);
 }
 
-/* Prints out the matchinfo. */
-static void
-length_print(const void *ip, const struct xt_entry_match *match, int numeric)
-{
-	printf("length ");
-	print_length((struct xt_length_info *)match->data);
-}
-
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void length_save(const void *ip, const struct xt_entry_match *match)
 {
-	printf("--length ");
-	print_length((struct xt_length_info *)match->data);
+	const struct xt_length_info *info = (void *)match->data;
+
+	printf("%s--length ", info->invert ? "! " : "");
+	if (info->min == info->max)
+		printf("%u ", info->min);
+	else
+		printf("%u:%u ", info->min, info->max);
 }
 
 static struct xtables_match length_match = {
-	.family		= AF_UNSPEC,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "length",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_length_info)),

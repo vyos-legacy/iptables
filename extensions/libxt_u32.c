@@ -15,16 +15,17 @@
 #include <errno.h>
 #include <getopt.h>
 #include <netdb.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <xtables.h>
-#include "../include/linux/netfilter/xt_u32.h"
+#include <linux/netfilter/xt_u32.h>
 
 static const struct option u32_opts[] = {
-	{"u32", 1, NULL, 'u'},
-	{ .name = NULL }
+	{.name = "u32", .has_arg = true, .val = 'u'},
+	XT_GETOPT_TABLEEND,
 };
 
 static void u32_help(void)
@@ -92,23 +93,22 @@ static u_int32_t parse_number(char **s, int pos)
 	errno  = 0;
 	number = strtoul(*s, &end, 0);
 	if (end == *s)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "u32: at char %d: expected number", pos);
 	if (errno != 0)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "u32: at char %d: error reading number", pos);
 	*s = end;
 	return number;
 }
 
-/* Function which parses command options; returns true if it ate an option */
 static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 		     const void *entry, struct xt_entry_match **match)
 {
 	struct xt_u32 *data = (void *)(*match)->data;
 	unsigned int testind = 0, locind = 0, valind = 0;
 	struct xt_u32_test *ct = &data->tests[testind]; /* current test */
-	char *arg = argv[optind-1]; /* the argument string */
+	char *arg = optarg; /* the argument string */
 	char *start = arg;
 	int state = 0;
 
@@ -130,10 +130,10 @@ static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (*arg == '\0') {
 			/* end of argument found */
 			if (state == 0)
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "u32: abrupt end of input after location specifier");
 			if (valind == 0)
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					   "u32: test ended with no value specified");
 
 			ct->nnums    = locind;
@@ -141,7 +141,7 @@ static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 			data->ntests = ++testind;
 
 			if (testind > XT_U32_MAXSIZE)
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 				           "u32: at char %u: too many \"&&\"s",
 				           (unsigned int)(arg - start));
 			return 1;
@@ -154,7 +154,7 @@ static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 			 */
 			if (*arg == '=') {
 				if (locind == 0) {
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 					           "u32: at char %u: "
 					           "location spec missing",
 					           (unsigned int)(arg - start));
@@ -169,18 +169,18 @@ static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 						ct->location[locind].nextop = XT_U32_AND;
 					} else if (*arg == '<') {
 						if (*++arg != '<')
-							exit_error(PARAMETER_PROBLEM,
+							xtables_error(PARAMETER_PROBLEM,
 								   "u32: at char %u: a second '<' was expected", (unsigned int)(arg - start));
 						ct->location[locind].nextop = XT_U32_LEFTSH;
 					} else if (*arg == '>') {
 						if (*++arg != '>')
-							exit_error(PARAMETER_PROBLEM,
+							xtables_error(PARAMETER_PROBLEM,
 								   "u32: at char %u: a second '>' was expected", (unsigned int)(arg - start));
 						ct->location[locind].nextop = XT_U32_RIGHTSH;
 					} else if (*arg == '@') {
 						ct->location[locind].nextop = XT_U32_AT;
 					} else {
-						exit_error(PARAMETER_PROBLEM,
+						xtables_error(PARAMETER_PROBLEM,
 							"u32: at char %u: operator expected", (unsigned int)(arg - start));
 					}
 					++arg;
@@ -189,7 +189,7 @@ static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 				ct->location[locind].number =
 					parse_number(&arg, arg - start);
 				if (++locind > XT_U32_MAXSIZE)
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 						   "u32: at char %u: too many operators", (unsigned int)(arg - start));
 			}
 		} else {
@@ -200,17 +200,17 @@ static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 			 */
 			if (*arg == '&') {
 				if (*++arg != '&')
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 						   "u32: at char %u: a second '&' was expected", (unsigned int)(arg - start));
 				if (valind == 0) {
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 						   "u32: at char %u: value spec missing", (unsigned int)(arg - start));
 				} else {
 					ct->nnums   = locind;
 					ct->nvalues = valind;
 					ct = &data->tests[++testind];
 					if (testind > XT_U32_MAXSIZE)
-						exit_error(PARAMETER_PROBLEM,
+						xtables_error(PARAMETER_PROBLEM,
 							   "u32: at char %u: too many \"&&\"s", (unsigned int)(arg - start));
 					++arg;
 					state  = 0;
@@ -220,7 +220,7 @@ static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 			} else { /* read value range */
 				if (valind > 0) { /* need , before number */
 					if (*arg != ',')
-						exit_error(PARAMETER_PROBLEM,
+						xtables_error(PARAMETER_PROBLEM,
 							   "u32: at char %u: expected \",\" or \"&&\"", (unsigned int)(arg - start));
 					++arg;
 				}
@@ -240,7 +240,7 @@ static int u32_parse(int c, char **argv, int invert, unsigned int *flags,
 				}
 
 				if (++valind > XT_U32_MAXSIZE)
-					exit_error(PARAMETER_PROBLEM,
+					xtables_error(PARAMETER_PROBLEM,
 						   "u32: at char %u: too many \",\"s", (unsigned int)(arg - start));
 			}
 		}
@@ -255,7 +255,6 @@ static void u32_print(const void *ip, const struct xt_entry_match *match,
 	if (data->invert)
 		printf("! ");
 	u32_dump(data);
-	return;
 }
 
 static void u32_save(const void *ip, const struct xt_entry_match *match)
@@ -265,12 +264,11 @@ static void u32_save(const void *ip, const struct xt_entry_match *match)
 		printf("! ");
 	printf("--u32 ");
 	u32_dump(data);
-	return;
 }
 
 static struct xtables_match u32_match = {
 	.name          = "u32",
-	.family        = AF_UNSPEC,
+	.family        = NFPROTO_UNSPEC,
 	.version       = XTABLES_VERSION,
 	.size          = XT_ALIGN(sizeof(struct xt_u32)),
 	.userspacesize = XT_ALIGN(sizeof(struct xt_u32)),

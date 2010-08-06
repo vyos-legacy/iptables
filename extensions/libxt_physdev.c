@@ -1,4 +1,5 @@
 /* Shared library add-on to iptables to add bridge port matching support. */
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -16,20 +17,20 @@ static void physdev_help(void)
 {
 	printf(
 "physdev match options:\n"
-" --physdev-in [!] input name[+]		bridge port name ([+] for wildcard)\n"
-" --physdev-out [!] output name[+]	bridge port name ([+] for wildcard)\n"
+" [!] --physdev-in inputname[+]		bridge port name ([+] for wildcard)\n"
+" [!] --physdev-out outputname[+]	bridge port name ([+] for wildcard)\n"
 " [!] --physdev-is-in			arrived on a bridge device\n"
 " [!] --physdev-is-out			will leave on a bridge device\n"
 " [!] --physdev-is-bridged		it's a bridged packet\n");
 }
 
 static const struct option physdev_opts[] = {
-	{ "physdev-in", 1, NULL, '1' },
-	{ "physdev-out", 1, NULL, '2' },
-	{ "physdev-is-in", 0, NULL, '3' },
-	{ "physdev-is-out", 0, NULL, '4' },
-	{ "physdev-is-bridged", 0, NULL, '5' },
-	{ .name = NULL }
+	{.name = "physdev-in",         .has_arg = true,  .val = '1'},
+	{.name = "physdev-out",        .has_arg = true,  .val = '2'},
+	{.name = "physdev-is-in",      .has_arg = false, .val = '3'},
+	{.name = "physdev-is-out",     .has_arg = false, .val = '4'},
+	{.name = "physdev-is-bridged", .has_arg = false, .val = '5'},
+	XT_GETOPT_TABLEEND,
 };
 
 static int
@@ -43,8 +44,8 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '1':
 		if (*flags & XT_PHYSDEV_OP_IN)
 			goto multiple_use;
-		check_inverse(optarg, &invert, &optind, 0);
-		parse_interface(argv[optind-1], info->physindev,
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		xtables_parse_interface(optarg, info->physindev,
 				(unsigned char *)info->in_mask);
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_IN;
@@ -55,8 +56,8 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '2':
 		if (*flags & XT_PHYSDEV_OP_OUT)
 			goto multiple_use;
-		check_inverse(optarg, &invert, &optind, 0);
-		parse_interface(argv[optind-1], info->physoutdev,
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		xtables_parse_interface(optarg, info->physoutdev,
 				(unsigned char *)info->out_mask);
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_OUT;
@@ -67,7 +68,7 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '3':
 		if (*flags & XT_PHYSDEV_OP_ISIN)
 			goto multiple_use;
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 		info->bitmask |= XT_PHYSDEV_OP_ISIN;
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_ISIN;
@@ -77,7 +78,7 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '4':
 		if (*flags & XT_PHYSDEV_OP_ISOUT)
 			goto multiple_use;
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 		info->bitmask |= XT_PHYSDEV_OP_ISOUT;
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_ISOUT;
@@ -87,7 +88,7 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 	case '5':
 		if (*flags & XT_PHYSDEV_OP_BRIDGED)
 			goto multiple_use;
-		check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 		if (invert)
 			info->invert |= XT_PHYSDEV_OP_BRIDGED;
 		*flags |= XT_PHYSDEV_OP_BRIDGED;
@@ -100,7 +101,7 @@ physdev_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	return 1;
 multiple_use:
-	exit_error(PARAMETER_PROBLEM,
+	xtables_error(PARAMETER_PROBLEM,
 	   "multiple use of the same physdev option is not allowed");
 
 }
@@ -108,14 +109,13 @@ multiple_use:
 static void physdev_check(unsigned int flags)
 {
 	if (flags == 0)
-		exit_error(PARAMETER_PROBLEM, "PHYSDEV: no physdev option specified");
+		xtables_error(PARAMETER_PROBLEM, "PHYSDEV: no physdev option specified");
 }
 
 static void
 physdev_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct xt_physdev_info *info =
-		(struct xt_physdev_info*)match->data;
+	const struct xt_physdev_info *info = (const void *)match->data;
 
 	printf("PHYSDEV match");
 	if (info->bitmask & XT_PHYSDEV_OP_ISIN)
@@ -139,44 +139,30 @@ physdev_print(const void *ip, const struct xt_entry_match *match, int numeric)
 
 static void physdev_save(const void *ip, const struct xt_entry_match *match)
 {
-	struct xt_physdev_info *info =
-		(struct xt_physdev_info*)match->data;
+	const struct xt_physdev_info *info = (const void *)match->data;
 
 	if (info->bitmask & XT_PHYSDEV_OP_ISIN)
-		printf("%s --physdev-is-in",
-		       info->invert & XT_PHYSDEV_OP_ISIN ? " !":"");
+		printf("%s--physdev-is-in ",
+		       (info->invert & XT_PHYSDEV_OP_ISIN) ? "! " : "");
 	if (info->bitmask & XT_PHYSDEV_OP_IN)
-		printf("%s --physdev-in %s",
-		(info->invert & XT_PHYSDEV_OP_IN) ? " !":"", info->physindev);
+		printf("%s--physdev-in %s ",
+		       (info->invert & XT_PHYSDEV_OP_IN) ? "! " : "",
+		       info->physindev);
 
 	if (info->bitmask & XT_PHYSDEV_OP_ISOUT)
-		printf("%s --physdev-is-out",
-		       info->invert & XT_PHYSDEV_OP_ISOUT ? " !":"");
+		printf("%s--physdev-is-out ",
+		       (info->invert & XT_PHYSDEV_OP_ISOUT) ? "! " : "");
 	if (info->bitmask & XT_PHYSDEV_OP_OUT)
-		printf("%s --physdev-out %s",
-		(info->invert & XT_PHYSDEV_OP_OUT) ? " !":"", info->physoutdev);
+		printf("%s--physdev-out %s ",
+		       (info->invert & XT_PHYSDEV_OP_OUT) ? "! " : "",
+		       info->physoutdev);
 	if (info->bitmask & XT_PHYSDEV_OP_BRIDGED)
-		printf("%s --physdev-is-bridged",
-		       info->invert & XT_PHYSDEV_OP_BRIDGED ? " !":"");
-	printf(" ");
+		printf("%s--physdev-is-bridged ",
+		       (info->invert & XT_PHYSDEV_OP_BRIDGED) ? "! " : "");
 }
 
 static struct xtables_match physdev_match = {
-	.family		= AF_INET,
-	.name		= "physdev",
-	.version	= XTABLES_VERSION,
-	.size		= XT_ALIGN(sizeof(struct xt_physdev_info)),
-	.userspacesize	= XT_ALIGN(sizeof(struct xt_physdev_info)),
-	.help		= physdev_help,
-	.parse		= physdev_parse,
-	.final_check	= physdev_check,
-	.print		= physdev_print,
-	.save		= physdev_save,
-	.extra_opts	= physdev_opts,
-};
-
-static struct xtables_match physdev_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "physdev",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_physdev_info)),
@@ -192,5 +178,4 @@ static struct xtables_match physdev_match6 = {
 void _init(void)
 {
 	xtables_register_match(&physdev_match);
-	xtables_register_match(&physdev_match6);
 }

@@ -2,12 +2,12 @@
  *
  * (C) 2000 Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>
  */
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <iptables.h>
-#include <linux/netfilter_ipv4/ip_tables.h>
+#include <xtables.h>
 #include <linux/netfilter_ipv4/ipt_REJECT.h>
 #include <linux/version.h>
 
@@ -57,16 +57,13 @@ print_reject_types(void)
 
 	printf("Valid reject types:\n");
 
-	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++) {
+	for (i = 0; i < ARRAY_SIZE(reject_table); ++i) {
 		printf("    %-25s\t%s\n", reject_table[i].name, reject_table[i].desc);
 		printf("    %-25s\talias\n", reject_table[i].alias);
 	}
 	printf("\n");
 }
 
-/* Saves the union ipt_targinfo in parsable form to stdout. */
-
-/* Function which prints out usage message. */
 static void REJECT_help(void)
 {
 	printf(
@@ -80,11 +77,10 @@ static void REJECT_help(void)
 }
 
 static const struct option REJECT_opts[] = {
-	{ "reject-with", 1, NULL, '1' },
-	{ .name = NULL }
+	{.name = "reject-with", .has_arg = true, .val = '1'},
+	XT_GETOPT_TABLEEND,
 };
 
-/* Allocate and initialize the target. */
 static void REJECT_init(struct xt_entry_target *t)
 {
 	struct ipt_reject_info *reject = (struct ipt_reject_info *)t->data;
@@ -94,19 +90,17 @@ static void REJECT_init(struct xt_entry_target *t)
 
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int REJECT_parse(int c, char **argv, int invert, unsigned int *flags,
                         const void *entry, struct xt_entry_target **target)
 {
 	struct ipt_reject_info *reject = (struct ipt_reject_info *)(*target)->data;
-	unsigned int limit = sizeof(reject_table)/sizeof(struct reject_names);
+	static const unsigned int limit = ARRAY_SIZE(reject_table);
 	unsigned int i;
 
 	switch(c) {
 	case '1':
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0, argv))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --reject-with");
 		for (i = 0; i < limit; i++) {
 			if ((strncasecmp(reject_table[i].name, optarg, strlen(optarg)) == 0)
@@ -120,7 +114,7 @@ static int REJECT_parse(int c, char **argv, int invert, unsigned int *flags,
 		    || strncasecmp("echoreply", optarg, strlen(optarg)) == 0)
 			fprintf(stderr, "--reject-with echo-reply no longer"
 				" supported\n");
-		exit_error(PARAMETER_PROBLEM, "unknown reject type `%s'",optarg);
+		xtables_error(PARAMETER_PROBLEM, "unknown reject type \"%s\"", optarg);
 	default:
 		/* Fall through */
 		break;
@@ -128,7 +122,6 @@ static int REJECT_parse(int c, char **argv, int invert, unsigned int *flags,
 	return 0;
 }
 
-/* Prints out ipt_reject_info. */
 static void REJECT_print(const void *ip, const struct xt_entry_target *target,
                          int numeric)
 {
@@ -136,21 +129,19 @@ static void REJECT_print(const void *ip, const struct xt_entry_target *target,
 		= (const struct ipt_reject_info *)target->data;
 	unsigned int i;
 
-	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++) {
+	for (i = 0; i < ARRAY_SIZE(reject_table); ++i)
 		if (reject_table[i].with == reject->with)
 			break;
-	}
 	printf("reject-with %s ", reject_table[i].name);
 }
 
-/* Saves ipt_reject in parsable form to stdout. */
 static void REJECT_save(const void *ip, const struct xt_entry_target *target)
 {
 	const struct ipt_reject_info *reject
 		= (const struct ipt_reject_info *)target->data;
 	unsigned int i;
 
-	for (i = 0; i < sizeof(reject_table)/sizeof(struct reject_names); i++)
+	for (i = 0; i < ARRAY_SIZE(reject_table); ++i)
 		if (reject_table[i].with == reject->with)
 			break;
 
@@ -160,7 +151,7 @@ static void REJECT_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target reject_tg_reg = {
 	.name		= "REJECT",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET,
+	.family		= NFPROTO_IPV4,
 	.size		= XT_ALIGN(sizeof(struct ipt_reject_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_reject_info)),
 	.help		= REJECT_help,

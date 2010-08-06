@@ -9,6 +9,7 @@
  *
  * --set-class added by Iain Barnes
  */
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -38,9 +39,9 @@ static void DSCP_help(void)
 }
 
 static const struct option DSCP_opts[] = {
-	{ "set-dscp", 1, NULL, 'F' },
-	{ "set-dscp-class", 1, NULL, 'G' },
-	{ .name = NULL }
+	{.name = "set-dscp",       .has_arg = true, .val = 'F'},
+	{.name = "set-dscp-class", .has_arg = true, .val = 'G'},
+	XT_GETOPT_TABLEEND,
 };
 
 static void
@@ -48,16 +49,15 @@ parse_dscp(const char *s, struct xt_DSCP_info *dinfo)
 {
 	unsigned int dscp;
        
-	if (string_to_number(s, 0, 255, &dscp) == -1)
-		exit_error(PARAMETER_PROBLEM,
+	if (!xtables_strtoui(s, NULL, &dscp, 0, UINT8_MAX))
+		xtables_error(PARAMETER_PROBLEM,
 			   "Invalid dscp `%s'\n", s);
 
 	if (dscp > XT_DSCP_MAX)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "DSCP `%d` out of range\n", dscp);
 
-    	dinfo->dscp = (u_int8_t )dscp;
-    	return;
+	dinfo->dscp = dscp;
 }
 
 
@@ -67,7 +67,7 @@ parse_class(const char *s, struct xt_DSCP_info *dinfo)
 	unsigned int dscp = class_to_dscp(s);
 
 	/* Assign the value */
-	dinfo->dscp = (u_int8_t)dscp;
+	dinfo->dscp = dscp;
 }
 
 
@@ -80,14 +80,14 @@ static int DSCP_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case 'F':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "DSCP target: Only use --set-dscp ONCE!");
 		parse_dscp(optarg, dinfo);
 		*flags = 1;
 		break;
 	case 'G':
 		if (*flags)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "DSCP target: Only use --set-dscp-class ONCE!");
 		parse_class(optarg, dinfo);
 		*flags = 1;
@@ -103,7 +103,7 @@ static int DSCP_parse(int c, char **argv, int invert, unsigned int *flags,
 static void DSCP_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "DSCP target: Parameter --set-dscp is required");
 }
 
@@ -113,7 +113,6 @@ print_dscp(u_int8_t dscp, int numeric)
  	printf("0x%02x ", dscp);
 }
 
-/* Prints out the targinfo. */
 static void DSCP_print(const void *ip, const struct xt_entry_target *target,
                        int numeric)
 {
@@ -123,7 +122,6 @@ static void DSCP_print(const void *ip, const struct xt_entry_target *target,
 	print_dscp(dinfo->dscp, numeric);
 }
 
-/* Saves the union ipt_targinfo in parsable form to stdout. */
 static void DSCP_save(const void *ip, const struct xt_entry_target *target)
 {
 	const struct xt_DSCP_info *dinfo =
@@ -133,21 +131,7 @@ static void DSCP_save(const void *ip, const struct xt_entry_target *target)
 }
 
 static struct xtables_target dscp_target = {
-	.family		= AF_INET,
-	.name		= "DSCP",
-	.version	= XTABLES_VERSION,
-	.size		= XT_ALIGN(sizeof(struct xt_DSCP_info)),
-	.userspacesize	= XT_ALIGN(sizeof(struct xt_DSCP_info)),
-	.help		= DSCP_help,
-	.parse		= DSCP_parse,
-	.final_check	= DSCP_check,
-	.print		= DSCP_print,
-	.save		= DSCP_save,
-	.extra_opts	= DSCP_opts,
-};
-
-static struct xtables_target dscp_target6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_UNSPEC,
 	.name		= "DSCP",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_DSCP_info)),
@@ -163,5 +147,4 @@ static struct xtables_target dscp_target6 = {
 void _init(void)
 {
 	xtables_register_target(&dscp_target);
-	xtables_register_target(&dscp_target6);
 }

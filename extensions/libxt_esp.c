@@ -1,25 +1,27 @@
 /* Shared library add-on to iptables to add ESP support. */
+#include <stdbool.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
+#include <limits.h>
+
 #include <xtables.h>
 #include <linux/netfilter/xt_esp.h>
 
-/* Function which prints out usage message. */
 static void esp_help(void)
 {
 	printf(
 "esp match options:\n"
-" --espspi [!] spi[:spi]\n"
+"[!] --espspi spi[:spi]\n"
 "				match spi (range)\n");
 }
 
 static const struct option esp_opts[] = {
-	{ "espspi", 1, NULL, '1' },
-	{ .name = NULL }
+	{.name = "espspi", .has_arg = true, .val = '1'},
+	XT_GETOPT_TABLEEND,
 };
 
 static u_int32_t
@@ -31,18 +33,18 @@ parse_esp_spi(const char *spistr)
 	spi =  strtoul(spistr,&ep,0) ;
 
 	if ( spistr == ep ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "ESP no valid digits in spi `%s'", spistr);
 	}
 	if ( spi == ULONG_MAX  && errno == ERANGE ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "spi `%s' specified too big: would overflow", spistr);
 	}	
 	if ( *spistr != '\0'  && *ep != '\0' ) {
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 			   "ESP error parsing spi `%s'", spistr);
 	}
-	return (u_int32_t) spi;
+	return spi;
 }
 
 static void
@@ -61,13 +63,12 @@ parse_esp_spis(const char *spistring, u_int32_t *spis)
 		spis[0] = buffer[0] ? parse_esp_spi(buffer) : 0;
 		spis[1] = cp[0] ? parse_esp_spi(cp) : 0xFFFFFFFF;
 		if (spis[0] > spis[1])
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Invalid ESP spi range: %s", spistring);
 	}
 	free(buffer);
 }
 
-/* Initialize the match. */
 static void esp_init(struct xt_entry_match *m)
 {
 	struct xt_esp *espinfo = (struct xt_esp *)m->data;
@@ -77,8 +78,6 @@ static void esp_init(struct xt_entry_match *m)
 
 #define ESP_SPI 0x01
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int
 esp_parse(int c, char **argv, int invert, unsigned int *flags,
           const void *entry, struct xt_entry_match **match)
@@ -88,10 +87,10 @@ esp_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (*flags & ESP_SPI)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--espspi' allowed");
-		check_inverse(optarg, &invert, &optind, 0);
-		parse_esp_spis(argv[optind-1], espinfo->spis);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_esp_spis(optarg, espinfo->spis);
 		if (invert)
 			espinfo->invflags |= XT_ESP_INV_SPI;
 		*flags |= ESP_SPI;
@@ -117,7 +116,6 @@ print_spis(const char *name, u_int32_t min, u_int32_t max,
 	}
 }
 
-/* Prints out the union ipt_matchinfo. */
 static void
 esp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 {
@@ -131,14 +129,13 @@ esp_print(const void *ip, const struct xt_entry_match *match, int numeric)
 		       esp->invflags & ~XT_ESP_INV_MASK);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void esp_save(const void *ip, const struct xt_entry_match *match)
 {
 	const struct xt_esp *espinfo = (struct xt_esp *)match->data;
 
 	if (!(espinfo->spis[0] == 0
 	    && espinfo->spis[1] == 0xFFFFFFFF)) {
-		printf("--espspi %s", 
+		printf("%s--espspi ",
 			(espinfo->invflags & XT_ESP_INV_SPI) ? "! " : "");
 		if (espinfo->spis[0]
 		    != espinfo->spis[1])
@@ -153,21 +150,7 @@ static void esp_save(const void *ip, const struct xt_entry_match *match)
 }
 
 static struct xtables_match esp_match = {
-	.family		= AF_INET,
-	.name 		= "esp",
-	.version 	= XTABLES_VERSION,
-	.size		= XT_ALIGN(sizeof(struct xt_esp)),
-	.userspacesize	= XT_ALIGN(sizeof(struct xt_esp)),
-	.help		= esp_help,
-	.init		= esp_init,
-	.parse		= esp_parse,
-	.print		= esp_print,
-	.save		= esp_save,
-	.extra_opts	= esp_opts,
-};
-
-static struct xtables_match esp_match6 = {
-	.family		= AF_INET6,
+	.family		= NFPROTO_UNSPEC,
 	.name 		= "esp",
 	.version 	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_esp)),
@@ -184,5 +167,4 @@ void
 _init(void)
 {
 	xtables_register_match(&esp_match);
-	xtables_register_match(&esp_match6);
 }

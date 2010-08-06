@@ -1,12 +1,14 @@
 .*.d
 .*.dd
 *.a
+*.la
+*.lo
 *.oo
 *.so
 *.o
-.*.swp
 .deps
 .dirstamp
+.libs
 Makefile
 Makefile.in
 
@@ -16,6 +18,7 @@ Makefile.in
 /extensions/targets?.man
 
 /include/xtables.h
+/include/iptables/internal.h
 
 /aclocal.m4
 /autom4te*.cache
@@ -32,7 +35,8 @@ Makefile.in
 /ltmain.sh
 /missing
 /stamp-h1
-/build-stamp
+/libiptc.pc
+/xtables.pc
 
 /ip6tables
 /ip6tables.8
@@ -47,16 +51,3 @@ Makefile.in
 /iptables-restore
 /iptables-static
 /iptables-xml
-
-/debian/files
-/debian/iptables-dev.debhelper.log
-/debian/iptables-dev.postinst.debhelper
-/debian/iptables-dev.prerm.debhelper
-/debian/iptables-dev
-/debian/iptables.debhelper.log
-/debian/iptables.postinst.debhelper
-/debian/iptables.prerm.debhelper
-/debian/iptables.substvars
-/debian/iptables
-/debian/tmp
-

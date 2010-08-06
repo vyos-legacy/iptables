@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <xtables.h>
+#include <netinet/tcp.h>
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter/xt_TCPOPTSTRIP.h>
 #ifndef TCPOPT_MD5SIG
@@ -27,7 +28,7 @@ struct tcp_optionmap {
 
 static const struct option tcpoptstrip_tg_opts[] = {
 	{.name = "strip-options", .has_arg = true, .val = 's'},
-	{ .name = NULL }
+	XT_GETOPT_TABLEEND,
 };
 
 static const struct tcp_optionmap tcp_optionmap[] = {
@@ -37,7 +38,7 @@ static const struct tcp_optionmap tcp_optionmap[] = {
 	{"sack",           "Selective ACK",        TCPOPT_SACK},
 	{"timestamp",      "Timestamp",            TCPOPT_TIMESTAMP},
 	{"md5",            "MD5 signature",        TCPOPT_MD5SIG},
-	{ .name = NULL }
+	XT_GETOPT_TABLEEND,
 };
 
 static void tcpoptstrip_tg_help(void)
@@ -81,16 +82,17 @@ static void parse_list(struct xt_tcpoptstrip_target_info *info, char *arg)
 				break;
 			}
 
-		if (option == 0 && string_to_number(arg, 0, 255, &option) == -1)
-			exit_error(PARAMETER_PROBLEM,
+		if (option == 0 &&
+		    !xtables_strtoui(arg, NULL, &option, 0, UINT8_MAX))
+			xtables_error(PARAMETER_PROBLEM,
 			           "Bad TCP option value \"%s\"", arg);
 
 		if (option < 2)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "Option value may not be 0 or 1");
 
 		if (tcpoptstrip_test_bit(info->strip_bmap, option))
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "Option \"%s\" already specified", arg);
 
 		tcpoptstrip_set_bit(info->strip_bmap, option);
@@ -109,7 +111,7 @@ static int tcpoptstrip_tg_parse(int c, char **argv, int invert,
 	switch (c) {
 	case 's':
 		if (*flags & FLAG_STRIP)
-			exit_error(PARAMETER_PROBLEM,
+			xtables_error(PARAMETER_PROBLEM,
 			           "You can specify --strip-options only once");
 		parse_list(info, optarg);
 		*flags |= FLAG_STRIP;
@@ -122,7 +124,7 @@ static int tcpoptstrip_tg_parse(int c, char **argv, int invert,
 static void tcpoptstrip_tg_check(unsigned int flags)
 {
 	if (flags == 0)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 		           "TCPOPTSTRIP: --strip-options parameter required");
 }
 
@@ -178,22 +180,7 @@ tcpoptstrip_tg_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target tcpoptstrip_tg_reg = {
 	.version       = XTABLES_VERSION,
 	.name          = "TCPOPTSTRIP",
-	.family        = AF_INET,
-	.size          = XT_ALIGN(sizeof(struct xt_tcpoptstrip_target_info)),
-	.userspacesize = XT_ALIGN(sizeof(struct xt_tcpoptstrip_target_info)),
-	.help          = tcpoptstrip_tg_help,
-	.init          = tcpoptstrip_tg_init,
-	.parse         = tcpoptstrip_tg_parse,
-	.final_check   = tcpoptstrip_tg_check,
-	.print         = tcpoptstrip_tg_print,
-	.save          = tcpoptstrip_tg_save,
-	.extra_opts    = tcpoptstrip_tg_opts,
-};
-
-static struct xtables_target tcpoptstrip_tg6_reg = {
-	.version       = XTABLES_VERSION,
-	.name          = "TCPOPTSTRIP",
-	.family        = AF_INET6,
+	.family        = NFPROTO_UNSPEC,
 	.size          = XT_ALIGN(sizeof(struct xt_tcpoptstrip_target_info)),
 	.userspacesize = XT_ALIGN(sizeof(struct xt_tcpoptstrip_target_info)),
 	.help          = tcpoptstrip_tg_help,
@@ -208,5 +195,4 @@ static struct xtables_target tcpoptstrip_tg6_reg = {
 void _init(void)
 {
 	xtables_register_target(&tcpoptstrip_tg_reg);
-	xtables_register_target(&tcpoptstrip_tg6_reg);
 }

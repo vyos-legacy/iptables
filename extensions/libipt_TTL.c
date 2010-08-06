@@ -5,13 +5,13 @@
  *
  * This program is distributed under the terms of GNU GPL
  */
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <iptables.h>
+#include <xtables.h>
 
-#include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_TTL.h>
 
 #define IPT_TTL_USED	1
@@ -32,20 +32,20 @@ static int TTL_parse(int c, char **argv, int invert, unsigned int *flags,
 	unsigned int value;
 
 	if (*flags & IPT_TTL_USED) {
-		exit_error(PARAMETER_PROBLEM, 
+		xtables_error(PARAMETER_PROBLEM,
 				"Can't specify TTL option twice");
 	}
 
 	if (!optarg) 
-		exit_error(PARAMETER_PROBLEM, 
+		xtables_error(PARAMETER_PROBLEM,
 				"TTL: You must specify a value");
 
-	if (check_inverse(optarg, &invert, NULL, 0))
-		exit_error(PARAMETER_PROBLEM,
+	if (xtables_check_inverse(optarg, &invert, NULL, 0, argv))
+		xtables_error(PARAMETER_PROBLEM,
 				"TTL: unexpected `!'");
 	
-	if (string_to_number(optarg, 0, 255, &value) == -1)
-		exit_error(PARAMETER_PROBLEM,
+	if (!xtables_strtoui(optarg, NULL, &value, 0, UINT8_MAX))
+		xtables_error(PARAMETER_PROBLEM,
 		           "TTL: Expected value between 0 and 255");
 
 	switch (c) {
@@ -56,7 +56,7 @@ static int TTL_parse(int c, char **argv, int invert, unsigned int *flags,
 
 		case '2':
 			if (value == 0) {
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					"TTL: decreasing by 0?");
 			}
 
@@ -65,7 +65,7 @@ static int TTL_parse(int c, char **argv, int invert, unsigned int *flags,
 
 		case '3':
 			if (value == 0) {
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 					"TTL: increasing by 0?");
 			}
 
@@ -86,7 +86,7 @@ static int TTL_parse(int c, char **argv, int invert, unsigned int *flags,
 static void TTL_check(unsigned int flags)
 {
 	if (!(flags & IPT_TTL_USED))
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 				"TTL: You must specify an action");
 }
 
@@ -132,16 +132,16 @@ static void TTL_print(const void *ip, const struct xt_entry_target *target,
 }
 
 static const struct option TTL_opts[] = {
-	{ "ttl-set", 1, NULL, '1' },
-	{ "ttl-dec", 1, NULL, '2' },
-	{ "ttl-inc", 1, NULL, '3' },
-	{ .name = NULL }
+	{.name = "ttl-set", .has_arg = true, .val = '1'},
+	{.name = "ttl-dec", .has_arg = true, .val = '2'},
+	{.name = "ttl-inc", .has_arg = true, .val = '3'},
+	XT_GETOPT_TABLEEND,
 };
 
 static struct xtables_target ttl_tg_reg = {
 	.name		= "TTL",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET,
+	.family		= NFPROTO_IPV4,
 	.size		= XT_ALIGN(sizeof(struct ipt_TTL_info)),
 	.userspacesize	= XT_ALIGN(sizeof(struct ipt_TTL_info)),
 	.help		= TTL_help,

@@ -1,14 +1,15 @@
 /* Shared library add-on to iptables to add masquerade support. */
+#include <stdbool.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <iptables.h>
+#include <xtables.h>
+#include <limits.h> /* INT_MAX in ip_tables.h */
 #include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter/nf_nat.h>
+#include <net/netfilter/nf_nat.h>
 
-/* Function which prints out usage message. */
 static void MASQUERADE_help(void)
 {
 	printf(
@@ -20,15 +21,14 @@ static void MASQUERADE_help(void)
 }
 
 static const struct option MASQUERADE_opts[] = {
-	{ "to-ports", 1, NULL, '1' },
-	{ "random", 0, NULL, '2' },
-	{ .name = NULL }
+	{.name = "to-ports", .has_arg = true,  .val = '1'},
+	{.name = "random",   .has_arg = false, .val = '2'},
+	XT_GETOPT_TABLEEND,
 };
 
-/* Initialize the target. */
 static void MASQUERADE_init(struct xt_entry_target *t)
 {
-	struct ip_nat_multi_range *mr = (struct ip_nat_multi_range *)t->data;
+	struct nf_nat_multi_range *mr = (struct nf_nat_multi_range *)t->data;
 
 	/* Actually, it's 0, but it's ignored at the moment. */
 	mr->rangesize = 1;
@@ -37,50 +37,50 @@ static void MASQUERADE_init(struct xt_entry_target *t)
 
 /* Parses ports */
 static void
-parse_ports(const char *arg, struct ip_nat_multi_range *mr)
+parse_ports(const char *arg, struct nf_nat_multi_range *mr)
 {
-	const char *dash;
-	int port;
+	char *end;
+	unsigned int port, maxport;
 
 	mr->range[0].flags |= IP_NAT_RANGE_PROTO_SPECIFIED;
 
-	port = atoi(arg);
-	if (port <= 0 || port > 65535)
-		exit_error(PARAMETER_PROBLEM, "Port `%s' not valid\n", arg);
+	if (!xtables_strtoui(arg, &end, &port, 0, UINT16_MAX))
+		xtables_param_act(XTF_BAD_VALUE, "MASQUERADE", "--to-ports", arg);
 
-	dash = strchr(arg, '-');
-	if (!dash) {
+	switch (*end) {
+	case '\0':
 		mr->range[0].min.tcp.port
 			= mr->range[0].max.tcp.port
 			= htons(port);
-	} else {
-		int maxport;
+		return;
+	case '-':
+		if (!xtables_strtoui(end + 1, NULL, &maxport, 0, UINT16_MAX))
+			break;
 
-		maxport = atoi(dash + 1);
-		if (maxport == 0 || maxport > 65535)
-			exit_error(PARAMETER_PROBLEM,
-				   "Port `%s' not valid\n", dash+1);
 		if (maxport < port)
-			/* People are stupid.  Present reader excepted. */
-			exit_error(PARAMETER_PROBLEM,
-				   "Port range `%s' funky\n", arg);
+			break;
+
 		mr->range[0].min.tcp.port = htons(port);
 		mr->range[0].max.tcp.port = htons(maxport);
+		return;
+	default:
+		break;
 	}
+	xtables_param_act(XTF_BAD_VALUE, "MASQUERADE", "--to-ports", arg);
 }
 
-/* Function which parses command options; returns true if it
-   ate an option */
 static int MASQUERADE_parse(int c, char **argv, int invert, unsigned int *flags,
                             const void *e, struct xt_entry_target **target)
 {
 	const struct ipt_entry *entry = e;
 	int portok;
-	struct ip_nat_multi_range *mr
-		= (struct ip_nat_multi_range *)(*target)->data;
+	struct nf_nat_multi_range *mr
+		= (struct nf_nat_multi_range *)(*target)->data;
 
 	if (entry->ip.proto == IPPROTO_TCP
 	    || entry->ip.proto == IPPROTO_UDP
+	    || entry->ip.proto == IPPROTO_SCTP
+	    || entry->ip.proto == IPPROTO_DCCP
 	    || entry->ip.proto == IPPROTO_ICMP)
 		portok = 1;
 	else
@@ -89,11 +89,11 @@ static int MASQUERADE_parse(int c, char **argv, int invert, unsigned int *flags,
 	switch (c) {
 	case '1':
 		if (!portok)
-			exit_error(PARAMETER_PROBLEM,
-				   "Need TCP or UDP with port specification");
+			xtables_error(PARAMETER_PROBLEM,
+				   "Need TCP, UDP, SCTP or DCCP with port specification");
 
-		if (check_inverse(optarg, &invert, NULL, 0))
-			exit_error(PARAMETER_PROBLEM,
+		if (xtables_check_inverse(optarg, &invert, NULL, 0, argv))
+			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --to-ports");
 
 		parse_ports(optarg, mr);
@@ -108,14 +108,12 @@ static int MASQUERADE_parse(int c, char **argv, int invert, unsigned int *flags,
 	}
 }
 
-/* Prints out the targinfo. */
 static void
 MASQUERADE_print(const void *ip, const struct xt_entry_target *target,
                  int numeric)
 {
-	struct ip_nat_multi_range *mr
-		= (struct ip_nat_multi_range *)target->data;
-	struct ip_nat_range *r = &mr->range[0];
+	const struct nf_nat_multi_range *mr = (const void *)target->data;
+	const struct nf_nat_range *r = &mr->range[0];
 
 	if (r->flags & IP_NAT_RANGE_PROTO_SPECIFIED) {
 		printf("masq ports: ");
@@ -129,13 +127,11 @@ MASQUERADE_print(const void *ip, const struct xt_entry_target *target,
 		printf("random ");
 }
 
-/* Saves the union ipt_targinfo in parsable form to stdout. */
 static void
 MASQUERADE_save(const void *ip, const struct xt_entry_target *target)
 {
-	struct ip_nat_multi_range *mr
-		= (struct ip_nat_multi_range *)target->data;
-	struct ip_nat_range *r = &mr->range[0];
+	const struct nf_nat_multi_range *mr = (const void *)target->data;
+	const struct nf_nat_range *r = &mr->range[0];
 
 	if (r->flags & IP_NAT_RANGE_PROTO_SPECIFIED) {
 		printf("--to-ports %hu", ntohs(r->min.tcp.port));
@@ -151,9 +147,9 @@ MASQUERADE_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target masquerade_tg_reg = {
 	.name		= "MASQUERADE",
 	.version	= XTABLES_VERSION,
-	.family		= PF_INET,
-	.size		= XT_ALIGN(sizeof(struct ip_nat_multi_range)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ip_nat_multi_range)),
+	.family		= NFPROTO_IPV4,
+	.size		= XT_ALIGN(sizeof(struct nf_nat_multi_range)),
+	.userspacesize	= XT_ALIGN(sizeof(struct nf_nat_multi_range)),
 	.help		= MASQUERADE_help,
 	.init		= MASQUERADE_init,
 	.parse		= MASQUERADE_parse,

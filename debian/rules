@@ -23,8 +23,6 @@ include debian/builddir.mk
 
 else
 
-include /usr/share/quilt/quilt.make
-
 build: debian/stamp-build
 debian/stamp-build:
 	dh build --before dh_auto_configure

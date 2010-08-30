@@ -2,7 +2,7 @@ Source: iptables
 Section: net
 Priority: important
 Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
-Build-Depends: debhelper (>>7.0), quilt, autoconf, automake, libtool
+Build-Depends: debhelper (>>7.0), autoconf, automake, libtool
 Standards-Version: 3.8.2
 Homepage: http://www.netfilter.org/
 

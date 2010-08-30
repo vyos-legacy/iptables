@@ -59,3 +59,11 @@ Makefile.in
 /iptables-restore
 /iptables-static
 /iptables-xml
+
+/debian/build
+/debian/iptables-dev.substvars
+/debian/iptables.postrm.debhelper
+/debian/stamp-build
+/debian/stamp-install
+/debian/stamp-tarcopy
+

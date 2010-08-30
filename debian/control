@@ -31,6 +31,6 @@ Conflicts: iptables (<<1.4.2-2)
 Section: devel
 Description: iptables development files
  iptables is used to setup, maintain, and inspect the tables of
- packet filter rules in the Linux kernel. This packages contains
+ packet filter rules in the Linux kernel. These packages contain
  the available library (libipq, libiptc, libxtables), header,
  documentation and related files for iptables development.

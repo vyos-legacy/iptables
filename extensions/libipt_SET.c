@@ -56,7 +56,7 @@ parse_target(char **argv, int invert, unsigned int *flags,
 		xtables_error(PARAMETER_PROBLEM,
 			   "--%s can be specified only once", what);
 
-	if (xtables_check_inverse(optarg, &invert, NULL, 0))
+	if (xtables_check_inverse(optarg, &invert, NULL, 0, argv))
 		xtables_error(PARAMETER_PROBLEM,
 			   "Unexpected `!' after --%s", what);
 
@@ -65,12 +65,12 @@ parse_target(char **argv, int invert, unsigned int *flags,
 		xtables_error(PARAMETER_PROBLEM,
 			   "--%s requires two args.", what);
 
-	if (strlen(argv[optind-1]) > IP_SET_MAXNAMELEN - 1)
+	if (strlen(optarg) > IP_SET_MAXNAMELEN - 1)
 		xtables_error(PARAMETER_PROBLEM,
 			   "setname `%s' too long, max %d characters.",
-			   argv[optind-1], IP_SET_MAXNAMELEN - 1);
+			   optarg, IP_SET_MAXNAMELEN - 1);
 
-	get_set_byname(argv[optind - 1], info);
+	get_set_byname(optarg, info);
 	parse_bindings(argv[optind], info);
 	optind++;
 	

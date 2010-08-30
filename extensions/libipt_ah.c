@@ -82,8 +82,8 @@ static int ah_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (*flags & AH_SPI)
 			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--ahspi' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
-		parse_ah_spis(argv[optind-1], ahinfo->spis);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_ah_spis(optarg, ahinfo->spis);
 		if (invert)
 			ahinfo->invflags |= IPT_AH_INV_SPI;
 		*flags |= AH_SPI;

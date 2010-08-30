@@ -154,11 +154,11 @@ static int DNAT_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		if (xtables_check_inverse(optarg, &invert, NULL, 0))
+		if (xtables_check_inverse(optarg, &invert, NULL, 0, argv))
 			xtables_error(PARAMETER_PROBLEM,
 				   "Unexpected `!' after --to-destination");
 
-		if (*flags) {
+		if (*flags & IPT_DNAT_OPT_DEST) {
 			if (!kernel_version)
 				get_kernel_version();
 			if (kernel_version > LINUX_VERSION(2, 6, 10))

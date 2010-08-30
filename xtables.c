@@ -331,7 +331,7 @@ int xtables_insmod(const char *modname, const char *modprobe, bool quiet)
 	 */
 	fflush(stdout);
 
-	switch (fork()) {
+	switch (vfork()) {
 	case 0:
 		argv[0] = (char *)modprobe;
 		argv[1] = (char *)modname;
@@ -1484,6 +1484,7 @@ void
 xtables_ip6parse_multiple(const char *name, struct in6_addr **addrpp,
 		      struct in6_addr **maskpp, unsigned int *naddrs)
 {
+	static const struct in6_addr zero_addr;
 	struct in6_addr *addrp;
 	char buf[256], *p;
 	unsigned int len, i, j, n, count = 1;
@@ -1526,7 +1527,7 @@ xtables_ip6parse_multiple(const char *name, struct in6_addr **addrpp,
 		memcpy(*maskpp + i, addrp, sizeof(*addrp));
 
 		/* if a null mask is given, the name is ignored, like in "any/0" */
-		if (memcmp(*maskpp + i, &in6addr_any, sizeof(in6addr_any)) == 0)
+		if (memcmp(*maskpp + i, &zero_addr, sizeof(zero_addr)) == 0)
 			strcpy(buf, "::");
 
 		addrp = ip6parse_hostnetwork(buf, &n);
@@ -1642,27 +1643,28 @@ void xtables_save_string(const char *value)
  * Do not use in new code.
  */
 int xtables_check_inverse(const char option[], int *invert,
-			  int *my_optind, int argc)
+			  int *my_optind, int argc, char **argv)
 {
-	if (option && strcmp(option, "!") == 0) {
-		fprintf(stderr, "Using intrapositioned negation "
-		        "(`--option ! this`) is deprecated in favor of "
-		        "extrapositioned (`! --option this`).\n");
+	if (option == NULL || strcmp(option, "!") != 0)
+		return false;
 
-		if (*invert)
+	fprintf(stderr, "Using intrapositioned negation "
+	        "(`--option ! this`) is deprecated in favor of "
+	        "extrapositioned (`! --option this`).\n");
+
+	if (*invert)
+		xt_params->exit_err(PARAMETER_PROBLEM,
+			   "Multiple `!' flags not allowed");
+	*invert = true;
+	if (my_optind != NULL) {
+		optarg = argv[*my_optind];
+		++*my_optind;
+		if (argc && *my_optind > argc)
 			xt_params->exit_err(PARAMETER_PROBLEM,
-				   "Multiple `!' flags not allowed");
-		*invert = true;
-		if (my_optind != NULL) {
-			++*my_optind;
-			if (argc && *my_optind > argc)
-				xt_params->exit_err(PARAMETER_PROBLEM,
-					   "no argument following `!'");
-		}
-
-		return true;
+				   "no argument following `!'");
 	}
-	return false;
+
+	return true;
 }
 
 const struct xtables_pprot xtables_chain_protos[] = {

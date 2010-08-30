@@ -79,7 +79,7 @@
 #define CMD_RENAME_CHAIN	0x0800U
 #define CMD_LIST_RULES		0x1000U
 #define CMD_ZERO_NUM		0x2000U
-#define NUMBER_OF_CMD  15
+#define NUMBER_OF_CMD	15
 static const char cmdflags[] = { 'I', 'D', 'D', 'R', 'A', 'L', 'F', 'Z',
 				 'Z', 'N', 'X', 'P', 'E', 'S' };
 
@@ -283,7 +283,7 @@ exit_printhelp(struct xtables_rule_match *matches)
 "				Print the rules in a chain or all chains\n"
 "  --flush   -F [chain]		Delete all rules in  chain or all chains\n"
 "  --zero    -Z [chain [rulenum]]\n"
-"		                Zero counters in chain or all chains\n"
+"				Zero counters in chain or all chains\n"
 "  --new     -N chain		Create a new user-defined chain\n"
 "  --delete-chain\n"
 "            -X [chain]		Delete a user-defined chain\n"
@@ -760,13 +760,15 @@ static int
 replace_entry(const ipt_chainlabel chain,
 	      struct ipt_entry *fw,
 	      unsigned int rulenum,
-	      const struct in_addr *saddr,
-	      const struct in_addr *daddr,
+	      const struct in_addr *saddr, const struct in_addr *smask,
+	      const struct in_addr *daddr, const struct in_addr *dmask,
 	      int verbose,
 	      struct iptc_handle *handle)
 {
 	fw->ip.src.s_addr = saddr->s_addr;
 	fw->ip.dst.s_addr = daddr->s_addr;
+	fw->ip.smsk.s_addr = smask->s_addr;
+	fw->ip.dmsk.s_addr = dmask->s_addr;
 
 	if (verbose)
 		print_firewall_line(fw, handle);
@@ -805,7 +807,8 @@ insert_entry(const ipt_chainlabel chain,
 }
 
 static unsigned char *
-make_delete_mask(struct xtables_rule_match *matches)
+make_delete_mask(struct xtables_rule_match *matches,
+		 const struct xtables_target *target)
 {
 	/* Establish mask for comparison */
 	unsigned int size;
@@ -818,7 +821,7 @@ make_delete_mask(struct xtables_rule_match *matches)
 
 	mask = xtables_calloc(1, size
 			 + IPT_ALIGN(sizeof(struct ipt_entry_target))
-			 + xtables_targets->size);
+			 + target->size);
 
 	memset(mask, 0xFF, sizeof(struct ipt_entry));
 	mptr = mask + sizeof(struct ipt_entry);
@@ -832,7 +835,7 @@ make_delete_mask(struct xtables_rule_match *matches)
 
 	memset(mptr, 0xFF,
 	       IPT_ALIGN(sizeof(struct ipt_entry_target))
-	       + xtables_targets->userspacesize);
+	       + target->userspacesize);
 
 	return mask;
 }
@@ -848,13 +851,14 @@ delete_entry(const ipt_chainlabel chain,
 	     const struct in_addr dmasks[],
 	     int verbose,
 	     struct iptc_handle *handle,
-	     struct xtables_rule_match *matches)
+	     struct xtables_rule_match *matches,
+	     const struct xtables_target *target)
 {
 	unsigned int i, j;
 	int ret = 1;
 	unsigned char *mask;
 
-	mask = make_delete_mask(matches);
+	mask = make_delete_mask(matches, target);
 	for (i = 0; i < nsaddrs; i++) {
 		fw->ip.src.s_addr = saddrs[i].s_addr;
 		fw->ip.smsk.s_addr = smasks[i].s_addr;
@@ -1402,8 +1406,8 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 			break;
 
 		case 'L':
-			add_command(&command, CMD_LIST, CMD_ZERO|CMD_ZERO_NUM,
-				    invert);
+			add_command(&command, CMD_LIST,
+				    CMD_ZERO | CMD_ZERO_NUM, invert);
 			if (optarg) chain = optarg;
 			else if (optind < argc && argv[optind][0] != '-'
 				 && argv[optind][0] != '!')
@@ -1414,7 +1418,7 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 			break;
 
 		case 'S':
-			add_command(&command, CMD_LIST_RULES, 
+			add_command(&command, CMD_LIST_RULES,
 				    CMD_ZERO|CMD_ZERO_NUM, invert);
 			if (optarg) chain = optarg;
 			else if (optind < argc && argv[optind][0] != '-'
@@ -1513,15 +1517,15 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 			 * Option selection
 			 */
 		case 'p':
-			xtables_check_inverse(optarg, &invert, &optind, argc);
+			xtables_check_inverse(optarg, &invert, &optind, argc, argv);
 			set_option(&options, OPT_PROTOCOL, &fw.ip.invflags,
 				   invert);
 
 			/* Canonicalize into lower case */
-			for (protocol = argv[optind-1]; *protocol; protocol++)
+			for (protocol = optarg; *protocol; protocol++)
 				*protocol = tolower(*protocol);
 
-			protocol = argv[optind-1];
+			protocol = optarg;
 			fw.ip.proto = xtables_parse_protocol(protocol);
 
 			if (fw.ip.proto == 0
@@ -1531,17 +1535,17 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 			break;
 
 		case 's':
-			xtables_check_inverse(optarg, &invert, &optind, argc);
+			xtables_check_inverse(optarg, &invert, &optind, argc, argv);
 			set_option(&options, OPT_SOURCE, &fw.ip.invflags,
 				   invert);
-			shostnetworkmask = argv[optind-1];
+			shostnetworkmask = optarg;
 			break;
 
 		case 'd':
-			xtables_check_inverse(optarg, &invert, &optind, argc);
+			xtables_check_inverse(optarg, &invert, &optind, argc, argv);
 			set_option(&options, OPT_DESTINATION, &fw.ip.invflags,
 				   invert);
-			dhostnetworkmask = argv[optind-1];
+			dhostnetworkmask = optarg;
 			break;
 
 #ifdef IPT_F_GOTO
@@ -1584,19 +1588,19 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 
 
 		case 'i':
-			xtables_check_inverse(optarg, &invert, &optind, argc);
+			xtables_check_inverse(optarg, &invert, &optind, argc, argv);
 			set_option(&options, OPT_VIANAMEIN, &fw.ip.invflags,
 				   invert);
-			xtables_parse_interface(argv[optind-1],
+			xtables_parse_interface(optarg,
 					fw.ip.iniface,
 					fw.ip.iniface_mask);
 			break;
 
 		case 'o':
-			xtables_check_inverse(optarg, &invert, &optind, argc);
+			xtables_check_inverse(optarg, &invert, &optind, argc, argv);
 			set_option(&options, OPT_VIANAMEOUT, &fw.ip.invflags,
 				   invert);
-			xtables_parse_interface(argv[optind-1],
+			xtables_parse_interface(optarg,
 					fw.ip.outiface,
 					fw.ip.outiface_mask);
 			break;
@@ -1979,15 +1983,15 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 				   nsaddrs, saddrs, smasks,
 				   ndaddrs, daddrs, dmasks,
 				   options&OPT_VERBOSE,
-				   *handle, matches);
+				   *handle, matches, target);
 		break;
 	case CMD_DELETE_NUM:
 		ret = iptc_delete_num_entry(chain, rulenum - 1, *handle);
 		break;
 	case CMD_REPLACE:
 		ret = replace_entry(chain, e, rulenum - 1,
-				    saddrs, daddrs, options&OPT_VERBOSE,
-				    *handle);
+				    saddrs, smasks, daddrs, dmasks,
+				    options&OPT_VERBOSE, *handle);
 		break;
 	case CMD_INSERT:
 		ret = insert_entry(chain, e, rulenum - 1,
@@ -2018,6 +2022,8 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 		if (ret && (command & CMD_ZERO))
 			ret = zero_entries(chain,
 					   options&OPT_VERBOSE, *handle);
+		if (ret && (command & CMD_ZERO_NUM))
+			ret = iptc_zero_counter(chain, rulenum, *handle);
 		break;
 	case CMD_LIST_RULES:
 	case CMD_LIST_RULES|CMD_ZERO:
@@ -2029,6 +2035,8 @@ int do_command(int argc, char *argv[], char **table, struct iptc_handle **handle
 		if (ret && (command & CMD_ZERO))
 			ret = zero_entries(chain,
 					   options&OPT_VERBOSE, *handle);
+		if (ret && (command & CMD_ZERO_NUM))
+			ret = iptc_zero_counter(chain, rulenum, *handle);
 		break;
 	case CMD_NEW_CHAIN:
 		ret = iptc_create_chain(chain, *handle);

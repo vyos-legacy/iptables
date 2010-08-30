@@ -72,8 +72,8 @@ udp_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (*flags & UDP_SRC_PORTS)
 			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--source-port' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
-		parse_udp_ports(argv[optind-1], udpinfo->spts);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_udp_ports(optarg, udpinfo->spts);
 		if (invert)
 			udpinfo->invflags |= XT_UDP_INV_SRCPT;
 		*flags |= UDP_SRC_PORTS;
@@ -83,8 +83,8 @@ udp_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (*flags & UDP_DST_PORTS)
 			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--destination-port' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
-		parse_udp_ports(argv[optind-1], udpinfo->dpts);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_udp_ports(optarg, udpinfo->dpts);
 		if (invert)
 			udpinfo->invflags |= XT_UDP_INV_DSTPT;
 		*flags |= UDP_DST_PORTS;

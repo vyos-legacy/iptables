@@ -147,8 +147,8 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (*flags & TCP_SRC_PORTS)
 			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--source-port' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
-		parse_tcp_ports(argv[optind-1], tcpinfo->spts);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_tcp_ports(optarg, tcpinfo->spts);
 		if (invert)
 			tcpinfo->invflags |= XT_TCP_INV_SRCPT;
 		*flags |= TCP_SRC_PORTS;
@@ -158,8 +158,8 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (*flags & TCP_DST_PORTS)
 			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--destination-port' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
-		parse_tcp_ports(argv[optind-1], tcpinfo->dpts);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_tcp_ports(optarg, tcpinfo->dpts);
 		if (invert)
 			tcpinfo->invflags |= XT_TCP_INV_DSTPT;
 		*flags |= TCP_DST_PORTS;
@@ -179,14 +179,14 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 			xtables_error(PARAMETER_PROBLEM,
 				   "Only one of `--syn' or `--tcp-flags' "
 				   " allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
 		if (!argv[optind]
 		    || argv[optind][0] == '-' || argv[optind][0] == '!')
 			xtables_error(PARAMETER_PROBLEM,
 				   "--tcp-flags requires two args.");
 
-		parse_tcp_flags(tcpinfo, argv[optind-1], argv[optind],
+		parse_tcp_flags(tcpinfo, optarg, argv[optind],
 				invert);
 		optind++;
 		*flags |= TCP_FLAGS;
@@ -196,8 +196,8 @@ tcp_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (*flags & TCP_OPTION)
 			xtables_error(PARAMETER_PROBLEM,
 				   "Only one `--tcp-option' allowed");
-		xtables_check_inverse(optarg, &invert, &optind, 0);
-		parse_tcp_option(argv[optind-1], &tcpinfo->option);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
+		parse_tcp_option(optarg, &tcpinfo->option);
 		if (invert)
 			tcpinfo->invflags |= XT_TCP_INV_OPTION;
 		*flags |= TCP_OPTION;

@@ -273,7 +273,7 @@ conntrack_ps_expires(struct xt_conntrack_mtinfo2 *info, const char *s)
 		xtables_param_act(XTF_BAD_VALUE, "conntrack", "--expires", s);
 	max = min;
 	if (*end == ':')
-		if (!xtables_strtoui(s, &end, &max, 0, UINT32_MAX))
+		if (!xtables_strtoui(end + 1, &end, &max, 0, UINT32_MAX))
 			xtables_param_act(XTF_BAD_VALUE, "conntrack", "--expires", s);
 	if (*end != '\0')
 		xtables_param_act(XTF_BAD_VALUE, "conntrack", "--expires", s);
@@ -298,9 +298,9 @@ static int conntrack_parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
-		parse_states(argv[optind-1], sinfo);
+		parse_states(optarg, sinfo);
 		if (invert) {
 			sinfo->invflags |= XT_CONNTRACK_STATE;
 		}
@@ -308,16 +308,16 @@ static int conntrack_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '2':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
 		if(invert)
 			sinfo->invflags |= XT_CONNTRACK_PROTO;
 
 		/* Canonicalize into lower case */
-		for (protocol = argv[optind-1]; *protocol; protocol++)
+		for (protocol = optarg; *protocol; protocol++)
 			*protocol = tolower(*protocol);
 
-		protocol = argv[optind-1];
+		protocol = optarg;
 		sinfo->tuple[IP_CT_DIR_ORIGINAL].dst.protonum =
 			xtables_parse_protocol(protocol);
 
@@ -330,12 +330,12 @@ static int conntrack_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '3':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
 		if (invert)
 			sinfo->invflags |= XT_CONNTRACK_ORIGSRC;
 
-		xtables_ipparse_any(argv[optind-1], &addrs,
+		xtables_ipparse_any(optarg, &addrs,
 					&sinfo->sipmsk[IP_CT_DIR_ORIGINAL],
 					&naddrs);
 		if(naddrs > 1)
@@ -350,12 +350,12 @@ static int conntrack_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '4':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
 		if (invert)
 			sinfo->invflags |= XT_CONNTRACK_ORIGDST;
 
-		xtables_ipparse_any(argv[optind-1], &addrs,
+		xtables_ipparse_any(optarg, &addrs,
 					&sinfo->dipmsk[IP_CT_DIR_ORIGINAL],
 					&naddrs);
 		if(naddrs > 1)
@@ -370,12 +370,12 @@ static int conntrack_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '5':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
 		if (invert)
 			sinfo->invflags |= XT_CONNTRACK_REPLSRC;
 
-		xtables_ipparse_any(argv[optind-1], &addrs,
+		xtables_ipparse_any(optarg, &addrs,
 					&sinfo->sipmsk[IP_CT_DIR_REPLY],
 					&naddrs);
 		if(naddrs > 1)
@@ -390,12 +390,12 @@ static int conntrack_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '6':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
 		if (invert)
 			sinfo->invflags |= XT_CONNTRACK_REPLDST;
 
-		xtables_ipparse_any(argv[optind-1], &addrs,
+		xtables_ipparse_any(optarg, &addrs,
 					&sinfo->dipmsk[IP_CT_DIR_REPLY],
 					&naddrs);
 		if(naddrs > 1)
@@ -410,9 +410,9 @@ static int conntrack_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '7':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
-		parse_statuses(argv[optind-1], sinfo);
+		parse_statuses(optarg, sinfo);
 		if (invert) {
 			sinfo->invflags |= XT_CONNTRACK_STATUS;
 		}
@@ -420,9 +420,9 @@ static int conntrack_parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '8':
-		xtables_check_inverse(optarg, &invert, &optind, 0);
+		xtables_check_inverse(optarg, &invert, &optind, 0, argv);
 
-		parse_expires(argv[optind-1], sinfo);
+		parse_expires(optarg, sinfo);
 		if (invert) {
 			sinfo->invflags |= XT_CONNTRACK_EXPIRES;
 		}

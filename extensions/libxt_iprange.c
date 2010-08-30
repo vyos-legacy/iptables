@@ -1,4 +1,5 @@
 /* Shared library add-on to iptables to add IP range matching support. */
+#include <stdbool.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
@@ -9,7 +10,19 @@
 #include <xtables.h>
 #include <linux/netfilter.h>
 #include <linux/netfilter/xt_iprange.h>
-#include <linux/netfilter_ipv4/ipt_iprange.h>
+
+struct ipt_iprange {
+	/* Inclusive: network order. */
+	__be32 min_ip, max_ip;
+};
+
+struct ipt_iprange_info {
+	struct ipt_iprange src;
+	struct ipt_iprange dst;
+
+	/* Flags from above */
+	u_int8_t flags;
+};
 
 enum {
 	F_SRCIP = 1 << 0,
@@ -27,7 +40,7 @@ static void iprange_mt_help(void)
 static const struct option iprange_mt_opts[] = {
 	{.name = "src-range", .has_arg = true, .val = '1'},
 	{.name = "dst-range", .has_arg = true, .val = '2'},
-	{ .name = NULL }
+	XT_GETOPT_TABLEEND,
 };
 
 static void
@@ -96,7 +109,8 @@ static int iprange_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (invert)
 			info->flags |= IPRANGE_SRC_INV;
 		iprange_parse_range(optarg, range, NFPROTO_IPV4, "--src-range");
-
+		info->src.min_ip = range[0].ip;
+		info->src.max_ip = range[1].ip;
 		break;
 
 	case '2':
@@ -110,8 +124,9 @@ static int iprange_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (invert)
 			info->flags |= IPRANGE_DST_INV;
 
-		iprange_parse_range(optarg, range, NFPROTO_IPV4, "--src-range");
-
+		iprange_parse_range(optarg, range, NFPROTO_IPV4, "--dst-range");
+		info->dst.min_ip = range[0].ip;
+		info->dst.max_ip = range[1].ip;
 		break;
 
 	default:

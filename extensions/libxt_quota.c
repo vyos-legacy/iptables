@@ -3,6 +3,7 @@
  *
  * Sam Johnston <samj@samj.net>
  */
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,14 +13,14 @@
 #include <linux/netfilter/xt_quota.h>
 
 static const struct option quota_opts[] = {
-	{"quota", 1, NULL, '1'},
-	{ .name = NULL }
+	{.name = "quota", .has_arg = true, .val = '1'},
+	XT_GETOPT_TABLEEND,
 };
 
 static void quota_help(void)
 {
 	printf("quota match options:\n"
-	       " --quota quota			quota (bytes)\n");
+	       "[!] --quota quota		quota (bytes)\n");
 }
 
 static void
@@ -65,6 +66,10 @@ quota_parse(int c, char **argv, int invert, unsigned int *flags,
 		if (!parse_quota(optarg, &info->quota))
 			xtables_error(PARAMETER_PROBLEM,
 				   "bad quota: '%s'", optarg);
+
+		if (invert)
+			info->flags |= XT_QUOTA_INVERT;
+
 		break;
 
 	default:
@@ -78,7 +83,7 @@ static struct xtables_match quota_match = {
 	.name		= "quota",
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof (struct xt_quota_info)),
-	.userspacesize	= offsetof(struct xt_quota_info, quota),
+	.userspacesize	= offsetof(struct xt_quota_info, master),
 	.help		= quota_help,
 	.parse		= quota_parse,
 	.print		= quota_print,

@@ -22,6 +22,39 @@
 #include <linux/netfilter/nf_conntrack_common.h>
 #include <arpa/inet.h>
 
+struct ip_conntrack_old_tuple {
+	struct {
+		__be32 ip;
+		union {
+			__u16 all;
+		} u;
+	} src;
+
+	struct {
+		__be32 ip;
+		union {
+			__u16 all;
+		} u;
+
+		/* The protocol. */
+		__u16 protonum;
+	} dst;
+};
+
+struct xt_conntrack_info {
+	unsigned int statemask, statusmask;
+
+	struct ip_conntrack_old_tuple tuple[IP_CT_DIR_MAX];
+	struct in_addr sipmsk[IP_CT_DIR_MAX], dipmsk[IP_CT_DIR_MAX];
+
+	unsigned long expires_min, expires_max;
+
+	/* Flags word */
+	u_int8_t flags;
+	/* Inverse flags */
+	u_int8_t invflags;
+};
+
 static void conntrack_mt_help(void)
 {
 	printf(
@@ -55,7 +88,7 @@ static const struct option conntrack_mt_opts_v0[] = {
 	{.name = "ctrepldst", .has_arg = true, .val = '6'},
 	{.name = "ctstatus",  .has_arg = true, .val = '7'},
 	{.name = "ctexpire",  .has_arg = true, .val = '8'},
-	{ .name = NULL }
+	XT_GETOPT_TABLEEND,
 };
 
 static const struct option conntrack_mt_opts[] = {
@@ -809,9 +842,13 @@ conntrack_dump_addr(const union nf_inet_addr *addr,
 			return;
 		}
 		if (numeric)
-			printf("%s ", xtables_ipaddr_to_numeric(&addr->in));
+			printf("%s%s ",
+			       xtables_ipaddr_to_numeric(&addr->in),
+			       xtables_ipmask_to_numeric(&mask->in));
 		else
-			printf("%s ", xtables_ipaddr_to_anyname(&addr->in));
+			printf("%s%s ",
+			       xtables_ipaddr_to_anyname(&addr->in),
+			       xtables_ipmask_to_numeric(&mask->in));
 	} else if (family == NFPROTO_IPV6) {
 		if (!numeric && addr->ip6[0] == 0 && addr->ip6[1] == 0 &&
 		    addr->ip6[2] == 0 && addr->ip6[3] == 0) {
@@ -819,9 +856,13 @@ conntrack_dump_addr(const union nf_inet_addr *addr,
 			return;
 		}
 		if (numeric)
-			printf("%s ", xtables_ip6addr_to_numeric(&addr->in6));
+			printf("%s%s ",
+			       xtables_ip6addr_to_numeric(&addr->in6),
+			       xtables_ip6mask_to_numeric(&mask->in6));
 		else
-			printf("%s ", xtables_ip6addr_to_anyname(&addr->in6));
+			printf("%s%s ",
+			       xtables_ip6addr_to_anyname(&addr->in6),
+			       xtables_ip6mask_to_numeric(&mask->in6));
 	}
 }
 

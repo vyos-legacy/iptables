@@ -19,6 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#include <stdbool.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
@@ -27,6 +28,11 @@
 
 #include <xtables.h>
 #include <linux/netfilter/xt_connmark.h>
+
+struct xt_connmark_info {
+	unsigned long mark, mask;
+	u_int8_t invert;
+};
 
 enum {
 	F_MARK = 1 << 0,
@@ -41,7 +47,7 @@ static void connmark_mt_help(void)
 
 static const struct option connmark_mt_opts[] = {
 	{.name = "mark", .has_arg = true, .val = '1'},
-	{ .name = NULL }
+	XT_GETOPT_TABLEEND,
 };
 
 static int

@@ -7,6 +7,7 @@
  * libipt_ecn.c borrowed heavily from libipt_dscp.c
  *
  */
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -51,16 +52,16 @@ static void sctp_help(void)
 " --dport ...\n" 
 "[!] --chunk-types (all|any|none) (chunktype[:flags])+	match if all, any or none of\n"
 "						        chunktypes are present\n"
-"chunktypes - DATA INIT INIT_ACK SACK HEARTBEAT HEARTBEAT_ACK ABORT SHUTDOWN SHUTDOWN_ACK ERROR COOKIE_ECHO COOKIE_ACK ECN_ECNE ECN_CWR SHUTDOWN_COMPLETE ASCONF ASCONF_ACK ALL NONE\n");
+"chunktypes - DATA INIT INIT_ACK SACK HEARTBEAT HEARTBEAT_ACK ABORT SHUTDOWN SHUTDOWN_ACK ERROR COOKIE_ECHO COOKIE_ACK ECN_ECNE ECN_CWR SHUTDOWN_COMPLETE ASCONF ASCONF_ACK FORWARD_TSN ALL NONE\n");
 }
 
 static const struct option sctp_opts[] = {
-	{ .name = "source-port", .has_arg = 1, .val = '1' },
-	{ .name = "sport", .has_arg = 1, .val = '1' },
-	{ .name = "destination-port", .has_arg = 1, .val = '2' },
-	{ .name = "dport", .has_arg = 1, .val = '2' },
-	{ .name = "chunk-types", .has_arg = 1, .val = '3' },
-	{ .name = NULL }
+	{.name = "source-port",      .has_arg = true, .val = '1'},
+	{.name = "sport",            .has_arg = true, .val = '1'},
+	{.name = "destination-port", .has_arg = true, .val = '2'},
+	{.name = "dport",            .has_arg = true, .val = '2'},
+	{.name = "chunk-types",      .has_arg = true, .val = '3'},
+	XT_GETOPT_TABLEEND,
 };
 
 static void
@@ -97,7 +98,7 @@ struct sctp_chunk_names {
 
 /*'ALL' and 'NONE' will be treated specially. */
 static const struct sctp_chunk_names sctp_chunk_names[]
-= { { .name = "DATA", 		.chunk_type = 0,   .valid_flags = "-----UBE"},
+= { { .name = "DATA", 		.chunk_type = 0,   .valid_flags = "----IUBE"},
     { .name = "INIT", 		.chunk_type = 1,   .valid_flags = "--------"},
     { .name = "INIT_ACK", 	.chunk_type = 2,   .valid_flags = "--------"},
     { .name = "SACK",		.chunk_type = 3,   .valid_flags = "--------"},
@@ -114,6 +115,7 @@ static const struct sctp_chunk_names sctp_chunk_names[]
     { .name = "SHUTDOWN_COMPLETE", .chunk_type = 14,  .valid_flags = "-------T"},
     { .name = "ASCONF",		.chunk_type = 193,  .valid_flags = "--------"},
     { .name = "ASCONF_ACK",	.chunk_type = 128,  .valid_flags = "--------"},
+    { .name = "FORWARD_TSN",	.chunk_type = 192,  .valid_flags = "--------"},
 };
 
 static void

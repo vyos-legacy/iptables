@@ -90,9 +90,7 @@ struct xtables_match
 	unsigned int option_offset;
 	struct xt_entry_match *m;
 	unsigned int mflags;
-#ifdef NO_SHARED_LIBS
 	unsigned int loaded; /* simulate loading so options are merged properly */
-#endif
 };
 
 struct xtables_target
@@ -152,9 +150,7 @@ struct xtables_target
 	struct xt_entry_target *t;
 	unsigned int tflags;
 	unsigned int used;
-#ifdef NO_SHARED_LIBS
 	unsigned int loaded; /* simulate loading so options are merged properly */
-#endif
 };
 
 struct xtables_rule_match {
@@ -215,6 +211,7 @@ extern void xtables_init(void);
 extern void xtables_set_nfproto(uint8_t);
 extern void *xtables_calloc(size_t, size_t);
 extern void *xtables_malloc(size_t);
+extern void *xtables_realloc(void *, size_t);
 
 extern int xtables_insmod(const char *, const char *, bool);
 extern int xtables_load_ko(const char *, bool);
@@ -232,7 +229,9 @@ extern struct xtables_target *xtables_find_target(const char *name,
 
 /* Your shared library should call one of these. */
 extern void xtables_register_match(struct xtables_match *me);
+extern void xtables_register_matches(struct xtables_match *, unsigned int);
 extern void xtables_register_target(struct xtables_target *me);
+extern void xtables_register_targets(struct xtables_target *, unsigned int);
 
 extern bool xtables_strtoul(const char *, char **, unsigned long *,
 	unsigned long, unsigned long);
@@ -260,6 +259,8 @@ extern struct in_addr *xtables_numeric_to_ipaddr(const char *);
 extern struct in_addr *xtables_numeric_to_ipmask(const char *);
 extern void xtables_ipparse_any(const char *, struct in_addr **,
 	struct in_addr *, unsigned int *);
+extern void xtables_ipparse_multiple(const char *, struct in_addr **,
+	struct in_addr **, unsigned int *);
 
 extern struct in6_addr *xtables_numeric_to_ip6addr(const char *);
 extern const char *xtables_ip6addr_to_numeric(const struct in6_addr *);
@@ -267,6 +268,8 @@ extern const char *xtables_ip6addr_to_anyname(const struct in6_addr *);
 extern const char *xtables_ip6mask_to_numeric(const struct in6_addr *);
 extern void xtables_ip6parse_any(const char *, struct in6_addr **,
 	struct in6_addr *, unsigned int *);
+extern void xtables_ip6parse_multiple(const char *, struct in6_addr **,
+	struct in6_addr **, unsigned int *);
 
 /**
  * Print the specified value to standard output, quoting dangerous
@@ -274,7 +277,7 @@ extern void xtables_ip6parse_any(const char *, struct in6_addr **,
  */
 extern void xtables_save_string(const char *value);
 
-#ifdef NO_SHARED_LIBS
+#if defined(ALL_INCLUSIVE) || defined(NO_SHARED_LIBS)
 #	ifdef _INIT
 #		undef _init
 #		define _init _INIT

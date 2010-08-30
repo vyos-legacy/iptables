@@ -1,4 +1,4 @@
-.TH IP6TABLES 8 "" "@PACKAGE_AND_VERSION@" "@PACKAGE_AND_VERSION@"
+.TH IP6TABLES 8 "" "iptables 1.4.4" "iptables 1.4.4"
 .\"
 .\" Man page written by Andras Kis-Szabo <kisza@sch.bme.hu>
 .\" It is based on iptables man page.
@@ -25,7 +25,7 @@
 .\"
 .\"
 .SH NAME
-ip6tables - IPv6 packet filter administration
+ip6tables \(em IPv6 packet filter administration
 .SH SYNOPSIS
 \fBip6tables\fP [\fB\-t\fP \fItable\fP] {\fB\-A\fP|\fB\-D\fP} \fIchain
 rule-specification\fP [\fIoptions...\fP]
@@ -175,7 +175,7 @@ arguments given. The exact rules are suppressed until you use
 .TP
 \fB\-S\fP, \fB\-\-list\-rules\fP [\fIchain\fP]
 Print all rules in the selected chain.  If no chain is selected, all
-chains are printed like ip6tables\-save. Like every other ip6tables command,
+chains are printed like ip6tables-save. Like every other ip6tables command,
 it applies to the specified table (filter is the default).
 .TP
 \fB\-F\fP, \fB\-\-flush\fP [\fIchain\fP]
@@ -248,6 +248,9 @@ specifying the number of 1's at the left side of the network mask.
 A "!" argument before the address specification inverts the sense of
 the address. The flag \fB\-\-src\fP
 is an alias for this option.
+Multiple addresses can be specified, but this will \fBexpand to multiple
+rules\fP (when adding with \-A), or will cause multiple rules to be
+deleted (with \-D).
 .TP
 [\fB!\fP] \fB\-d\fP, \fB\-\-destination\fP \fIaddress\fP[\fB/\fP\fImask\fP]
 Destination specification. 

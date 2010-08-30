@@ -1,3 +1,10 @@
+iptables (1.4.9+vyatta+1) unstable; urgency=low
+
+  * merge upstream 1.4.9
+  * clean up build and packaging
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Mon, 30 Aug 2010 15:40:50 -0700
+
 iptables (1.4.4-2+vyatta+6) unstable; urgency=low
 
   * UNRELEASED

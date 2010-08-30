@@ -30,7 +30,8 @@ debian/stamp-build:
 	dh build --before dh_auto_configure
 	autoreconf -i
 	dh_auto_configure -- $(configure)
-	dh build --after dh_auto_configure
+	dh build --after dh_auto_configure --before dh_auto_test
+	dh build --after dh_auto_test
 	touch $@
 
 install: build debian/stamp-install

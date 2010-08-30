@@ -2,7 +2,7 @@
 
 configure :=  --with-xtlibdir=/lib/xtables --enable-libipq \
 	 --libdir=/lib
-install :=  --exclude=-multi
+install :=
 
 %:
 	dh $@
@@ -36,11 +36,6 @@ install: build debian/stamp-install
 debian/stamp-install:
 	dh install --before dh_install
 	dh_install $(install)
-
-	#fixme# excluding the *-multi binaries fails on buildds
-	find debian/iptables/sbin -type f -name \*-multi | xargs -r rm -v
-
-	find
 
 	# BTS 509386
 	mv debian/iptables/usr/sbin/iptables-xml debian/iptables/usr/bin

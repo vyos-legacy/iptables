@@ -25,6 +25,7 @@ Makefile.in
 /extensions/targets?.man
 
 /include/xtables.h
+/include/iptables/internal.h
 
 /aclocal.m4
 /autom4te*.cache
@@ -42,6 +43,7 @@ Makefile.in
 /missing
 /stamp-h1
 /build-stamp
+/libiptc.pc
 /xtables.pc
 
 /ip6tables

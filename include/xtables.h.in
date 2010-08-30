@@ -34,8 +34,6 @@
 
 struct in_addr;
 
-struct in_addr;
-
 /* Include file for additions: new matches and targets. */
 struct xtables_match
 {

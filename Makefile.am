@@ -123,6 +123,3 @@ config.status: extensions/GNUmakefile.in \
 # Using if..fi avoids an ugly "error (ignored)" message :)
 install-exec-hook:
 	-if test -z "${DESTDIR}"; then /sbin/ldconfig; fi;
-
-test check:
-	echo "Are we on the air? Hello, Mom!"

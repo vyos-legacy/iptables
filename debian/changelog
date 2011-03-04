@@ -1,3 +1,9 @@
+iptables (1.4.10+vyatta+1) unstable; urgency=low
+
+  * merge in 1.4.10
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Fri, 04 Mar 2011 09:40:57 -0800
+
 iptables (1.4.9+vyatta+3) unstable; urgency=low
 
   * new branch

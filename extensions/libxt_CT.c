@@ -14,6 +14,7 @@ static void ct_help(void)
 "CT target options:\n"
 " --notrack			Don't track connection\n"
 " --helper name			Use conntrack helper 'name' for connection\n"
+" --timeout name               Use timeout policy 'name' for connection\n"
 " --ctevents event[,event...]	Generate specified conntrack events for connection\n"
 " --expevents event[,event...]	Generate specified expectation events for connection\n"
 " --zone ID			Assign/Lookup connection in zone ID\n"
@@ -26,11 +27,13 @@ enum ct_options {
 	CT_OPT_CTEVENTS		= 0x4,
 	CT_OPT_EXPEVENTS	= 0x8,
 	CT_OPT_ZONE		= 0x10,
+	CT_OPT_TIMEOUT		= 0x20,
 };
 
 static const struct option ct_opts[] = {
 	{.name = "notrack",	.has_arg = false, .val = CT_OPT_NOTRACK},
 	{.name = "helper",	.has_arg = true,  .val = CT_OPT_HELPER},
+	{.name = "timeout",	.has_arg = true,  .val = CT_OPT_TIMEOUT},
 	{.name = "ctevents",	.has_arg = true,  .val = CT_OPT_CTEVENTS},
 	{.name = "expevents",	.has_arg = true,  .val = CT_OPT_EXPEVENTS},
 	{.name = "zone",	.has_arg = true,  .val = CT_OPT_ZONE},
@@ -113,6 +116,11 @@ static int ct_parse(int c, char **argv, int invert, unsigned int *flags,
 		strncpy(info->helper, optarg, sizeof(info->helper));
 		info->helper[sizeof(info->helper) - 1] = '\0';
 		break;
+	case CT_OPT_TIMEOUT:
+		xtables_param_act(XTF_ONLY_ONCE, "CT", "--timeout", *flags & CT_OPT_TIMEOUT);
+		strncpy(info->timeout, optarg, sizeof(info->timeout));
+		info->timeout[sizeof(info->timeout) - 1] = '\0';
+		break;
 	case CT_OPT_CTEVENTS:
 		xtables_param_act(XTF_ONLY_ONCE, "CT", "--ctevents", *flags & CT_OPT_CTEVENTS);
 		info->ct_events = ct_parse_events(ct_event_tbl, ARRAY_SIZE(ct_event_tbl), optarg);
@@ -145,6 +153,8 @@ static void ct_print(const void *ip, const struct xt_entry_target *target, int n
 		printf("notrack ");
 	if (info->helper[0])
 		printf("helper %s ", info->helper);
+	if (info->timeout[0])
+		printf(" timeout %s", info->timeout);
 	if (info->ct_events)
 		ct_print_events("ctevents", ct_event_tbl,
 				ARRAY_SIZE(ct_event_tbl), info->ct_events);
@@ -164,6 +174,8 @@ static void ct_save(const void *ip, const struct xt_entry_target *target)
 		printf("--notrack ");
 	if (info->helper[0])
 		printf("--helper %s ", info->helper);
+	if (info->timeout[0])
+		printf(" timeout %s", info->timeout);
 	if (info->ct_events)
 		ct_print_events("--ctevents", ct_event_tbl,
 				ARRAY_SIZE(ct_event_tbl), info->ct_events);
@@ -177,6 +189,7 @@ static void ct_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target ct_target = {
 	.family		= NFPROTO_UNSPEC,
 	.name		= "CT",
+	.revision	= 1,
 	.version	= XTABLES_VERSION,
 	.size		= XT_ALIGN(sizeof(struct xt_ct_target_info)),
 	.userspacesize	= offsetof(struct xt_ct_target_info, ct),

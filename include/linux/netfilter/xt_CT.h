@@ -9,6 +9,7 @@ struct xt_ct_target_info {
 	u_int32_t	ct_events;
 	u_int32_t	exp_events;
 	char		helper[16];
+	char		timeout[32];
 
 	/* Used internally by the kernel */
 	struct nf_conn	*ct __attribute__((aligned(8)));

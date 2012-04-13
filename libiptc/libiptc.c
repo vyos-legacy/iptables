@@ -31,7 +31,9 @@
  */
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdbool.h>
 #include <xtables.h>
+#include <libiptc/xtcshared.h>
 
 #include "linux_list.h"
 
@@ -60,18 +62,9 @@ static const char *hooknames[] = {
 	[HOOK_FORWARD]		= "FORWARD",
 	[HOOK_LOCAL_OUT]	= "OUTPUT",
 	[HOOK_POST_ROUTING]	= "POSTROUTING",
-#ifdef HOOK_DROPPING
-	[HOOK_DROPPING]		= "DROPPING"
-#endif
 };
 
 /* Convenience structures */
-struct ipt_error_target
-{
-	STRUCT_ENTRY_TARGET t;
-	char error[TABLE_MAXNAMELEN];
-};
-
 struct chain_head;
 struct rule_head;
 
@@ -129,8 +122,7 @@ struct chain_head
 	unsigned int foot_offset;	/* offset in rule blob */
 };
 
-STRUCT_TC_HANDLE
-{
+struct xtc_handle {
 	int sockfd;
 	int changed;			 /* Have changes been made? */
 
@@ -402,7 +394,7 @@ __iptcc_bsearch_chain_index(const char *name, unsigned int offset,
 		}
 		debug("jump back to pos:%d (end:%d)\n", pos, end);
 		goto loop;
-	} else if (res > 0 ){ /* Not far enough, jump forward */
+	} else { /* res > 0; Not far enough, jump forward */
 
 		/* Exit case: Last element of array */
 		if (pos == handle->chain_index_sz-1) {
@@ -429,8 +421,6 @@ __iptcc_bsearch_chain_index(const char *name, unsigned int offset,
 		debug("jump forward to pos:%d (end:%d)\n", pos, end);
 		goto loop;
 	}
-
-	return list_pos;
 }
 
 /* Wrapper for string chain name based bsearch */
@@ -607,7 +597,7 @@ static int iptcc_chain_index_rebuild(struct xtc_handle *h)
  */
 static int iptcc_chain_index_delete_chain(struct chain_head *c, struct xtc_handle *h)
 {
-	struct list_head *index_ptr, *index_ptr2, *next;
+	struct list_head *index_ptr, *next;
 	struct chain_head *c2;
 	unsigned int idx, idx2;
 
@@ -627,7 +617,7 @@ static int iptcc_chain_index_delete_chain(struct chain_head *c, struct xtc_handl
 		 * is located in the same index bucket.
 		 */
 		c2         = list_entry(next, struct chain_head, list);
-		index_ptr2 = iptcc_bsearch_chain_index(c2->name, &idx2, h);
+		iptcc_bsearch_chain_index(c2->name, &idx2, h);
 		if (idx != idx2) {
 			/* Rebuild needed */
 			return iptcc_chain_index_rebuild(h);
@@ -1093,10 +1083,10 @@ static int parse_table(struct xtc_handle *h)
 /* Convenience structures */
 struct iptcb_chain_start{
 	STRUCT_ENTRY e;
-	struct ipt_error_target name;
+	struct xt_error_target name;
 };
 #define IPTCB_CHAIN_START_SIZE	(sizeof(STRUCT_ENTRY) +			\
-				 ALIGN(sizeof(struct ipt_error_target)))
+				 ALIGN(sizeof(struct xt_error_target)))
 
 struct iptcb_chain_foot {
 	STRUCT_ENTRY e;
@@ -1107,10 +1097,10 @@ struct iptcb_chain_foot {
 
 struct iptcb_chain_error {
 	STRUCT_ENTRY entry;
-	struct ipt_error_target target;
+	struct xt_error_target target;
 };
 #define IPTCB_CHAIN_ERROR_SIZE	(sizeof(STRUCT_ENTRY) +			\
-				 ALIGN(sizeof(struct ipt_error_target)))
+				 ALIGN(sizeof(struct xt_error_target)))
 
 
 
@@ -1153,10 +1143,10 @@ static int iptcc_compile_chain(struct xtc_handle *h, STRUCT_REPLACE *repl, struc
 		head = (void *)repl->entries + c->head_offset;
 		head->e.target_offset = sizeof(STRUCT_ENTRY);
 		head->e.next_offset = IPTCB_CHAIN_START_SIZE;
-		strcpy(head->name.t.u.user.name, ERROR_TARGET);
-		head->name.t.u.target_size =
-				ALIGN(sizeof(struct ipt_error_target));
-		strcpy(head->name.error, c->name);
+		strcpy(head->name.target.u.user.name, ERROR_TARGET);
+		head->name.target.u.target_size =
+				ALIGN(sizeof(struct xt_error_target));
+		strcpy(head->name.errorname, c->name);
 	} else {
 		repl->hook_entry[c->hooknum-1] = c->head_offset;
 		repl->underflow[c->hooknum-1] = c->foot_offset;
@@ -1199,7 +1189,7 @@ static int iptcc_compile_chain_offsets(struct xtc_handle *h, struct chain_head *
 	if (!iptcc_is_builtin(c))  {
 		/* Chain has header */
 		*offset += sizeof(STRUCT_ENTRY)
-			     + ALIGN(sizeof(struct ipt_error_target));
+			     + ALIGN(sizeof(struct xt_error_target));
 		(*num)++;
 	}
 
@@ -1239,7 +1229,7 @@ static int iptcc_compile_table_prep(struct xtc_handle *h, unsigned int *size)
 	/* Append one error rule at end of chain */
 	num++;
 	offset += sizeof(STRUCT_ENTRY)
-		  + ALIGN(sizeof(struct ipt_error_target));
+		  + ALIGN(sizeof(struct xt_error_target));
 
 	/* ruleset size is now in offset */
 	*size = offset;
@@ -1262,10 +1252,10 @@ static int iptcc_compile_table(struct xtc_handle *h, STRUCT_REPLACE *repl)
 	error = (void *)repl->entries + repl->size - IPTCB_CHAIN_ERROR_SIZE;
 	error->entry.target_offset = sizeof(STRUCT_ENTRY);
 	error->entry.next_offset = IPTCB_CHAIN_ERROR_SIZE;
-	error->target.t.u.user.target_size =
-		ALIGN(sizeof(struct ipt_error_target));
-	strcpy((char *)&error->target.t.u.user.name, ERROR_TARGET);
-	strcpy((char *)&error->target.error, "ERROR");
+	error->target.target.u.user.target_size =
+		ALIGN(sizeof(struct xt_error_target));
+	strcpy((char *)&error->target.target.u.user.name, ERROR_TARGET);
+	strcpy((char *)&error->target.errorname, "ERROR");
 
 	return 1;
 }
@@ -1278,12 +1268,9 @@ static int iptcc_compile_table(struct xtc_handle *h, STRUCT_REPLACE *repl)
 static struct xtc_handle *
 alloc_handle(const char *tablename, unsigned int size, unsigned int num_rules)
 {
-	size_t len;
 	struct xtc_handle *h;
 
-	len = sizeof(STRUCT_TC_HANDLE) + size;
-
-	h = malloc(sizeof(STRUCT_TC_HANDLE));
+	h = malloc(sizeof(*h));
 	if (!h) {
 		errno = ENOMEM;
 		return NULL;
@@ -1956,12 +1943,11 @@ is_same(const STRUCT_ENTRY *a,
 	const STRUCT_ENTRY *b,
 	unsigned char *matchmask);
 
-/* Delete the first rule in `chain' which matches `fw'. */
-int
-TC_DELETE_ENTRY(const IPT_CHAINLABEL chain,
-		const STRUCT_ENTRY *origfw,
-		unsigned char *matchmask,
-		struct xtc_handle *handle)
+
+/* find the first rule in `chain' which matches `fw' and remove it unless dry_run is set */
+static int delete_entry(const IPT_CHAINLABEL chain, const STRUCT_ENTRY *origfw,
+			unsigned char *matchmask, struct xtc_handle *handle,
+			bool dry_run)
 {
 	struct chain_head *c;
 	struct rule_head *r, *i;
@@ -2005,6 +1991,10 @@ TC_DELETE_ENTRY(const IPT_CHAINLABEL chain,
 		if (!target_same(r, i, mask))
 			continue;
 
+		/* if we are just doing a dry run, we simply skip the rest */
+		if (dry_run)
+			return 1;
+
 		/* If we are about to delete the rule that is the
 		 * current iterator, move rule iterator back.  next
 		 * pointer will then point to real next node */
@@ -2027,6 +2017,20 @@ TC_DELETE_ENTRY(const IPT_CHAINLABEL chain,
 	return 0;
 }
 
+/* check whether a specified rule is present */
+int TC_CHECK_ENTRY(const IPT_CHAINLABEL chain, const STRUCT_ENTRY *origfw,
+		   unsigned char *matchmask, struct xtc_handle *handle)
+{
+	/* do a dry-run delete to find out whether a matching rule exists */
+	return delete_entry(chain, origfw, matchmask, handle, true);
+}
+
+/* Delete the first rule in `chain' which matches `fw'. */
+int TC_DELETE_ENTRY(const IPT_CHAINLABEL chain,	const STRUCT_ENTRY *origfw,
+		    unsigned char *matchmask, struct xtc_handle *handle)
+{
+	return delete_entry(chain, origfw, matchmask, handle, false);
+}
 
 /* Delete the rule in position `rulenum' in `chain'. */
 int
@@ -2728,3 +2732,14 @@ TC_STRERROR(int err)
 
 	return strerror(err);
 }
+
+const struct xtc_ops TC_OPS = {
+	.commit        = TC_COMMIT,
+	.free          = TC_FREE,
+	.builtin       = TC_BUILTIN,
+	.is_chain      = TC_IS_CHAIN,
+	.flush_entries = TC_FLUSH_ENTRIES,
+	.create_chain  = TC_CREATE_CHAIN,
+	.set_policy    = TC_SET_POLICY,
+	.strerror      = TC_STRERROR,
+};

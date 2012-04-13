@@ -5,6 +5,6 @@ lib/libxtables.so.*
 lib/libip*tc.so.*
 lib/libipq.so.*
 usr/share/man/man8 usr/share/man
-iptables-apply usr/sbin
-iptables-apply.8 usr/share/man/man8
-iptables.xslt usr/share/iptables
+iptables/iptables-apply usr/sbin
+iptables/iptables-apply.8 usr/share/man/man8
+iptables/iptables.xslt usr/share/iptables

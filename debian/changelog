@@ -1,3 +1,12 @@
+iptables (1.4.10+vyatta+5) unstable; urgency=low
+
+  [ Pablo Neira Ayuso ]
+  * libipt_ULOG: fix --ulog-cprange
+
+  [ Gaurav Sinha ]
+
+ -- Gaurav Sinha <gaurav.sinha@vyatta.com>  Thu, 10 May 2012 17:10:48 -0700
+
 iptables (1.4.10+vyatta+4) unstable; urgency=low
 
   [ Jan Engelhardt ]

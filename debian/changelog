@@ -1,3 +1,9 @@
+iptables (1.4.10+vyatta+5+pacifica2) unstable; urgency=low
+
+  * new branch
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 12 Oct 2012 18:42:28 -0700
+
 iptables (1.4.10+vyatta+5+pacifica1) unstable; urgency=low
 
   * new branch

@@ -30,7 +30,7 @@
 #include <asm/types.h>
 #include <linux/netlink.h>
 
-#include <linux/netfilter_ipv4/ip_queue.h>
+#include "ip_queue.h"
 typedef unsigned long ipq_id_t;
 
 #ifdef DEBUG_LIBIPQ
